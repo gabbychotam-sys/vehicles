@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<title>פיקוח רכבים</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    background: #f4f6fb;
+    font-family: 'Segoe UI', Arial, sans-serif;
+  }
+
+  /* ═══ SCREEN SYSTEM ═══ */
+  .screen { display:none; position:fixed; inset:0; flex-direction:column; overflow:hidden; }
+  .screen.active { display:flex; }
+
+  /* ═══ HEADER — exact from your design ═══ */
+  .header {
+    background: linear-gradient(135deg, #0f3460, #16213e);
+    padding: 32px 14px 14px; color: #fff;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .back-btn {
+    width: 30px; height: 30px; background: rgba(255,255,255,0.15);
+    border-radius: 9px; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; cursor: pointer; flex-shrink: 0; border: none; color: #fff;
+  }
+  .header-title { font-size: 16px; font-weight: 700; }
+  .header-sub { margin-top: 3px; }
+  .type-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(255,255,255,0.15); border-radius: 20px;
+    padding: 3px 9px; font-size: 10px; font-weight: 700; color: #fff;
+  }
+  .edit-btn {
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 9px; color: #fff; font-size: 10px; font-weight: 700;
+    padding: 6px 11px; cursor: pointer; white-space: nowrap; font-family: inherit;
+  }
+  .edit-btn.active { background: #2e7d32; border-color: #2e7d32; }
+
+  /* ═══ COUNTDOWN — exact from your design ═══ */
+  .header-countdown {
+    background: rgba(255,255,255,0.08);
+    margin: 0 14px 10px; border-radius: 10px; padding: 8px 12px; flex-shrink: 0;
+  }
+  .countdown-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+  .countdown-label { font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600; }
+  .countdown-days { font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 20px; }
+  .days-yellow { background: #fff8e1; color: #f57f17; }
+  .days-red    { background: #ffebee; color: #c62828; }
+  .days-orange { background: #fff3e0; color: #e65100; }
+  .days-green  { background: #e8f5e9; color: #2e7d32; }
+  .progress-bar-bg { height: 5px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; border-radius: 10px; }
+  .fill-yellow { background: linear-gradient(90deg, #66bb6a, #ffd54f); }
+  .fill-red    { background: linear-gradient(90deg, #ffd54f, #ef5350); }
+  .fill-orange { background: linear-gradient(90deg, #ffa726, #ff7043); }
+  .fill-green  { background: linear-gradient(90deg, #66bb6a, #4caf50); }
+
+  /* ═══ PHOTO STRIP — exact from your design ═══ */
+  .photo-strip {
+    background: #16213e; padding: 8px 10px;
+    display: flex; gap: 7px; flex-shrink: 0; overflow-x: auto;
+  }
+  .photo-thumb {
+    width: 56px; height: 56px; border-radius: 9px; background: #2d2d4e;
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 24px; border: 2px solid #3d3d6e; overflow: hidden;
+  }
+  .photo-thumb img { width:100%; height:100%; object-fit:cover; }
+  .add-photo {
+    width: 56px; height: 56px; border-radius: 9px;
+    background: rgba(255,255,255,0.05); border: 2px dashed rgba(255,255,255,0.2);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 18px; color: rgba(255,255,255,0.4); cursor: pointer; flex-shrink: 0;
+  }
+  .add-photo span { font-size: 8px; margin-top: 2px; }
+
+  /* ═══ CONTENT / CARDS — exact from your design ═══ */
+  .content {
+    flex: 1; overflow-y: auto; padding: 10px 14px 14px;
+    display: flex; flex-direction: column; gap: 9px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .card {
+    background: #fff; border-radius: 12px; padding: 10px 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .card-title {
+    font-size: 10px; font-weight: 700; color: #0f3460;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    border-bottom: 1px solid #f0f0f0; padding-bottom: 6px;
+  }
+  .field-row { display: flex; flex-direction: column; gap: 2px; }
+  .field-label { font-size: 9px; color: #bbb; font-weight: 600; }
+  .field-value { font-size: 13px; color: #1a1a2e; font-weight: 600; padding: 1px 0; }
+  .field-value.plate { font-size: 18px; letter-spacing: 2px; color: #0f3460; font-weight: 800; }
+  .field-value.muted { font-size: 12px; color: #555; font-weight: 400; line-height: 1.5; }
+
+  .phone-row { display: flex; align-items: center; gap: 7px; }
+  .phone-row .field-value { flex: 1; }
+  .call-btn {
+    width: 32px; height: 32px; background: #e8f5e9; border: 1px solid #a5d6a7;
+    border-radius: 9px; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; cursor: pointer; flex-shrink: 0; text-decoration: none;
+  }
+
+  /* ═══ EDIT INPUTS — exact from your design ═══ */
+  .field-input {
+    background: #f8f9ff; border: 1.5px solid #9fa8da; border-radius: 9px;
+    padding: 8px 10px; font-size: 12px; color: #1a1a2e; direction: rtl;
+    width: 100%; font-family: inherit; outline: none;
+  }
+  .field-input:focus { border-color: #5c6bc0; }
+  .field-input.plate {
+    font-size: 15px; font-weight: 700; letter-spacing: 2px;
+    text-align: center; color: #0f3460; background: #e8eaf6; border-color: #5c6bc0;
+  }
+  select.field-input {
+    appearance: none; -webkit-appearance: none; background-color: #f8f9ff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='%23999'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: left 10px center;
+  }
+  textarea.field-input { resize: none; height: 55px; line-height: 1.5; }
+  .phone-row .field-input { flex: 1; }
+  .coord-row { display: flex; gap: 6px; }
+  .coord-row .field-value { flex: 1; text-align: center; font-size: 11px; color: #666; font-weight: 400; }
+  .coord-row .field-input { flex: 1; text-align: center; font-size: 10px; }
+
+  .save-btn {
+    background: linear-gradient(135deg, #2e7d32, #1b5e20);
+    color: #fff; border: none; border-radius: 12px; padding: 13px;
+    font-size: 14px; font-weight: 700; width: 100%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    font-family: inherit;
+  }
+
+  /* ═══ HOME SCREEN ═══ */
+  .home-header {
+    background: linear-gradient(135deg, #0f3460, #16213e);
+    padding: 36px 14px 16px; color: #fff; flex-shrink: 0;
+  }
+  .home-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .home-logo { font-size: 28px; }
+  .home-title { font-size: 18px; font-weight: 800; }
+  .home-sub { font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+  .home-user { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 8px; }
+
+  .home-content {
+    flex: 1; overflow-y: auto; padding: 14px;
+    display: flex; flex-direction: column; gap: 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .home-action {
+    background: #fff; border-radius: 14px; padding: 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    display: flex; align-items: center; gap: 14px;
+    cursor: pointer; transition: transform 0.1s; border: 1px solid #eef1f5;
+  }
+  .home-action:active { transform: scale(0.97); }
+  .home-action-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .home-action-title { font-size: 14px; font-weight: 700; color: #1a1a2e; }
+  .home-action-desc { font-size: 11px; color: #999; margin-top: 2px; }
+
+  .my-cases-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 6px; margin-bottom: -4px;
+  }
+  .my-cases-title { font-size: 12px; font-weight: 700; color: #0f3460; }
+  .my-cases-count { font-size: 10px; color: #999; font-weight: 600; }
+
+  .mini-case {
+    background: #fff; border-radius: 10px; padding: 10px 12px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.04); display: flex; gap: 10px; align-items: center;
+    cursor: pointer; border: 1px solid #eef1f5;
+  }
+  .mini-case:active { transform: scale(0.98); }
+  .mc-bar { width: 3px; height: 34px; border-radius: 2px; flex-shrink: 0; }
+  .mc-bar.yellow { background: #ffd54f; } .mc-bar.red { background: #ef5350; }
+  .mc-bar.orange { background: #ffa726; } .mc-bar.green { background: #66bb6a; }
+  .mc-body { flex: 1; }
+  .mc-top { display: flex; justify-content: space-between; align-items: center; }
+  .mc-plate { font-family: 'Courier New', monospace; font-size: 13px; font-weight: 800; color: #0f3460; }
+  .mc-badge { font-size: 8px; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
+  .mc-badge.yellow { background:#fff8e1; color:#f57f17; }
+  .mc-badge.red { background:#ffebee; color:#c62828; }
+  .mc-badge.orange { background:#fff3e0; color:#e65100; }
+  .mc-badge.green { background:#e8f5e9; color:#2e7d32; }
+  .mc-loc { font-size: 10px; color: #bbb; margin-top: 2px; }
+
+  /* ═══ TOAST ═══ */
+  .toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    background: #2e7d32; color: #fff; padding: 10px 20px; border-radius: 12px;
+    font-size: 12px; font-weight: 700; z-index: 99;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    animation: toastAnim 2.5s ease forwards;
+  }
+  @keyframes toastAnim {
+    0% { opacity:0; transform:translateX(-50%) translateY(20px); }
+    10% { opacity:1; transform:translateX(-50%) translateY(0); }
+    80% { opacity:1; }
+    100% { opacity:0; transform:translateX(-50%) translateY(-10px); }
+  }
+
+  .hidden { display: none; }
+
+  /* ═══ SYNC INDICATOR ═══ */
+  .sync-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(255,255,255,0.12); border-radius: 20px;
+    padding: 3px 9px; font-size: 9px; font-weight: 700;
+    color: rgba(255,255,255,0.9); margin-top: 6px;
+  }
+  .sync-chip.ok { background: rgba(46,125,50,0.5); }
+  .sync-chip.err { background: rgba(198,40,40,0.5); }
+  .sync-chip.pending { background: rgba(245,127,23,0.5); }
+  @keyframes spin { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
+  .sync-chip.pending .sync-icon { display:inline-block; animation: spin 1s linear infinite; }
+
+  /* ═══ LOGIN SCREEN ═══ */
+  .login-wrap {
+    flex: 1; display: flex; flex-direction: column; justify-content: center;
+    padding: 28px; background: linear-gradient(135deg, #0f3460, #16213e); color: #fff;
+  }
+  .login-logo { text-align: center; margin-bottom: 22px; }
+  .login-logo img { width: 64px; height: 64px; border-radius: 14px; }
+  .login-title { font-size: 22px; font-weight: 800; text-align: center; }
+  .login-sub { font-size: 12px; color: rgba(255,255,255,0.6); text-align: center; margin-top: 4px; margin-bottom: 26px; }
+  .login-label { font-size: 11px; color: rgba(255,255,255,0.7); margin-bottom: 6px; font-weight: 600; }
+  .login-input {
+    width: 100%; background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.2);
+    border-radius: 12px; padding: 14px; font-size: 15px; color: #fff;
+    font-family: inherit; outline: none; margin-bottom: 14px; direction: rtl;
+  }
+  .login-input::placeholder { color: rgba(255,255,255,0.4); }
+  .login-input:focus { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.16); }
+  .login-btn {
+    width: 100%; background: #2e7d32; color: #fff; border: none;
+    border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 700;
+    cursor: pointer; font-family: inherit; margin-top: 8px;
+  }
+  .login-note { font-size: 10px; color: rgba(255,255,255,0.5); text-align: center; margin-top: 14px; line-height: 1.5; }
+
+  /* settings cog button */
+  .settings-cog {
+    position: absolute; top: 32px; left: 14px; width: 30px; height: 30px;
+    background: rgba(255,255,255,0.15); border-radius: 9px; display: flex;
+    align-items: center; justify-content: center; cursor: pointer; border: none;
+    color: #fff; font-size: 14px; z-index: 5;
+  }
+  /* settings modal */
+  .modal-bg {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100;
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-bg.open { display: flex; }
+  .modal-box {
+    background: #fff; border-radius: 16px; padding: 18px;
+    max-width: 360px; width: 100%; max-height: 90vh; overflow-y: auto;
+  }
+  .modal-title { font-size: 16px; font-weight: 700; color: #0f3460; margin-bottom: 6px; }
+  .modal-sub { font-size: 11px; color: #999; margin-bottom: 14px; line-height: 1.5; }
+  .modal-label { font-size: 10px; color: #777; font-weight: 600; margin-bottom: 4px; }
+  .modal-input {
+    width: 100%; background: #f8f9ff; border: 1.5px solid #9fa8da; border-radius: 9px;
+    padding: 9px 10px; font-size: 12px; color: #1a1a2e; direction: ltr;
+    font-family: inherit; outline: none; margin-bottom: 10px;
+  }
+  .modal-actions { display: flex; gap: 8px; margin-top: 6px; }
+  .modal-btn {
+    flex: 1; padding: 11px; border-radius: 10px; font-size: 13px; font-weight: 700;
+    border: none; cursor: pointer; font-family: inherit;
+  }
+  .modal-btn.primary { background: #2e7d32; color: #fff; }
+  .modal-btn.secondary { background: #eef1f5; color: #555; }
+</style>
+
+<!-- Firebase SDK (compat v8 — works without ES modules) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+
+<!-- ═══════════ LOGIN SCREEN (first time only) ═══════════ -->
+<div class="screen" id="scr-login">
+  <div class="login-wrap">
+    <div class="login-logo"><img src="data:image/png;base64,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"></div>
+    <div class="login-title">פיקוח רכבים</div>
+    <div class="login-sub">מועצה אזורית הגליל העליון</div>
+
+    <div class="login-label">שם הפקח המלא</div>
+    <input type="text" id="login-name" class="login-input" placeholder="לדוגמה: שימי רוזנברג" autocomplete="off">
+
+    <div class="login-label">מספר טלפון (אופציונלי)</div>
+    <input type="tel" id="login-phone" class="login-input" placeholder="0501234567" autocomplete="off">
+
+    <button class="login-btn" onclick="doLogin()">המשך →</button>
+
+    <div class="login-note">הפרטים יישמרו במכשיר שלך<br>כדי לזהות תיקים שאתה פותח</div>
+  </div>
+</div>
+
+<!-- ═══════════ HOME SCREEN ═══════════ -->
+<div class="screen active" id="scr-home">
+
+  <div class="home-header" style="position:relative;">
+    <button class="settings-cog" onclick="openSettings()" title="הגדרות סנכרון">⚙️</button>
+    <div class="home-brand">
+      <div class="home-logo"><img src="data:image/png;base64,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" style="width:36px;height:36px;border-radius:8px;"></div>
+      <div>
+        <div class="home-title">פיקוח רכבים</div>
+        <div class="home-sub">מועצה אזורית הגליל העליון</div>
+      </div>
+    </div>
+    <div class="home-user" id="home-user-line">👷 פקח</div>
+    <div id="home-sync-chip"></div>
+  </div>
+
+  <div class="home-content">
+
+    <div class="home-action" onclick="newCase()" style="border:2px solid #0f3460;">
+      <div class="home-action-icon" style="background:#e3f2fd;">📸</div>
+      <div>
+        <div class="home-action-title">פתח תיק חדש</div>
+        <div class="home-action-desc">צלם רכב, מלא פרטים ושלח לתוכנת הניהול</div>
+      </div>
+    </div>
+
+    <div class="home-action" onclick="showScreen('list')">
+      <div class="home-action-icon" style="background:#fff8e1;">📋</div>
+      <div>
+        <div class="home-action-title">התיקים שלי</div>
+        <div class="home-action-desc" id="my-count">0 תיקים שנפתחו מהנייד</div>
+      </div>
+    </div>
+
+    <div class="my-cases-header" id="recent-header" style="display:none;">
+      <div class="my-cases-title">📌 תיקים אחרונים</div>
+      <div class="my-cases-count" id="recent-count"></div>
+    </div>
+
+    <div id="recent-cases"></div>
+
+  </div>
+</div>
+
+<!-- ═══════════ LIST SCREEN ═══════════ -->
+<div class="screen" id="scr-list">
+  <div class="header">
+    <div class="header-right">
+      <button class="back-btn" onclick="showScreen('home')">→</button>
+      <div><div class="header-title">📋 התיקים שלי</div></div>
+    </div>
+  </div>
+  <div class="content" id="list-content"></div>
+</div>
+
+<!-- ═══════════ CASE DETAIL — VIEW ═══════════ -->
+<div class="screen" id="scr-view">
+  <div class="header">
+    <div class="header-right">
+      <button class="back-btn" onclick="goBackFromView()">→</button>
+      <div>
+        <div class="header-title" id="v-title">תיק</div>
+        <div class="header-sub"><span class="type-badge">🚗 רכב נטוש</span></div>
+      </div>
+    </div>
+    <button class="edit-btn" onclick="startEdit()">✏️ עריכה</button>
+  </div>
+  <div class="header-countdown" id="v-countdown" style="margin-top:-4px"></div>
+  <div class="photo-strip" id="v-photos"></div>
+  <div class="content" id="v-content"></div>
+</div>
+
+<!-- ═══════════ CASE DETAIL — EDIT ═══════════ -->
+<div class="screen" id="scr-edit">
+  <div class="header">
+    <div class="header-right">
+      <button class="back-btn" onclick="cancelEdit()">→</button>
+      <div>
+        <div class="header-title" id="e-title">תיק</div>
+        <div class="header-sub"><span class="type-badge">🚗 רכב נטוש</span></div>
+      </div>
+    </div>
+    <button class="edit-btn active" onclick="saveCase()">✅ שמור</button>
+  </div>
+  <div class="header-countdown" id="e-countdown" style="margin-top:-4px"></div>
+  <div class="photo-strip" id="e-photos"></div>
+  <div class="content" id="e-content"></div>
+</div>
+
+<!-- ═══════════ SETTINGS MODAL ═══════════ -->
+<div class="modal-bg" id="settings-modal" onclick="closeSettings(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">⚙️ הגדרות סנכרון Firebase</div>
+    <div class="modal-sub">הזן את פרטי פרויקט ה-Firebase כדי לסנכרן תיקים לתוכנת הניהול. הפרטים נשמרים במכשיר שלך.</div>
+
+    <div class="modal-label">apiKey</div>
+    <input type="text" id="cfg-apiKey" class="modal-input" placeholder="AIzaSy...">
+
+    <div class="modal-label">databaseURL</div>
+    <input type="text" id="cfg-dbUrl" class="modal-input" placeholder="https://your-project-default-rtdb.firebaseio.com">
+
+    <div class="modal-label">projectId</div>
+    <input type="text" id="cfg-projectId" class="modal-input" placeholder="your-project-id">
+
+    <div class="modal-label" style="margin-top:8px;border-top:1px solid #eee;padding-top:12px;">פרטי הפקח</div>
+    <div class="modal-label" style="font-size:9px;color:#999;">שם</div>
+    <input type="text" id="cfg-inspector" class="modal-input" placeholder="שם הפקח" style="direction:rtl;">
+    <div class="modal-label" style="font-size:9px;color:#999;">טלפון</div>
+    <input type="tel" id="cfg-phone" class="modal-input" placeholder="0501234567" style="direction:rtl;">
+
+    <div class="modal-actions">
+      <button class="modal-btn secondary" onclick="closeSettings()">ביטול</button>
+      <button class="modal-btn primary" onclick="saveSettings()">שמור</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" accept="image/*" capture="environment" class="hidden" id="cam" onchange="onPhoto(this)">
+
+<script>
+// ═══ STORAGE ═══
+var DB = 'galil_mobile_cases';
+var CFG_KEY = 'galil_mobile_cfg';
+var INSPECTOR_KEY = 'galil_mobile_inspector';
+var cases = loadDB();
+var cur = null; // current case being viewed/edited
+var photos = [];
+
+// ═══ INSPECTOR / CONFIG ═══
+// Default Firebase config — baked in for distribution to inspectors.
+// Inspectors don't need to enter anything; everything just works on first open.
+var FB_DEFAULTS = {
+  apiKey:      "AIzaSyBvTzz4d__umScNiSIrculeQuogSIHSddY",
+  databaseURL: "https://galil-elyon-vehicles-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:   "galil-elyon-vehicles"
+};
+
+function loadCfg() {
+  try {
+    var saved = JSON.parse(localStorage.getItem(CFG_KEY)) || {};
+    // Saved values (if any) override defaults; missing fields fall back to defaults
+    return {
+      apiKey:      saved.apiKey      || FB_DEFAULTS.apiKey,
+      databaseURL: saved.databaseURL || FB_DEFAULTS.databaseURL,
+      projectId:   saved.projectId   || FB_DEFAULTS.projectId
+    };
+  } catch(e) { return Object.assign({}, FB_DEFAULTS); }
+}
+function saveCfg(c) { try { localStorage.setItem(CFG_KEY, JSON.stringify(c)); } catch(e) {} }
+function loadInspector() {
+  try { return JSON.parse(localStorage.getItem(INSPECTOR_KEY)) || null; } catch(e) { return null; }
+}
+function saveInspector(i) { try { localStorage.setItem(INSPECTOR_KEY, JSON.stringify(i)); } catch(e) {} }
+
+// ═══ FIREBASE ═══
+var fbApp = null, fbDb = null, fbReady = false;
+
+function initFirebase() {
+  var cfg = loadCfg();
+  if (!cfg.apiKey || !cfg.databaseURL) {
+    setSyncChip('off', 'לא מוגדר');
+    return;
+  }
+  if (typeof firebase === 'undefined') {
+    setSyncChip('err', 'Firebase SDK לא נטען');
+    return;
+  }
+  try {
+    if (firebase.apps && firebase.apps.length) {
+      fbApp = firebase.app();
+    } else {
+      fbApp = firebase.initializeApp({
+        apiKey: cfg.apiKey,
+        databaseURL: cfg.databaseURL,
+        projectId: cfg.projectId || ''
+      });
+    }
+    fbDb = firebase.database();
+    fbReady = true;
+    setSyncChip('ok', 'מסונכרן');
+    // Test connection
+    fbDb.ref('.info/connected').on('value', function(snap) {
+      if (snap.val() === true) setSyncChip('ok', 'מסונכרן');
+      else setSyncChip('pending', 'מתחבר...');
+    });
+  } catch(e) {
+    console.error('Firebase init failed:', e);
+    setSyncChip('err', 'שגיאת חיבור');
+  }
+}
+
+function setSyncChip(state, text) {
+  var el = document.getElementById('home-sync-chip');
+  if (!el) return;
+  var icons = { ok:'✓', err:'⚠', pending:'⟳', off:'⚙️' };
+  el.innerHTML = '<span class="sync-chip ' + state + '"><span class="sync-icon">' + icons[state] + '</span> ' + text + '</span>';
+}
+
+function pushCaseToFirebase(c) {
+  if (!fbReady || !fbDb) return Promise.resolve(false);
+  setSyncChip('pending', 'מעלה...');
+  var data = Object.assign({}, c, {
+    inspector: (loadInspector() || {}).name || c.inspector || '',
+    inspectorPhone: (loadInspector() || {}).phone || '',
+    source: 'mobile',
+    syncedAt: new Date().toISOString()
+  });
+  return fbDb.ref('cases/' + c.id).set(data)
+    .then(function() {
+      setSyncChip('ok', 'מסונכרן');
+      return true;
+    })
+    .catch(function(err) {
+      console.error('Push failed:', err);
+      setSyncChip('err', 'שמירה ל-Firebase נכשלה');
+      return false;
+    });
+}
+
+// ═══ LOGIN / SETTINGS ═══
+function doLogin() {
+  var name = document.getElementById('login-name').value.trim();
+  var phone = document.getElementById('login-phone').value.trim();
+  if (!name) { alert('נא להזין שם'); return; }
+  saveInspector({ name: name, phone: phone });
+  refreshHomeUser();
+  showScreen('home');
+}
+
+function refreshHomeUser() {
+  var i = loadInspector();
+  var el = document.getElementById('home-user-line');
+  if (el) el.textContent = '👷 ' + (i ? i.name : 'פקח') + ' · פקח';
+}
+
+function openSettings() {
+  var cfg = loadCfg();
+  var i = loadInspector() || {};
+  document.getElementById('cfg-apiKey').value = cfg.apiKey || '';
+  document.getElementById('cfg-dbUrl').value = cfg.databaseURL || '';
+  document.getElementById('cfg-projectId').value = cfg.projectId || '';
+  document.getElementById('cfg-inspector').value = i.name || '';
+  document.getElementById('cfg-phone').value = i.phone || '';
+  document.getElementById('settings-modal').classList.add('open');
+}
+function closeSettings(e) {
+  if (e && e.target.id !== 'settings-modal' && e.type === 'click') return;
+  document.getElementById('settings-modal').classList.remove('open');
+}
+function saveSettings() {
+  var cfg = {
+    apiKey: document.getElementById('cfg-apiKey').value.trim(),
+    databaseURL: document.getElementById('cfg-dbUrl').value.trim(),
+    projectId: document.getElementById('cfg-projectId').value.trim()
+  };
+  saveCfg(cfg);
+  saveInspector({
+    name: document.getElementById('cfg-inspector').value.trim(),
+    phone: document.getElementById('cfg-phone').value.trim()
+  });
+  refreshHomeUser();
+  closeSettings();
+  initFirebase();
+  toast('✅ ההגדרות נשמרו');
+}
+
+function loadDB() { try { return JSON.parse(localStorage.getItem(DB)) || []; } catch(e) { return []; } }
+function saveDB() { try { localStorage.setItem(DB, JSON.stringify(cases)); } catch(e) {} }
+
+// ═══ HOME ═══
+function renderHome() {
+  document.getElementById('my-count').textContent = cases.length + ' תיקים שנפתחו מהנייד';
+  var rc = document.getElementById('recent-cases');
+  var rh = document.getElementById('recent-header');
+  if (!cases.length) { rh.style.display = 'none'; rc.innerHTML = ''; return; }
+  rh.style.display = '';
+  document.getElementById('recent-count').textContent = cases.length + ' תיקים';
+  var h = '';
+  var recent = cases.slice().reverse().slice(0, 5);
+  recent.forEach(function(c) {
+    h += '<div class="mini-case" onclick="viewCase(\'' + c.id + '\')">';
+    h += '<div class="mc-bar ' + c.status + '"></div><div class="mc-body">';
+    h += '<div class="mc-top"><span class="mc-plate">' + (c.plate || '—') + '</span>';
+    h += '<span class="mc-badge ' + c.status + '">' + (c.badge || '') + '</span></div>';
+    h += '<div class="mc-loc">📍 ' + (c.location || '—') + '</div>';
+    h += '</div></div>';
+  });
+  rc.innerHTML = h;
+}
+
+// ═══ LIST ═══
+function renderList() {
+  var el = document.getElementById('list-content');
+  if (!cases.length) {
+    el.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#bbb"><div style="font-size:40px;margin-bottom:10px">📋</div><div style="font-size:14px;font-weight:600;color:#666">עדיין לא נפתחו תיקים</div><div style="font-size:11px;margin-top:6px">חזור למסך הראשי ולחץ "פתח תיק חדש"</div></div>';
+    return;
+  }
+  var h = '';
+  cases.slice().reverse().forEach(function(c) {
+    var dt = c.date ? new Date(c.date).toLocaleDateString('he-IL', {day:'2-digit',month:'2-digit',year:'numeric'}) : '';
+    h += '<div class="card" style="cursor:pointer;padding:12px" onclick="viewCase(\'' + c.id + '\')">';
+    h += '<div style="display:flex;gap:10px;align-items:center">';
+    h += '<div class="mc-bar ' + c.status + '"></div>';
+    h += '<div style="flex:1">';
+    h += '<div style="display:flex;justify-content:space-between;align-items:center">';
+    h += '<span class="mc-plate">' + (c.plate || '—') + '</span>';
+    h += '<span class="mc-badge ' + c.status + '">' + (c.badge || '') + '</span></div>';
+    h += '<div style="font-size:12px;font-weight:600;margin-top:2px">' + (c.owner || '—') + '</div>';
+    h += '<div style="font-size:10px;color:#bbb;margin-top:1px">📍 ' + (c.location || '—') + ' · ' + dt + '</div>';
+    h += '</div></div></div>';
+  });
+  el.innerHTML = h;
+}
+
+// ═══ VIEW CASE ═══
+function viewCase(id) {
+  cur = cases.find(function(c) { return c.id === id; });
+  if (!cur) return;
+  photos = cur.photos ? cur.photos.slice() : [];
+  renderView();
+  showScreen('view');
+}
+
+function renderView() {
+  var c = cur;
+  document.getElementById('v-title').textContent = 'תיק #' + (c.plate || 'חדש');
+  renderCountdown('v-countdown', c);
+  renderPhotos('v-photos', false);
+
+  var h = '';
+  h += '<div class="card"><div class="card-title">🚗 פרטי הרכב</div>';
+  h += F('לוחית רישוי', '<div class="field-value plate">' + (c.plate||'—') + '</div>');
+  h += F('בעל הרכב', '<div class="field-value">' + (c.owner||'—') + '</div>');
+  h += F('📱 נייד בעל הרכב', '<div class="phone-row"><div class="field-value" style="flex:1">' + (c.phone||'—') + '</div>' + (c.phone ? '<a href="tel:'+c.phone+'" class="call-btn">📞</a>' : '') + '</div>');
+  h += F('🏠 כתובת בעל הרכב', '<div class="field-value" style="font-size:12px">' + (c.address||'—') + '</div>');
+  h += '</div>';
+
+  h += '<div class="card"><div class="card-title">📍 מיקום ואיש קשר</div>';
+  h += F('קיבוץ / יישוב', '<div class="field-value">' + (c.location||'—') + '</div>');
+  h += F('איש קשר', '<div class="field-value">' + (c.contact||'—') + '</div>');
+  h += F('📱 נייד איש קשר', '<div class="phone-row"><div class="field-value" style="flex:1">' + (c.contactPhone||'—') + '</div>' + (c.contactPhone ? '<a href="tel:'+c.contactPhone+'" class="call-btn">📞</a>' : '') + '</div>');
+  h += F('כתובת', '<div class="field-value" style="font-size:12px">' + (c.locAddress||'—') + '</div>');
+  if (c.lat && c.lon) h += F('קורדינטות GPS', '<div class="coord-row"><div class="field-value">' + c.lat + '</div><div class="field-value">' + c.lon + '</div></div>');
+  h += '</div>';
+
+  h += '<div class="card"><div class="card-title">⚡ מה נעשה</div><div class="field-value" style="font-size:12px">' + (c.badge||'—') + '</div></div>';
+  h += '<div class="card"><div class="card-title">📝 הערות</div><div class="field-value muted">' + (c.notes||'אין הערות') + '</div></div>';
+
+  document.getElementById('v-content').innerHTML = h;
+}
+
+// ═══ EDIT / NEW CASE ═══
+function newCase() {
+  cur = {
+    id: 'M' + Date.now(), date: new Date().toISOString().split('T')[0],
+    status: 'yellow', plate: '', owner: '', location: '',
+    badge: '🟡 מדבקה צהובה', phone: '', contact: '', contactPhone: '',
+    address: '', locAddress: '', notes: '', lat: '', lon: '', inspector: '', photos: []
+  };
+  photos = [];
+  renderEdit();
+  showScreen('edit');
+}
+
+function startEdit() {
+  photos = cur.photos ? cur.photos.slice() : [];
+  renderEdit();
+  showScreen('edit');
+}
+
+function cancelEdit() {
+  if (cases.find(function(c) { return c.id === cur.id; })) {
+    renderView();
+    showScreen('view');
+  } else {
+    showScreen('home');
+  }
+}
+
+function renderEdit() {
+  var c = cur;
+  document.getElementById('e-title').textContent = c.plate ? 'תיק #' + c.plate : 'תיק חדש';
+  renderCountdown('e-countdown', c);
+  renderPhotos('e-photos', true);
+
+  var h = '';
+  h += '<div class="card"><div class="card-title">🚗 פרטי הרכב</div>';
+  h += F('לוחית רישוי', '<input class="field-input plate" id="f-plate" value="' + (c.plate||'') + '">');
+  h += F('בעל הרכב', '<input class="field-input" id="f-owner" value="' + (c.owner||'') + '">');
+  h += F('📱 נייד בעל הרכב', '<div class="phone-row"><input class="field-input" id="f-phone" type="tel" value="' + (c.phone||'') + '"><div class="call-btn">📞</div></div>');
+  h += F('🏠 כתובת בעל הרכב', '<input class="field-input" id="f-address" value="' + (c.address||'') + '">');
+  h += '</div>';
+
+  h += '<div class="card"><div class="card-title">📍 מיקום ואיש קשר</div>';
+  h += F('קיבוץ / יישוב', '<input class="field-input" id="f-location" value="' + (c.location||'') + '">');
+  h += F('איש קשר', '<input class="field-input" id="f-contact" value="' + (c.contact||'') + '">');
+  h += F('📱 נייד איש קשר', '<div class="phone-row"><input class="field-input" id="f-cphone" type="tel" value="' + (c.contactPhone||'') + '"><div class="call-btn">📞</div></div>');
+  h += F('כתובת', '<input class="field-input" id="f-locaddr" value="' + (c.locAddress||'') + '">');
+  h += F('קורדינטות GPS', '<div class="coord-row"><input class="field-input" id="f-lat" value="' + (c.lat||'') + '" placeholder="קו רוחב"><input class="field-input" id="f-lon" value="' + (c.lon||'') + '" placeholder="קו אורך"></div>');
+  h += '</div>';
+
+  h += '<div class="card"><div class="card-title">⚡ מה נעשה</div>';
+  h += '<select class="field-input" id="f-status" style="background-color:#f8f9ff">';
+  h += '<option value="yellow"' + (c.status==='yellow'?' selected':'') + '>📷 צולם וממתין להמשך טיפול</option>';
+  h += '<option value="yellow"' + (c.status==='yellow'?' selected':'') + '>🟡 הודבקה מדבקה צהובה</option>';
+  h += '<option value="red"' + (c.status==='red'?' selected':'') + '>🔴 הודבקה מדבקה אדומה</option>';
+  h += '</select></div>';
+
+  h += '<div class="card"><div class="card-title">📝 הערות</div>';
+  h += '<textarea class="field-input" id="f-notes">' + (c.notes||'') + '</textarea></div>';
+
+  h += '<button class="save-btn" onclick="saveCase()">💾 שמור ושלח לתוכנת ניהול</button>';
+
+  document.getElementById('e-content').innerHTML = h;
+}
+
+function saveCase() {
+  var v = function(id) { var el = document.getElementById(id); return el ? el.value : ''; };
+  cur.plate = v('f-plate') || cur.plate;
+  cur.owner = v('f-owner') || cur.owner;
+  cur.phone = v('f-phone') || cur.phone;
+  cur.address = v('f-address') || cur.address;
+  cur.location = v('f-location') || cur.location;
+  cur.contact = v('f-contact') || cur.contact;
+  cur.contactPhone = v('f-cphone') || cur.contactPhone;
+  cur.locAddress = v('f-locaddr') || cur.locAddress;
+  cur.lat = v('f-lat') || cur.lat;
+  cur.lon = v('f-lon') || cur.lon;
+  cur.notes = v('f-notes') || cur.notes;
+  cur.photos = photos;
+
+  var st = v('f-status');
+  if (st) {
+    cur.status = st;
+    var badges = { yellow:'🟡 מדבקה צהובה', red:'🔴 מדבקה אדומה' };
+    cur.badge = badges[st] || cur.badge;
+  }
+
+  // Add or update
+  var idx = cases.findIndex(function(x) { return x.id === cur.id; });
+  if (idx === -1) cases.push(cur); else cases[idx] = cur;
+
+  saveDB(); // → localStorage
+
+  // Push to Firebase (cross-device sync to management software)
+  pushCaseToFirebase(cur).then(function(ok) {
+    if (ok) toast('✅ נשמר וסונכרן לתוכנת הניהול');
+    else if (fbReady) toast('⚠️ נשמר במכשיר, סנכרון נכשל - יישלח שוב כשיתחבר');
+    else toast('💾 נשמר במכשיר (סנכרון לא מוגדר)');
+  });
+
+  renderView();
+  showScreen('view');
+  renderHome();
+}
+
+// ═══ HELPERS ═══
+function F(label, inner) {
+  return '<div class="field-row"><div class="field-label">' + label + '</div>' + inner + '</div>';
+}
+
+function renderCountdown(elId, c) {
+  var info = { yellow:{l:'🟡 מדבקה צהובה — עד מדבקה אדומה',d:30}, red:{l:'🔴 מדבקה אדומה — עד גרירה',d:14}, orange:{l:'🚛 באחסנה — עד מכירה',d:60}, green:{l:'✅ תיק סגור',d:1} };
+  var i = info[c.status] || info.yellow;
+  var elapsed = Math.floor((new Date() - new Date(c.date)) / 86400000);
+  var rem = Math.max(0, i.d - elapsed);
+  var pct = Math.min(100, Math.round(elapsed / i.d * 100));
+  var bg = c.status==='red' ? '239,83,80' : c.status==='orange' ? '255,167,38' : c.status==='green' ? '102,187,106' : '249,168,37';
+
+  document.getElementById(elId).innerHTML =
+    '<div style="background:rgba(' + bg + ',0.15);border-radius:10px;padding:8px 12px">' +
+    '<div class="countdown-row"><div class="countdown-label">' + i.l + '</div>' +
+    '<div class="countdown-days days-' + c.status + '">' + (c.status==='green' ? 'הושלם' : rem + ' ימים') + '</div></div>' +
+    '<div class="progress-bar-bg"><div class="progress-bar-fill fill-' + c.status + '" style="width:' + pct + '%"></div></div></div>';
+}
+
+function renderPhotos(elId, editable) {
+  var h = '';
+  photos.forEach(function(src) {
+    h += '<div class="photo-thumb"><img src="' + src + '"></div>';
+  });
+  if (editable) {
+    h += '<div class="add-photo" onclick="takePhoto()">➕<span>הוסף</span></div>';
+  } else if (!photos.length) {
+    h += '<div class="photo-thumb">🚗</div>';
+    h += '<div class="add-photo" onclick="startEdit()">➕<span>הוסף</span></div>';
+  }
+  document.getElementById(elId).innerHTML = h;
+}
+
+function takePhoto() { document.getElementById('cam').click(); }
+function onPhoto(inp) {
+  if (!inp.files || !inp.files[0]) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var cv = document.createElement('canvas');
+      var mx = 400, w = img.width, h = img.height;
+      if (w > h) { if (w > mx) { h *= mx/w; w = mx; } } else { if (h > mx) { w *= mx/h; h = mx; } }
+      cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      photos.push(cv.toDataURL('image/jpeg', 0.6));
+      renderPhotos('e-photos', true);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(inp.files[0]);
+  inp.value = '';
+}
+
+function toast(msg) {
+  var t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function() { t.remove(); }, 2600);
+}
+
+// ═══ NAVIGATION ═══
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('scr-' + name).classList.add('active');
+  if (name === 'home') renderHome();
+  if (name === 'list') renderList();
+}
+
+function goBackFromView() {
+  showScreen('home');
+}
+
+// ═══ INIT ═══
+(function init() {
+  var insp = loadInspector();
+  if (!insp) {
+    // First-time: show login
+    document.getElementById('scr-home').classList.remove('active');
+    document.getElementById('scr-login').classList.add('active');
+  } else {
+    refreshHomeUser();
+    renderHome();
+  }
+  // Init Firebase (waits for SDK to be loaded)
+  if (typeof firebase !== 'undefined') {
+    initFirebase();
+  } else {
+    // SDK still loading - retry
+    var tries = 0;
+    var retry = setInterval(function() {
+      tries++;
+      if (typeof firebase !== 'undefined') {
+        clearInterval(retry);
+        initFirebase();
+      } else if (tries > 50) {
+        clearInterval(retry);
+        setSyncChip('err', 'אין חיבור לאינטרנט?');
+      }
+    }, 100);
+  }
+})();
+</script>
+</body>
+</html>
