@@ -893,11 +893,26 @@ function saveDB() { try { localStorage.setItem(DB, JSON.stringify(cases)); } cat
 
 // ═══ ARCHIVE ═══
 function deleteArchivedCase(id) {
-  if (!confirm('למחוק את התיק לצמיתות מהמכשיר?\n(לא משפיע על תוכנת הניהול)')) return;
+  if (!confirm('למחוק את התיק לצמיתות?\n\nהתיק יימחק גם מתוכנת הניהול במחשב.')) return;
+
+  // ═══ NEW: Delete from Firebase too (so it doesn't reappear in management software) ═══
+  if (fbReady && fbDb) {
+    setSyncChip('pending', 'מוחק...');
+    fbDb.ref('cases/' + id).remove()
+      .then(function() {
+        setSyncChip('ok', 'מסונכרן');
+      })
+      .catch(function(err) {
+        console.error('Firebase delete failed:', err);
+        setSyncChip('err', 'מחיקה מ-Firebase נכשלה');
+      });
+  }
+
+  // Delete from local device
   cases = cases.filter(function(c) { return c.id !== id; });
   saveDB();
   renderHome();
-  toast('🗑️ התיק נמחק מהמכשיר');
+  toast('🗑️ התיק נמחק לצמיתות');
 }
 
 // ═══ HOME ═══
