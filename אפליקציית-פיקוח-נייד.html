@@ -139,6 +139,28 @@
     flex-shrink: 0;
   }
   .arc-delete-btn:active { transform: scale(0.92); }
+
+  /* Delete button in "My Cases" list */
+  .list-delete-btn {
+    width: 50px; height: 50px;
+    border-radius: 12px;
+    background: #ffebee;
+    border: 1.5px solid #ef9a9a;
+    color: #c62828;
+    font-size: 26px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-family: inherit;
+  }
+  .list-delete-btn:active { transform: scale(0.92); }
+  body.dark .list-delete-btn {
+    background: rgba(239,83,80,0.15);
+    border-color: rgba(239,83,80,0.4);
+    color: #ef9a9a;
+  }
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; overflow: hidden; }
   body {
@@ -893,26 +915,11 @@ function saveDB() { try { localStorage.setItem(DB, JSON.stringify(cases)); } cat
 
 // ═══ ARCHIVE ═══
 function deleteArchivedCase(id) {
-  if (!confirm('למחוק את התיק לצמיתות?\n\nהתיק יימחק גם מתוכנת הניהול במחשב.')) return;
-
-  // ═══ NEW: Delete from Firebase too (so it doesn't reappear in management software) ═══
-  if (fbReady && fbDb) {
-    setSyncChip('pending', 'מוחק...');
-    fbDb.ref('cases/' + id).remove()
-      .then(function() {
-        setSyncChip('ok', 'מסונכרן');
-      })
-      .catch(function(err) {
-        console.error('Firebase delete failed:', err);
-        setSyncChip('err', 'מחיקה מ-Firebase נכשלה');
-      });
-  }
-
-  // Delete from local device
+  if (!confirm('למחוק את התיק לצמיתות מהמכשיר?\n(לא משפיע על תוכנת הניהול)')) return;
   cases = cases.filter(function(c) { return c.id !== id; });
   saveDB();
   renderHome();
-  toast('🗑️ התיק נמחק לצמיתות');
+  toast('🗑️ התיק נמחק מהמכשיר');
 }
 
 // ═══ HOME ═══
@@ -978,8 +985,8 @@ function renderList() {
   var h = '';
   cases.slice().reverse().forEach(function(c) {
     var dt = c.date ? new Date(c.date).toLocaleDateString('he-IL', {day:'2-digit',month:'2-digit',year:'numeric'}) : '';
-    h += '<div class="card" style="cursor:pointer;padding:12px" onclick="viewCase(\'' + c.id + '\')">';
-    h += '<div style="display:flex;gap:10px;align-items:center">';
+    h += '<div class="card" style="padding:12px;display:flex;gap:10px;align-items:center">';
+    h += '<div onclick="viewCase(\'' + c.id + '\')" style="flex:1;cursor:pointer;display:flex;gap:10px;align-items:center">';
     h += '<div class="mc-bar ' + c.status + '"></div>';
     h += '<div style="flex:1">';
     h += '<div style="display:flex;justify-content:space-between;align-items:center">';
@@ -987,9 +994,40 @@ function renderList() {
     h += '<span class="mc-badge ' + c.status + '">' + (c.badge || '') + '</span></div>';
     h += '<div style="font-size:22px;font-weight:600;margin-top:2px">' + (c.owner || '—') + '</div>';
     h += '<div style="font-size:19px;color:#bbb;margin-top:1px">📍 ' + (c.location || '—') + ' · ' + dt + '</div>';
-    h += '</div></div></div>';
+    h += '</div></div>';
+    // Delete button (works for both active AND archived cases)
+    h += '<button class="list-delete-btn" onclick="event.stopPropagation();deleteCaseFromList(\'' + c.id + '\')" title="מחק תיק">🗑️</button>';
+    h += '</div>';
   });
   el.innerHTML = h;
+}
+
+// Delete any case (active or archived) - removes from device + Firebase
+function deleteCaseFromList(id) {
+  var c = cases.find(function(x) { return x.id === id; });
+  if (!c) return;
+  var label = c.plate ? ('לוחית ' + c.plate) : (c.owner || 'התיק');
+  if (!confirm('למחוק את ' + label + ' לצמיתות?\n\nהתיק יימחק גם מתוכנת הניהול במחשב.')) return;
+
+  // Delete from Firebase (so it doesn't reappear in management software)
+  if (fbReady && fbDb) {
+    setSyncChip('pending', 'מוחק...');
+    fbDb.ref('cases/' + id).remove()
+      .then(function() {
+        setSyncChip('ok', 'מסונכרן');
+      })
+      .catch(function(err) {
+        console.error('Firebase delete failed:', err);
+        setSyncChip('err', 'מחיקה מ-Firebase נכשלה');
+      });
+  }
+
+  // Delete from local device
+  cases = cases.filter(function(x) { return x.id !== id; });
+  saveDB();
+  renderList();
+  renderHome();
+  toast('🗑️ התיק נמחק לצמיתות');
 }
 
 // ═══ VIEW CASE ═══
