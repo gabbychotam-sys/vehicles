@@ -139,28 +139,6 @@
     flex-shrink: 0;
   }
   .arc-delete-btn:active { transform: scale(0.92); }
-
-  /* Delete button in "My Cases" list */
-  .list-delete-btn {
-    width: 50px; height: 50px;
-    border-radius: 12px;
-    background: #ffebee;
-    border: 1.5px solid #ef9a9a;
-    color: #c62828;
-    font-size: 26px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    font-family: inherit;
-  }
-  .list-delete-btn:active { transform: scale(0.92); }
-  body.dark .list-delete-btn {
-    background: rgba(239,83,80,0.15);
-    border-color: rgba(239,83,80,0.4);
-    color: #ef9a9a;
-  }
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; overflow: hidden; }
   body {
@@ -492,18 +470,21 @@
     <div class="login-title">פיקוח רכבים</div>
     <div class="login-sub">מועצה אזורית הגליל העליון</div>
 
-    <div class="login-label">שם הפקח המלא</div>
-    <input type="text" id="login-name" class="login-input" placeholder="לדוגמה: שימי רוזנברג" autocomplete="off">
+    <div class="login-label">בחר את שמך מהרשימה</div>
+    <select id="login-inspector-select" class="login-input" style="background:#fff;cursor:pointer;" onchange="onInspectorSelected()">
+      <option value="">— בחר את שמך —</option>
+    </select>
 
-    <div class="login-label">📧 כתובת מייל</div>
-    <input type="email" id="login-email" class="login-input" placeholder="example@galil-elion.org.il" autocomplete="off" dir="ltr">
+    <div id="login-selected-info" style="display:none;background:#f0f7ff;border:1.5px solid #c8e0ff;border-radius:12px;padding:14px;margin:12px 0;font-size:18px;">
+      <div id="login-info-name" style="font-weight:700;font-size:22px;margin-bottom:4px;"></div>
+      <div id="login-info-role" style="color:#666;font-size:16px;margin-bottom:8px;"></div>
+      <div id="login-info-phone" style="font-size:17px;" dir="ltr"></div>
+      <div id="login-info-email" style="color:#0066cc;font-size:17px;" dir="ltr"></div>
+    </div>
 
-    <div class="login-label">📱 טלפון (אופציונלי)</div>
-    <input type="tel" id="login-phone" class="login-input" placeholder="0501234567" autocomplete="off" dir="ltr">
+    <button class="login-btn" onclick="doLogin()" id="login-btn-go" disabled style="opacity:0.5;">המשך →</button>
 
-    <button class="login-btn" onclick="doLogin()">המשך →</button>
-
-    <div class="login-note">הפרטים יישמרו במכשיר שלך<br>תוכל לערוך אותם בהגדרות בכל זמן</div>
+    <div class="login-note">השמות הינם רשימת הפקחים והעובדים<br>של מועצה אזורית הגליל העליון</div>
   </div>
 </div>
 
@@ -610,12 +591,15 @@
 
     <!-- Inspector info -->
     <div class="modal-label" style="margin-top:6px;font-size:24px;color:var(--primary-color);font-weight:700;">👷 פרטי הפקח</div>
-    <div class="modal-label">שם מלא</div>
-    <input type="text" id="cfg-inspector" class="modal-input" placeholder="שם הפקח" style="direction:rtl;">
-    <div class="modal-label">📧 מייל</div>
-    <input type="email" id="cfg-email" class="modal-input" placeholder="example@galil-elion.org.il" style="direction:ltr;">
-    <div class="modal-label">📱 טלפון</div>
-    <input type="tel" id="cfg-phone" class="modal-input" placeholder="0501234567" style="direction:ltr;">
+    <div class="modal-label">בחר את שמך</div>
+    <select id="cfg-inspector-select" class="modal-input" style="background:#fff;cursor:pointer;" onchange="onCfgInspectorChange()">
+      <option value="">— בחר את שמך —</option>
+    </select>
+    <div id="cfg-inspector-info" style="display:none;background:#f0f7ff;border:1.5px solid #c8e0ff;border-radius:10px;padding:10px;margin:8px 0;font-size:16px;">
+      <div id="cfg-info-role" style="color:#666;font-size:14px;margin-bottom:6px;"></div>
+      <div id="cfg-info-phone" style="font-size:15px;" dir="ltr"></div>
+      <div id="cfg-info-email" style="color:#0066cc;font-size:15px;" dir="ltr"></div>
+    </div>
 
     <!-- Send all cases by email -->
     <button class="modal-btn primary" onclick="emailAllCases()" style="width:100%;margin-top:14px;background:var(--primary-color);">📧 שלח לי את כל התיקים שלי במייל</button>
@@ -757,13 +741,73 @@ function pushCaseToFirebase(c) {
 }
 
 // ═══ LOGIN / SETTINGS ═══
+
+// Staff list - matches the staff in the management software.
+// To add/remove staff, update this list AND the management software's staffList.
+var STAFF_LIST = [
+  { name: 'שימי רוזנברג',  role: 'פקח',         phone: '054-669-3634', email: 'pikuach@galil-elion.org.il' },
+  { name: 'פרנסיס ברוטמן', role: 'פקח',         phone: '054-452-7582', email: 'pikuach@galil-elion.org.il' },
+  { name: 'אייל ארצי',      role: 'פקח',         phone: '052-619-1985', email: 'pikuach@galil-elion.org.il' },
+  { name: 'מורן לוז',        role: 'מזכירה',     phone: '052-379-1659', email: 'pikuach@galil-elion.org.il' },
+  { name: 'גבי חותם',        role: 'מנהל פיקוח', phone: '',              email: 'pikuach@galil-elion.org.il' }
+];
+
+// Populate the dropdown when login screen opens
+function populateInspectorDropdown() {
+  var sel = document.getElementById('login-inspector-select');
+  if (!sel) return;
+  // Sort alphabetically (Hebrew)
+  var sorted = STAFF_LIST.slice().sort(function(a, b) {
+    return a.name.localeCompare(b.name, 'he');
+  });
+  var html = '<option value="">— בחר את שמך —</option>';
+  sorted.forEach(function(s, idx) {
+    html += '<option value="' + idx + '">' + s.name + ' · ' + s.role + '</option>';
+  });
+  sel.innerHTML = html;
+  // Store sorted list for lookup by index
+  sel._sortedList = sorted;
+}
+
+// Called when user picks a name from dropdown
+function onInspectorSelected() {
+  var sel = document.getElementById('login-inspector-select');
+  var info = document.getElementById('login-selected-info');
+  var btn = document.getElementById('login-btn-go');
+  var idx = sel.value;
+
+  if (idx === '' || !sel._sortedList) {
+    info.style.display = 'none';
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    return;
+  }
+
+  var s = sel._sortedList[parseInt(idx, 10)];
+  if (!s) return;
+
+  document.getElementById('login-info-name').textContent = '👷 ' + s.name;
+  document.getElementById('login-info-role').textContent = s.role;
+  document.getElementById('login-info-phone').textContent = s.phone ? '📱 ' + s.phone : '';
+  document.getElementById('login-info-email').textContent = s.email ? '📧 ' + s.email : '';
+  info.style.display = '';
+  btn.disabled = false;
+  btn.style.opacity = '1';
+}
+
 function doLogin() {
-  var name = document.getElementById('login-name').value.trim();
-  var email = document.getElementById('login-email').value.trim();
-  var phone = document.getElementById('login-phone').value.trim();
-  if (!name) { alert('נא להזין שם'); return; }
-  if (!email) { alert('נא להזין כתובת מייל'); return; }
-  saveInspector({ name: name, email: email, phone: phone });
+  var sel = document.getElementById('login-inspector-select');
+  var idx = sel.value;
+  if (idx === '' || !sel._sortedList) {
+    alert('אנא בחר את שמך מהרשימה');
+    return;
+  }
+  var s = sel._sortedList[parseInt(idx, 10)];
+  if (!s) {
+    alert('שגיאה - אנא נסה שוב');
+    return;
+  }
+  saveInspector({ name: s.name, email: s.email || '', phone: s.phone || '', role: s.role || '' });
   refreshHomeUser();
   showScreen('home');
 }
@@ -771,7 +815,7 @@ function doLogin() {
 function refreshHomeUser() {
   var i = loadInspector();
   var el = document.getElementById('home-user-line');
-  if (el) el.textContent = '👷 ' + (i ? i.name : 'פקח') + ' · פקח';
+  if (el) el.textContent = '👷 ' + (i ? i.name : 'פקח') + ' · ' + (i && i.role ? i.role : 'פקח');
 }
 
 // ═══ THEME / SETTINGS STATE ═══
@@ -837,22 +881,69 @@ function setFontSize(size) {
 
 // ═══ SETTINGS ═══
 function openSettings() {
+  // Populate the dropdown if not already done
+  var sel = document.getElementById('cfg-inspector-select');
+  if (sel && !sel._sortedList) {
+    var sorted = STAFF_LIST.slice().sort(function(a, b) {
+      return a.name.localeCompare(b.name, 'he');
+    });
+    var html = '<option value="">— בחר את שמך —</option>';
+    sorted.forEach(function(s, idx) {
+      html += '<option value="' + idx + '">' + s.name + ' · ' + s.role + '</option>';
+    });
+    sel.innerHTML = html;
+    sel._sortedList = sorted;
+  }
+  // Pre-select current inspector
   var i = loadInspector() || {};
-  document.getElementById('cfg-inspector').value = i.name || '';
-  document.getElementById('cfg-email').value = i.email || '';
-  document.getElementById('cfg-phone').value = i.phone || '';
+  if (sel && sel._sortedList) {
+    var matchIdx = -1;
+    sel._sortedList.forEach(function(s, idx) {
+      if (s.name === i.name) matchIdx = idx;
+    });
+    sel.value = matchIdx >= 0 ? String(matchIdx) : '';
+    onCfgInspectorChange();
+  }
   applyTheme(); // refresh active states
   document.getElementById('settings-modal').classList.add('open');
 }
+
+// Show info when user picks a name in settings dropdown
+function onCfgInspectorChange() {
+  var sel = document.getElementById('cfg-inspector-select');
+  var info = document.getElementById('cfg-inspector-info');
+  if (!sel || !info) return;
+  var idx = sel.value;
+  if (idx === '' || !sel._sortedList) {
+    info.style.display = 'none';
+    return;
+  }
+  var s = sel._sortedList[parseInt(idx, 10)];
+  if (!s) return;
+  document.getElementById('cfg-info-role').textContent = s.role || '';
+  document.getElementById('cfg-info-phone').textContent = s.phone ? '📱 ' + s.phone : '';
+  document.getElementById('cfg-info-email').textContent = s.email ? '📧 ' + s.email : '';
+  info.style.display = '';
+}
+
 function closeSettings(e) {
   if (e && e.target.id !== 'settings-modal' && e.type === 'click') return;
   document.getElementById('settings-modal').classList.remove('open');
 }
 function saveSettings() {
+  var sel = document.getElementById('cfg-inspector-select');
+  var idx = sel.value;
+  if (idx === '' || !sel._sortedList) {
+    alert('אנא בחר את שמך מהרשימה');
+    return;
+  }
+  var s = sel._sortedList[parseInt(idx, 10)];
+  if (!s) { alert('שגיאה - אנא נסה שוב'); return; }
   saveInspector({
-    name: document.getElementById('cfg-inspector').value.trim(),
-    email: document.getElementById('cfg-email').value.trim(),
-    phone: document.getElementById('cfg-phone').value.trim()
+    name: s.name,
+    email: s.email || '',
+    phone: s.phone || '',
+    role: s.role || ''
   });
   refreshHomeUser();
   closeSettings();
@@ -985,8 +1076,8 @@ function renderList() {
   var h = '';
   cases.slice().reverse().forEach(function(c) {
     var dt = c.date ? new Date(c.date).toLocaleDateString('he-IL', {day:'2-digit',month:'2-digit',year:'numeric'}) : '';
-    h += '<div class="card" style="padding:12px;display:flex;gap:10px;align-items:center">';
-    h += '<div onclick="viewCase(\'' + c.id + '\')" style="flex:1;cursor:pointer;display:flex;gap:10px;align-items:center">';
+    h += '<div class="card" style="cursor:pointer;padding:12px" onclick="viewCase(\'' + c.id + '\')">';
+    h += '<div style="display:flex;gap:10px;align-items:center">';
     h += '<div class="mc-bar ' + c.status + '"></div>';
     h += '<div style="flex:1">';
     h += '<div style="display:flex;justify-content:space-between;align-items:center">';
@@ -994,40 +1085,9 @@ function renderList() {
     h += '<span class="mc-badge ' + c.status + '">' + (c.badge || '') + '</span></div>';
     h += '<div style="font-size:22px;font-weight:600;margin-top:2px">' + (c.owner || '—') + '</div>';
     h += '<div style="font-size:19px;color:#bbb;margin-top:1px">📍 ' + (c.location || '—') + ' · ' + dt + '</div>';
-    h += '</div></div>';
-    // Delete button (works for both active AND archived cases)
-    h += '<button class="list-delete-btn" onclick="event.stopPropagation();deleteCaseFromList(\'' + c.id + '\')" title="מחק תיק">🗑️</button>';
-    h += '</div>';
+    h += '</div></div></div>';
   });
   el.innerHTML = h;
-}
-
-// Delete any case (active or archived) - removes from device + Firebase
-function deleteCaseFromList(id) {
-  var c = cases.find(function(x) { return x.id === id; });
-  if (!c) return;
-  var label = c.plate ? ('לוחית ' + c.plate) : (c.owner || 'התיק');
-  if (!confirm('למחוק את ' + label + ' לצמיתות?\n\nהתיק יימחק גם מתוכנת הניהול במחשב.')) return;
-
-  // Delete from Firebase (so it doesn't reappear in management software)
-  if (fbReady && fbDb) {
-    setSyncChip('pending', 'מוחק...');
-    fbDb.ref('cases/' + id).remove()
-      .then(function() {
-        setSyncChip('ok', 'מסונכרן');
-      })
-      .catch(function(err) {
-        console.error('Firebase delete failed:', err);
-        setSyncChip('err', 'מחיקה מ-Firebase נכשלה');
-      });
-  }
-
-  // Delete from local device
-  cases = cases.filter(function(x) { return x.id !== id; });
-  saveDB();
-  renderList();
-  renderHome();
-  toast('🗑️ התיק נמחק לצמיתות');
 }
 
 // ═══ VIEW CASE ═══
@@ -1306,6 +1366,10 @@ function goBackFromView() {
     // First-time: show login
     document.getElementById('scr-home').classList.remove('active');
     document.getElementById('scr-login').classList.add('active');
+    // Populate inspector dropdown with staff list
+    if (typeof populateInspectorDropdown === 'function') {
+      populateInspectorDropdown();
+    }
   } else {
     refreshHomeUser();
     renderHome();
