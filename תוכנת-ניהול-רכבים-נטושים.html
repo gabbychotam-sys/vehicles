@@ -2236,8 +2236,9 @@ try {
             <div class="edit-group"><textarea class="edit-input" id="nf-notes" rows="2" placeholder="הערות נוספות..." style="resize:vertical;"></textarea></div>
           </div>
           <!-- כפתור שמירה -->
-          <div style="display:flex;gap:10px;margin-top:16px;">
+          <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
             <button class="btn-save" id="nf-save-btn" onclick="saveNewCase()" style="padding:12px 32px;font-size:14px;">💾 שמור ופתח תיק</button>
+            <button class="btn-save" id="nf-save-only-btn" onclick="saveNewCaseOnly()" style="padding:12px 24px;font-size:14px;background:#5a6c7d;">💾 שמור בלבד</button>
             <button class="btn-cancel" onclick="cancelNewCase()" style="padding:12px 24px;">ביטול</button>
           </div>
         </div>
@@ -3994,6 +3995,9 @@ function saveCase() {
   btn.style.opacity = '0.7';
   btn.disabled = true;
 
+  // Capture old plate BEFORE we overwrite — used to find the row
+  var oldPlate = CASE.plate;
+
   const city   = document.getElementById('e-location-city').value;
   const street = document.getElementById('e-location-street').value.trim();
 
@@ -4008,13 +4012,6 @@ function saveCase() {
   CASE.towDate     = document.getElementById('e-tow-date').value || null;
   CASE.notes       = document.getElementById('e-notes').value.trim();
   CASE.status      = currentStatus;
-
-  /* ── Firebase save ─────────────────────────────────────────────────────
-     import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
-     await updateDoc(doc(db, "cases", caseId), {
-       ...CASE, updatedAt: serverTimestamp()
-     });
-     ────────────────────────────────────────────────────────────────────── */
 
   setTimeout(() => {
     // Live update header via IDs
@@ -4044,8 +4041,460 @@ function saveCase() {
     btn.disabled = false;
     closeEditModal({ target: document.getElementById('edit-modal-overlay') });
     renderCasePhotos();
-    showToast('✅ פרטי התיק עודכנו בהצלחה!');
+
+    // ═══ NEW: Update the row in cases-tbody + persist ═══
+    try {
+      // Build a deep copy of CASE to store on the row (so it survives reloads)
+      var fullCaseSnapshot = Object.assign({}, CASE, {
+        photos: Array.isArray(casePhotos) ? casePhotos.slice() : [],
+        inspector: (document.getElementById('e-inspector') || {}).value || ''
+      });
+      upsertCaseRow(oldPlate, {
+        plate: CASE.plate,
+        date: (new Date()).toISOString().split('T')[0],
+        owner: CASE.ownerName,
+        location: (CASE.location || '').split(',')[0].trim(),
+        status: CASE.status,
+        inspector: (document.getElementById('e-inspector') || {}).value || ''
+      }, fullCaseSnapshot);
+      if (typeof markDirty === 'function') markDirty();
+
+      // Log activity + refresh dashboard panels
+      var inspectorName = (document.getElementById('e-inspector') || {}).value || '';
+      var actionDesc = 'הפרטים עודכנו';
+      if (CASE.status === 'red') actionDesc = 'הודבקה מדבקה אדומה';
+      else if (CASE.status === 'orange' || CASE.status === 'towed') actionDesc = 'נגרר למגרש';
+      else if (CASE.status === 'green' || CASE.status === 'closed') actionDesc = 'נסגר';
+      if (typeof logActivity === 'function') logActivity(CASE.plate, actionDesc, inspectorName, CASE.status);
+      if (typeof refreshDashboardPanels === 'function') refreshDashboardPanels();
+    } catch(e) { console.error('upsertCaseRow failed:', e); }
+
+    showToast('✅ פרטי התיק עודכנו ונשמרו!');
   }, 600);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   DASHBOARD AUTO-REFRESH — keeps "פעילות אחרונה", "צוות פיקוח",
+   "יישובים" panels in sync with cases-tbody when cases are added/edited
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── Activity feed: list of {plate, action, who, time, color} ── */
+var activityFeed = [];
+
+function loadActivityFeed() {
+  try {
+    var raw = localStorage.getItem('galilElyon_activityFeed');
+    if (raw) activityFeed = JSON.parse(raw) || [];
+  } catch(e) { activityFeed = []; }
+}
+function saveActivityFeed() {
+  try { localStorage.setItem('galilElyon_activityFeed', JSON.stringify(activityFeed.slice(0,15))); } catch(e){}
+}
+
+function logActivity(plate, action, who, status) {
+  var colors = { red:'var(--red)', yellow:'var(--yellow)', orange:'var(--orange)', green:'var(--green)', teal:'var(--teal)', blue:'var(--teal)' };
+  activityFeed.unshift({
+    plate: plate || '',
+    action: action || '',
+    who: who || '',
+    time: new Date().toISOString(),
+    color: colors[status] || 'var(--teal)'
+  });
+  if (activityFeed.length > 15) activityFeed = activityFeed.slice(0, 15);
+  saveActivityFeed();
+  renderActivityFeed();
+}
+
+function timeAgo(iso) {
+  try {
+    var diff = (Date.now() - new Date(iso).getTime()) / 60000;
+    if (diff < 1) return 'הרגע';
+    if (diff < 60) return 'לפני ' + Math.floor(diff) + ' דקות';
+    if (diff < 1440) return 'לפני ' + Math.floor(diff/60) + ' שעות';
+    var days = Math.floor(diff/1440);
+    if (days === 1) return 'אתמול';
+    return 'לפני ' + days + ' ימים';
+  } catch(e) { return ''; }
+}
+
+function renderActivityFeed() {
+  var container = document.querySelector('.activity-list');
+  if (!container) return;
+  if (!activityFeed.length) {
+    // Keep the demo content visible if no real activity yet
+    return;
+  }
+  var html = '';
+  activityFeed.slice(0, 6).forEach(function(a) {
+    html += '<div class="activity-item">' +
+      '<div class="ai-dot" style="background:' + a.color + '"></div>' +
+      '<div class="ai-content">' +
+        '<div class="ai-text">' + (a.plate ? 'תיק <strong>' + a.plate + '</strong> — ' : '') + a.action + '</div>' +
+        '<div class="ai-time">' + timeAgo(a.time) + (a.who ? ' • ' + a.who : '') + '</div>' +
+      '</div>' +
+    '</div>';
+  });
+  container.innerHTML = html;
+}
+
+/* ── Inspectors panel: recount cases per inspector ── */
+function refreshInspectorCounts() {
+  var rows = document.querySelectorAll('#cases-tbody tr');
+  var counts = {};
+  rows.forEach(function(r) {
+    var cells = r.querySelectorAll('td');
+    if (cells.length < 9) return;
+    var inspName = (cells[8].textContent || '').trim();
+    if (!inspName || inspName === '—') return;
+    counts[inspName] = (counts[inspName] || 0) + 1;
+  });
+
+  // Update existing inspector rows (by name match)
+  var seenNames = {};
+  document.querySelectorAll('.inspector-row').forEach(function(row) {
+    var nameEl = row.querySelector('.ins-name');
+    if (!nameEl) return;
+    var name = nameEl.textContent.trim();
+    seenNames[name] = true;
+    var casesEl = row.querySelector('.ins-cases span');
+    if (!casesEl) return;
+    casesEl.textContent = counts[name] || 0;
+  });
+
+  // Add NEW rows for inspectors that exist in the table but not in the panel
+  // (e.g., a mobile inspector with a name not in the original 4)
+  var listEl = document.querySelector('.inspector-list');
+  if (listEl) {
+    Object.keys(counts).forEach(function(name) {
+      if (seenNames[name]) return; // already shown
+      // Build a new dynamic row
+      var firstChar = (name.charAt(0) || '?');
+      var hashH = 0;
+      for (var i = 0; i < name.length; i++) hashH = ((hashH << 5) - hashH + name.charCodeAt(i)) | 0;
+      var palette = [
+        '#3498db,#1a4268', '#e74c3c,#7b241c', '#9b59b6,#4a235a', '#f39c12,#d68910',
+        '#16a085,#0e6655', '#27ae60,#196f3d', '#2980b9,#1b4f72', '#8e44ad,#5b2c6f'
+      ];
+      var color = palette[Math.abs(hashH) % palette.length];
+      var div = document.createElement('div');
+      div.className = 'inspector-row';
+      div.setAttribute('data-dynamic-inspector', '1');
+      div.innerHTML =
+        '<div class="ins-avatar" style="background:linear-gradient(135deg,' + color + ')">' + firstChar + '</div>' +
+        '<div>' +
+          '<div class="ins-name">' + name.replace(/</g,'&lt;') + '</div>' +
+          '<div class="ins-area">פקח (מהשטח)</div>' +
+          '<div style="font-size:10px;color:var(--muted);">פעיל באפליקציית פיקוח</div>' +
+        '</div>' +
+        '<div class="ins-cases"><span>' + counts[name] + '</span>תיקים</div>' +
+        '<div class="ins-status" style="background:var(--green)"></div>';
+      listEl.appendChild(div);
+    });
+
+    // Also: remove dynamic rows that no longer have any cases
+    listEl.querySelectorAll('.inspector-row[data-dynamic-inspector="1"]').forEach(function(row) {
+      var nameEl = row.querySelector('.ins-name');
+      if (!nameEl) return;
+      var nm = nameEl.textContent.trim();
+      if (!counts[nm]) row.remove();
+    });
+  }
+}
+
+/* ── Towns: trigger re-render if towns view is active ── */
+function refreshTownsIfActive() {
+  var towns = document.getElementById('view-towns');
+  if (towns && towns.classList.contains('active-view') && typeof renderTownsPage === 'function') {
+    try { renderTownsPage(); } catch(e){}
+  }
+}
+
+/* ── Master refresh: call after any case change ── */
+function refreshDashboardPanels() {
+  // Always dedupe first — removes any duplicate rows by plate
+  try { _dedupeTbodyByPlate(); } catch(e){}
+  try { renderActivityFeed(); } catch(e){}
+  try { refreshInspectorCounts(); } catch(e){}
+  try { renderStaffCards(); } catch(e){}
+  try { refreshTownsIfActive(); } catch(e){}
+  try { if (typeof renderMapMarkers === 'function') renderMapMarkers(); } catch(e){}
+  if (typeof updateAllCounters === 'function') {
+    try { updateAllCounters(); } catch(e){}
+  }
+}
+
+/* Remove duplicate rows in #cases-tbody by plate.
+   When duplicates exist, prefer the row with data-case attribute
+   (it has the full saved data); otherwise keep the first one. */
+function _dedupeTbodyByPlate() {
+  var tbody = document.getElementById('cases-tbody');
+  if (!tbody) return false;
+  var seen = {}; // plate → tr (the one we keep)
+  var toRemove = [];
+  Array.prototype.forEach.call(tbody.querySelectorAll('tr'), function(tr) {
+    var pb = tr.querySelector('.plate-badge');
+    var plate = pb ? pb.textContent.trim() : '';
+    if (!plate || plate === '—' || plate === '') return;
+    if (seen[plate]) {
+      // Found duplicate. Decide which to keep.
+      var existing = seen[plate];
+      var existingHasCase = existing.hasAttribute('data-case');
+      var newHasCase = tr.hasAttribute('data-case');
+      if (newHasCase && !existingHasCase) {
+        // The new row has full data — keep it, drop the old one
+        toRemove.push(existing);
+        seen[plate] = tr;
+      } else {
+        // Otherwise drop the duplicate (the new one)
+        toRemove.push(tr);
+      }
+    } else {
+      seen[plate] = tr;
+    }
+  });
+  if (toRemove.length) {
+    toRemove.forEach(function(tr) { tr.remove(); });
+    if (typeof markDirty === 'function') markDirty();
+    if (typeof showToast === 'function') {
+      showToast('🧹 הוסרו ' + toRemove.length + ' שורות כפולות מהטבלה');
+    }
+    console.log('Removed', toRemove.length, 'duplicate rows from cases-tbody');
+    return true;
+  }
+  return false;
+}
+
+// Load activity feed + refresh dashboard panels on startup
+function _initDashboardPanels() {
+  loadActivityFeed();
+  // Small delay to ensure cases-tbody is fully rendered before counting
+  setTimeout(function() {
+    // First clean up any existing duplicate rows from prior buggy saves
+    try { _dedupeTbodyByPlate(); } catch(e){}
+    try { renderActivityFeed(); } catch(e){}
+    try { refreshInspectorCounts(); } catch(e){}
+    try { if (typeof renderMapMarkers === 'function') renderMapMarkers(); } catch(e){}
+    if (typeof updateAllCounters === 'function') {
+      try { updateAllCounters(); } catch(e){}
+    }
+  }, 300);
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _initDashboardPanels);
+} else {
+  _initDashboardPanels();
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   upsertCaseRow — Updates an existing row (matched by plate) in
+   #cases-tbody, or inserts a new row at the top if none matches.
+   This makes saved edits persist via the existing autosave mechanism.
+   When fullData is provided, it's stored on the row so the user can
+   re-open the case for editing.
+   ════════════════════════════════════════════════════════════════════ */
+function upsertCaseRow(oldPlate, c, fullData) {
+  var tbody = document.getElementById('cases-tbody');
+  if (!tbody) return;
+
+  // Status info
+  var statusInfo = {
+    yellow: { cls: 'sb-yellow', label: '🟡 מדבקה צהובה', days: 30, cd: 'ok' },
+    red:    { cls: 'sb-red',    label: '🔴 מדבקה אדומה', days: 14, cd: 'urgent' },
+    orange: { cls: 'sb-orange', label: '🚛 באחסנה',     days: 60, cd: 'warn' },
+    green:  { cls: 'sb-green',  label: '✅ סגור',         days: 0,  cd: 'ok' },
+    towed:  { cls: 'sb-orange', label: '🚛 נגרר',         days: 45, cd: 'warn' },
+    closed: { cls: 'sb-green',  label: '✅ סגור',         days: 0,  cd: 'ok' }
+  };
+  var s = statusInfo[c.status] || statusInfo.yellow;
+  var elapsed = 0;
+  try { elapsed = Math.floor((new Date() - new Date(c.date)) / 86400000); } catch(e){}
+  var rem = s.days ? Math.max(0, s.days - elapsed) : 0;
+  var pct = s.days ? Math.min(100, Math.round(elapsed / s.days * 100)) : 100;
+  var dt = '';
+  try { dt = c.date ? new Date(c.date).toLocaleDateString('he-IL', {day:'2-digit',month:'2-digit',year:'numeric'}) : ''; } catch(e){}
+
+  var safe = function(v) {
+    return String(v == null ? '' : v)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  };
+
+  // Try to find existing row by old plate
+  var existing = null;
+  if (oldPlate) {
+    Array.prototype.forEach.call(tbody.querySelectorAll('tr'), function(tr) {
+      var pb = tr.querySelector('.plate-badge');
+      if (pb && pb.textContent.trim() === String(oldPlate).trim()) existing = tr;
+    });
+  }
+
+  var num = existing ?
+    (Array.prototype.indexOf.call(tbody.children, existing) + 1) :
+    (tbody.children.length + 1);
+
+  var rowHtml =
+    '<td style="text-align:center;" onclick="event.stopPropagation()">' +
+      '<input type="checkbox" class="ms-cb" onchange="msUpdateCount(\'cases-tbody\',\'ms-bar-cases\',\'ms-count-cases\',\'ms-all-cases\')">' +
+    '</td>' +
+    '<td style="color:var(--muted);font-size:13px;">' + num + '</td>' +
+    '<td style="font-size:12px;">' + safe(dt) + '</td>' +
+    '<td><span class="plate-badge">' + safe(c.plate || '—') + '</span></td>' +
+    '<td>' +
+      '<div class="owner-name">' + safe(c.owner || '—') + '</div>' +
+      '<div class="owner-loc">📍 ' + safe(c.location || '—') + '</div>' +
+    '</td>' +
+    '<td style="font-size:12px;">📍 ' + safe(c.location || '—') + '</td>' +
+    '<td><span class="status-badge ' + s.cls + '">' + s.label + '</span></td>' +
+    '<td>' +
+      '<div class="countdown-cell">' +
+        '<div class="cd-days ' + s.cd + '">' + rem + ' ימים</div>' +
+        '<div class="cd-track"><div class="cd-fill ' + s.cd + '" style="width:' + pct + '%"></div></div>' +
+      '</div>' +
+    '</td>' +
+    '<td style="font-size:12px;">' + safe(c.inspector || '—') + '</td>' +
+    '<td style="white-space:nowrap;">' +
+      '<button class="row-action" onclick="event.stopPropagation();openCaseFromRow(this.closest(\'tr\'))">📋 פרטים</button>' +
+    '</td>';
+
+  var tr;
+  if (existing) {
+    existing.innerHTML = rowHtml;
+    existing.setAttribute('data-status', c.status || 'yellow');
+    if (fullData) {
+      try { existing.setAttribute('data-case', JSON.stringify(fullData)); } catch(e){}
+    }
+    existing.style.cursor = 'pointer';
+    existing.onclick = function() { openCaseFromRow(this); };
+    tr = existing;
+    // Brief flash to indicate update
+    tr.style.background = 'rgba(46,125,50,0.18)';
+    setTimeout(function() {
+      tr.style.transition = 'background 1.5s';
+      tr.style.background = '';
+    }, 100);
+  } else {
+    tr = document.createElement('tr');
+    tr.innerHTML = rowHtml;
+    tr.setAttribute('data-status', c.status || 'yellow');
+    if (fullData) {
+      try { tr.setAttribute('data-case', JSON.stringify(fullData)); } catch(e){}
+    }
+    tr.style.cursor = 'pointer';
+    tr.onclick = function() { openCaseFromRow(this); };
+    tbody.insertBefore(tr, tbody.firstChild);
+    // Brief highlight on insert
+    tr.style.background = 'rgba(46,125,50,0.18)';
+    setTimeout(function() {
+      tr.style.transition = 'background 1.5s';
+      tr.style.background = '';
+    }, 100);
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   openCaseFromRow — Opens a saved case for viewing/editing.
+   Reads the full case data from the row's data-case attribute.
+   ════════════════════════════════════════════════════════════════════ */
+function openCaseFromRow(tr) {
+  if (!tr) return;
+
+  var caseDataStr = tr.getAttribute('data-case');
+  if (!caseDataStr) {
+    // No saved data — likely a demo row. Just show a notice.
+    if (typeof showToast === 'function') {
+      showToast('💡 תיק זה ללא נתונים מורחבים — צור תיק חדש כדי לערוך');
+    }
+    return;
+  }
+
+  var saved;
+  try { saved = JSON.parse(caseDataStr); } catch(e) {
+    console.error('failed to parse case data:', e);
+    return;
+  }
+
+  // Reset CASE then merge saved data
+  Object.assign(CASE, CASE_EMPTY);
+  Object.keys(saved).forEach(function(k) { CASE[k] = saved[k]; });
+  // Reset SENT to a clean slate (per-case mailing data isn't persisted yet)
+  Object.assign(SENT, SENT_EMPTY);
+
+  // Populate the view
+  populateCaseView(CASE);
+
+  // Show case detail view (existing case mode, not new case form)
+  var nf = document.getElementById('new-case-form');
+  if (nf) nf.style.display = 'none';
+  var ec = document.getElementById('case-existing-content');
+  if (ec) ec.style.display = '';
+  var hdr = document.querySelector('.case-header');
+  if (hdr) hdr.style.display = '';
+  var tba = document.querySelector('.tb-actions');
+  if (tba) tba.style.display = '';
+  var pc = document.getElementById('cv-photos-card');
+  if (pc) pc.style.display = '';
+
+  // Switch to case view
+  if (typeof showView === 'function') showView('case');
+
+  // Scroll to top
+  var ps = document.querySelector('.view-case .page-scroll');
+  if (ps) ps.scrollTop = 0;
+}
+
+/* Populate the case detail view from a CASE object */
+function populateCaseView(c) {
+  var setText = function(id, val) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = val == null ? '' : val;
+  };
+  var setHtml = function(id, val) {
+    var el = document.getElementById(id);
+    if (el) el.innerHTML = val == null ? '' : val;
+  };
+
+  setText('cv-bc-title', 'תיק ' + (c.plate || ''));
+  setText('cv-plate', c.plate || '—');
+  setText('cv-owner', c.ownerName || '—');
+  setHtml('cv-loc', '📍 ' + (c.location || '') +
+    (c.vehicleType ? ' &nbsp;|&nbsp; ' + c.vehicleType + ' ' + (c.color || '') : ''));
+
+  setText('cv-card-owner', c.ownerName || '—');
+  setText('cv-card-id', 'ת"ז: ' + (c.ownerId || ''));
+  setText('cv-card-addr', c.ownerAddr || '');
+  setText('cv-card-phone', c.ownerPhone ? ('📱 ' + c.ownerPhone) : '');
+  setText('cv-card-plate', c.plate || '—');
+  setText('cv-card-model', c.vehicleType || '');
+  setText('cv-card-color', 'צבע: ' + (c.color || ''));
+  var parts = (c.location || '').split(', ');
+  setText('cv-card-city', parts[0] || '');
+  setText('cv-card-street', parts.slice(1).join(', ') || '');
+
+  var inspText = '';
+  if (c.inspector) inspText = 'פקח: ' + c.inspector;
+  setText('cv-card-inspector', inspText);
+
+  // Pills based on status
+  var pillHtml = '<span class="chip chip-blue">🚗 רכב נטוש</span>';
+  if (c.status === 'red') pillHtml += '<span class="chip chip-red">🔴 מדבקה אדומה</span>';
+  else if (c.status === 'green' || c.status === 'closed') pillHtml += '<span class="chip chip-green">✅ סגור</span>';
+  else if (c.status === 'towed' || c.status === 'orange') pillHtml += '<span class="chip" style="background:rgba(243,156,18,0.15);color:#f39c12;border:1px solid rgba(243,156,18,0.3);">🚛 באחסנה</span>';
+  else pillHtml += '<span class="chip chip-yellow">🟡 מדבקה צהובה</span>';
+  setHtml('cv-pills', pillHtml);
+
+  // Photos
+  if (Array.isArray(c.photos)) {
+    casePhotos = c.photos.slice();
+  } else {
+    casePhotos = [];
+  }
+  if (typeof renderCasePhotos === 'function') {
+    try { renderCasePhotos(); } catch(e) {}
+  }
+
+  // Timeline (uses SENT which we already reset)
+  if (typeof renderTimeline === 'function') {
+    try { renderTimeline(); } catch(e) {}
+  }
 }
 
 /* ═══════════════ DOCUMENTS PREVIEW SYSTEM ═══════════════ */
@@ -4447,6 +4896,9 @@ function showView(viewName) {
 
   // Render dashboard towns panel
   if (viewName === 'dashboard') renderDashTowns();
+
+  // Refresh staff cards when entering staff page (so counts are current)
+  if (viewName === 'staff' && typeof renderStaffCards === 'function') renderStaffCards();
 
   // Update sidebar active state
   document.querySelectorAll('.sb-item').forEach(el => {
@@ -4871,20 +5323,8 @@ function saveNewCase() {
   btn.textContent = '⏳ שומר...';
   btn.disabled = true;
 
-  var city = document.getElementById('nf-location-city').value;
-  var street = document.getElementById('nf-location-street').value.trim();
-
-  CASE.plate = document.getElementById('nf-plate').value.trim();
-  CASE.vehicleType = document.getElementById('nf-vehicle-type').value.trim();
-  CASE.color = document.getElementById('nf-color').value;
-  CASE.ownerName = document.getElementById('nf-owner-name').value.trim();
-  CASE.ownerId = document.getElementById('nf-owner-id').value.trim();
-  CASE.ownerAddr = document.getElementById('nf-owner-addr').value.trim();
-  CASE.ownerPhone = document.getElementById('nf-owner-phone').value.trim();
-  CASE.location = street ? city + ', ' + street : city;
-  CASE.notes = document.getElementById('nf-notes').value.trim();
-  CASE.status = 'yellow';
-  CASE.caseType = newCaseType;
+  // Read all fields into CASE
+  _newCaseReadFields();
 
   // Transfer photos from new case form to case photos
   casePhotos = newCasePhotos.slice();
@@ -4938,8 +5378,136 @@ function saveNewCase() {
     btn.textContent = '💾 שמור ופתח תיק';
     btn.disabled = false;
 
+    // ═══ NEW: Add row to cases-tbody + persist ═══
+    _newCasePersistRow();
+
+    // ═══ NEW: Remove the original mobile-source row (it's now an active case)
+    _removeMobilePromotedRow();
+
     showToast('✅ תיק חדש נפתח בהצלחה!');
   }, 500);
+}
+
+/* "שמור בלבד" — saves to the cases list without transitioning to case detail.
+   Use case: quick triage of a mobile case → just register it and continue. */
+function saveNewCaseOnly() {
+  var btn = document.getElementById('nf-save-only-btn');
+  if (btn) { btn.textContent = '⏳ שומר...'; btn.disabled = true; }
+
+  _newCaseReadFields();
+
+  // Validate minimum: plate
+  if (!CASE.plate) {
+    if (btn) { btn.textContent = '💾 שמור בלבד'; btn.disabled = false; }
+    showToast('⚠️ נא להזין לוחית רישוי');
+    return;
+  }
+
+  setTimeout(function() {
+    // Add the row to cases-tbody + persist
+    _newCasePersistRow();
+
+    // Remove the original mobile-source row if applicable
+    _removeMobilePromotedRow();
+
+    if (btn) { btn.textContent = '💾 שמור בלבד'; btn.disabled = false; }
+
+    // Stay on cases list — go back from new case form
+    showView('cases-list');
+
+    showToast('✅ התיק נשמר ברשימה');
+  }, 300);
+}
+
+/* Helper: read all fields from the new case form into CASE */
+function _newCaseReadFields() {
+  var city = document.getElementById('nf-location-city').value;
+  var street = document.getElementById('nf-location-street').value.trim();
+
+  CASE.plate = document.getElementById('nf-plate').value.trim();
+  CASE.vehicleType = document.getElementById('nf-vehicle-type').value.trim();
+  CASE.color = document.getElementById('nf-color').value;
+  CASE.ownerName = document.getElementById('nf-owner-name').value.trim();
+  CASE.ownerId = document.getElementById('nf-owner-id').value.trim();
+  CASE.ownerAddr = document.getElementById('nf-owner-addr').value.trim();
+  CASE.ownerPhone = document.getElementById('nf-owner-phone').value.trim();
+  CASE.location = street ? city + ', ' + street : city;
+  CASE.notes = document.getElementById('nf-notes').value.trim();
+  CASE.status = 'yellow';
+  CASE.caseType = newCaseType;
+
+  // Transfer photos
+  if (typeof newCasePhotos !== 'undefined') {
+    casePhotos = newCasePhotos.slice();
+  }
+}
+
+/* Helper: insert/update the corresponding row in #cases-tbody and persist */
+function _newCasePersistRow() {
+  try {
+    if (typeof upsertCaseRow === 'function') {
+      var foundDate = (document.getElementById('nf-found-date') || {}).value || (new Date()).toISOString().split('T')[0];
+      var inspector = (document.getElementById('nf-inspector') || {}).value || '';
+      // Build a full snapshot of the case (so it can be re-opened later)
+      var fullCaseSnapshot = Object.assign({}, CASE, {
+        photos: Array.isArray(casePhotos) ? casePhotos.slice() :
+                (Array.isArray(newCasePhotos) ? newCasePhotos.map(function(p){ return p.dataUrl || p; }) : []),
+        inspector: inspector,
+        date: foundDate
+      });
+      upsertCaseRow(null, {
+        plate: CASE.plate,
+        date: foundDate,
+        owner: CASE.ownerName,
+        location: (CASE.location || '').split(',')[0].trim(),
+        status: CASE.status || 'yellow',
+        inspector: inspector
+      }, fullCaseSnapshot);
+
+      // Log activity + refresh dashboard panels
+      if (typeof logActivity === 'function') {
+        logActivity(CASE.plate,
+          'תיק חדש נפתח — ' + ((CASE.location || '').split(',')[0].trim() || ''),
+          inspector,
+          CASE.status || 'teal');
+      }
+      if (typeof refreshDashboardPanels === 'function') refreshDashboardPanels();
+    }
+    if (typeof markDirty === 'function') markDirty();
+  } catch(e) { console.error('persist row failed:', e); }
+}
+
+/* Helper: when promoting a mobile case to active, remove the original
+   "📱 מהשטח" row so we don't show it twice. Also persists the promoted
+   ID so future Firebase child_added events for this ID will be skipped. */
+function _removeMobilePromotedRow() {
+  try {
+    var pendingId = window.__pendingMobilePromotion;
+    if (!pendingId) return;
+
+    // Mark this ID as promoted (persisted across refreshes)
+    try {
+      var promoted = JSON.parse(localStorage.getItem('galilElyon_promotedMobileIds') || '[]');
+      if (promoted.indexOf(String(pendingId)) === -1) {
+        promoted.push(String(pendingId));
+        localStorage.setItem('galilElyon_promotedMobileIds', JSON.stringify(promoted));
+      }
+    } catch(e) {}
+
+    var tbody = document.getElementById('cases-tbody');
+    if (!tbody) { window.__pendingMobilePromotion = null; return; }
+    var row = tbody.querySelector('tr[data-mobile-id="' + String(pendingId).replace(/"/g,'\\"') + '"]');
+    if (row) row.remove();
+    window.__pendingMobilePromotion = null;
+  } catch(e) { console.error('remove mobile row failed:', e); }
+}
+
+/* Helper: check if a mobile case ID was already promoted to an active case */
+function _isMobileIdPromoted(id) {
+  try {
+    var promoted = JSON.parse(localStorage.getItem('galilElyon_promotedMobileIds') || '[]');
+    return promoted.indexOf(String(id)) !== -1;
+  } catch(e) { return false; }
 }
 
 function cancelNewCase() {
@@ -5426,94 +5994,189 @@ var MAP_CASES = [
 var STATUS_COLORS = { red:'#e53935', yellow:'#fdd835', orange:'#ff9800', green:'#4caf50' };
 var STATUS_LABELS = { red:'🔴 מדבקה אדומה', yellow:'🟡 מדבקה צהובה', orange:'🚛 באחסנה' };
 
+/* ════════════════════════════════════════════════════════════════════
+   TOWN_COORDS — coordinates of each town on the illustrated SVG map.
+   Built from the original MAP_CASES seed data so we know where to
+   position each town pin. Unknown towns get auto-positioned.
+   ════════════════════════════════════════════════════════════════════ */
+var TOWN_COORDS = {
+  'מטולה': {x:310, y:90}, 'קרית שמונה': {x:195, y:195}, 'ח׳ מנסורה': {x:680, y:305},
+  'קיבוץ מנרה': {x:530, y:180}, 'כפר ורדים': {x:420, y:310}, 'חצור הגלילית': {x:250, y:400},
+  'ראש פינה': {x:600, y:400}, 'שדה אליעזר': {x:300, y:530}, 'עמוקה': {x:620, y:510},
+  'הגושרים': {x:130, y:125}, 'כפר בלום': {x:350, y:195}, 'סאסא': {x:200, y:650},
+  'דפנה': {x:150, y:315}, 'שניר': {x:700, y:165}, 'יפתח': {x:550, y:630},
+  'פקיעין': {x:500, y:550}, 'אבירים': {x:650, y:610}, 'נווה אטי״ב': {x:100, y:590},
+  'דלתון': {x:380, y:610}, 'יראון': {x:480, y:145}, 'עין אל-אסד': {x:460, y:480}
+};
+
+/* Auto-position unknown towns: deterministic pseudo-random based on name */
+function _townHashCoords(name) {
+  var h = 0;
+  for (var i = 0; i < name.length; i++) h = ((h << 5) - h + name.charCodeAt(i)) | 0;
+  var x = 100 + Math.abs(h % 600);
+  var y = 100 + Math.abs((h >> 8) % 500);
+  return { x: x, y: y };
+}
+
+function getTownCoords(townName) {
+  if (!townName) return null;
+  var t = String(townName).trim();
+  if (TOWN_COORDS[t]) return TOWN_COORDS[t];
+  // Try partial match (in case of slight naming differences)
+  for (var k in TOWN_COORDS) {
+    if (k.indexOf(t) !== -1 || t.indexOf(k) !== -1) return TOWN_COORDS[k];
+  }
+  // Fallback: hash-based deterministic position
+  return _townHashCoords(t);
+}
+
 function renderMapMarkers() {
   var g = document.getElementById('map-markers');
   if (!g) return;
   g.innerHTML = '';
 
-  MAP_CASES.forEach(function(c, i) {
-    var color = STATUS_COLORS[c.status] || '#888';
+  // Aggregate active cases by town from cases-tbody (single source of truth)
+  var townsAgg = {}; // { townName: { count, hasUrgent, statuses: {red, yellow, orange}, plates: [], rows: [] } }
+  var rows = document.querySelectorAll('#cases-tbody tr');
+  rows.forEach(function(row) {
+    var status = row.dataset.status;
+    // Skip closed/green cases — pin removed when town has 0 active cases
+    if (status === 'green' || status === 'closed') return;
 
-    // Pulse ring for urgent (red)
-    if (c.status === 'red') {
+    var locEl = row.querySelector('.owner-loc');
+    var loc = locEl ? locEl.textContent.replace('📍', '').trim() : '';
+    if (!loc) {
+      // Try owner-loc fallback: 6th cell (location column)
+      var cells = row.querySelectorAll('td');
+      if (cells.length >= 6) loc = (cells[5].textContent || '').replace('📍', '').trim();
+    }
+    if (!loc) return;
+
+    if (!townsAgg[loc]) {
+      townsAgg[loc] = { count: 0, hasUrgent: false, statuses: {}, plates: [], rows: [] };
+    }
+    townsAgg[loc].count++;
+    townsAgg[loc].statuses[status] = (townsAgg[loc].statuses[status] || 0) + 1;
+    if (status === 'red') townsAgg[loc].hasUrgent = true;
+    var plateEl = row.querySelector('.plate-badge');
+    if (plateEl) townsAgg[loc].plates.push(plateEl.textContent.trim());
+    townsAgg[loc].rows.push(row);
+  });
+
+  // Render one pin per town
+  Object.keys(townsAgg).forEach(function(townName) {
+    var t = townsAgg[townName];
+    var coords = getTownCoords(townName);
+    if (!coords) return;
+
+    // Determine pin color: red if any urgent, orange if any towed, else yellow
+    var color = '#fdd835'; // yellow default
+    if (t.statuses.red) color = '#e53935';
+    else if (t.statuses.orange || t.statuses.towed) color = '#ff9800';
+
+    // Pulse ring if urgent
+    if (t.hasUrgent) {
       var pulse = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      pulse.setAttribute('cx', c.x);
-      pulse.setAttribute('cy', c.y);
-      pulse.setAttribute('r', '18');
+      pulse.setAttribute('cx', coords.x);
+      pulse.setAttribute('cy', coords.y);
+      pulse.setAttribute('r', '22');
       pulse.setAttribute('fill', color);
       pulse.setAttribute('class', 'map-marker-pulse');
       g.appendChild(pulse);
     }
 
-    // Main marker circle
+    // Main marker — bigger circle to fit number
     var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    circle.setAttribute('cx', c.x);
-    circle.setAttribute('cy', c.y);
-    circle.setAttribute('r', '10');
+    circle.setAttribute('cx', coords.x);
+    circle.setAttribute('cy', coords.y);
+    circle.setAttribute('r', '14');
     circle.setAttribute('fill', color);
     circle.setAttribute('stroke', '#fff');
-    circle.setAttribute('stroke-width', '2.5');
+    circle.setAttribute('stroke-width', '3');
     circle.setAttribute('class', 'map-marker');
-    circle.setAttribute('data-idx', i);
-
-    circle.addEventListener('mouseenter', function(e) {
-      var idx = parseInt(this.getAttribute('data-idx'));
-      var mc = MAP_CASES[idx];
-      var tt = document.getElementById('map-tooltip');
-      tt.style.display = 'block';
-      document.getElementById('tt-plate').textContent = mc.plate;
-      document.getElementById('tt-owner').textContent = mc.owner;
-      document.getElementById('tt-location').textContent = '📍 ' + mc.loc;
-      document.getElementById('tt-status').innerHTML = '<span style="color:' + STATUS_COLORS[mc.status] + ';font-weight:700;">' + STATUS_LABELS[mc.status] + '</span> · ' + mc.days;
-
-      // Position tooltip
-      var container = document.getElementById('map-container');
-      var svg = document.getElementById('map-svg');
-      var rect = svg.getBoundingClientRect();
-      var cRect = container.getBoundingClientRect();
-      var scaleX = rect.width / 800;
-      var scaleY = rect.height / 700;
-      var px = rect.left - cRect.left + mc.x * scaleX;
-      var py = rect.top - cRect.top + mc.y * scaleY;
-      tt.style.left = (px + 15) + 'px';
-      tt.style.top = (py - 30) + 'px';
-    });
-
-    circle.addEventListener('mouseleave', function() {
-      document.getElementById('map-tooltip').style.display = 'none';
-    });
-
-    circle.addEventListener('click', function() {
-      document.getElementById('map-tooltip').style.display = 'none';
-      var idx = parseInt(this.getAttribute('data-idx'));
-      var mc = MAP_CASES[idx];
-      // Find matching row in cases table and open it
-      var rows = document.querySelectorAll('#cases-tbody tr');
-      for (var r = 0; r < rows.length; r++) {
-        var pb = rows[r].querySelector('.plate-badge');
-        if (pb && pb.textContent.trim() === mc.plate) {
-          openExistingCase(rows[r]);
-          return;
-        }
-      }
-      showView('case');
-    });
-
+    circle.style.cursor = 'pointer';
     g.appendChild(circle);
 
-    // Plate label on marker
-    var text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    text.setAttribute('x', c.x);
-    text.setAttribute('y', c.y + 25);
-    text.setAttribute('text-anchor', 'middle');
-    text.setAttribute('font-size', '8');
-    text.setAttribute('font-weight', '700');
-    text.setAttribute('fill', '#333');
-    text.setAttribute('font-family', 'monospace');
-    text.setAttribute('pointer-events', 'none');
-    text.textContent = c.plate;
-    g.appendChild(text);
+    // Number label inside circle
+    var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('x', coords.x);
+    label.setAttribute('y', coords.y + 4);
+    label.setAttribute('text-anchor', 'middle');
+    label.setAttribute('font-size', '13');
+    label.setAttribute('font-weight', '900');
+    label.setAttribute('fill', '#fff');
+    label.style.cursor = 'pointer';
+    label.style.pointerEvents = 'none';
+    label.textContent = t.count;
+    g.appendChild(label);
+
+    // Town name label below pin
+    var nameLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    nameLabel.setAttribute('x', coords.x);
+    nameLabel.setAttribute('y', coords.y + 32);
+    nameLabel.setAttribute('text-anchor', 'middle');
+    nameLabel.setAttribute('font-size', '11');
+    nameLabel.setAttribute('font-weight', '700');
+    nameLabel.setAttribute('fill', '#2c3e50');
+    nameLabel.setAttribute('stroke', '#fff');
+    nameLabel.setAttribute('stroke-width', '3');
+    nameLabel.setAttribute('paint-order', 'stroke');
+    nameLabel.style.pointerEvents = 'none';
+    nameLabel.textContent = townName;
+    g.appendChild(nameLabel);
+
+    // Hover tooltip
+    var townDataJson = JSON.stringify({ name: townName, count: t.count, plates: t.plates });
+    circle.addEventListener('mouseenter', function() {
+      var data = JSON.parse(townDataJson);
+      var tt = document.getElementById('map-tooltip');
+      if (!tt) return;
+      tt.style.display = 'block';
+      var ttPlate = document.getElementById('tt-plate');
+      var ttOwner = document.getElementById('tt-owner');
+      var ttLoc = document.getElementById('tt-location');
+      var ttStatus = document.getElementById('tt-status');
+      if (ttPlate) ttPlate.textContent = '📍 ' + data.name;
+      if (ttOwner) ttOwner.textContent = data.count + ' תיקים פעילים';
+      if (ttLoc) ttLoc.textContent = 'לוחיות: ' + data.plates.slice(0, 3).join(', ') + (data.plates.length > 3 ? '...' : '');
+      if (ttStatus) ttStatus.innerHTML = '<span style="color:' + color + ';font-weight:700;">לחץ לצפייה</span>';
+
+      var container = document.getElementById('map-container');
+      var svg = document.getElementById('map-svg');
+      if (container && svg) {
+        var rect = svg.getBoundingClientRect();
+        var cRect = container.getBoundingClientRect();
+        var scaleX = rect.width / 800;
+        var scaleY = rect.height / 700;
+        var px = rect.left - cRect.left + coords.x * scaleX;
+        var py = rect.top - cRect.top + coords.y * scaleY;
+        tt.style.left = (px + 15) + 'px';
+        tt.style.top = (py - 30) + 'px';
+      }
+    });
+    circle.addEventListener('mouseleave', function() {
+      var tt = document.getElementById('map-tooltip');
+      if (tt) tt.style.display = 'none';
+    });
+
+    // Click → navigate to towns view filtered to this town
+    circle.addEventListener('click', function() {
+      var tt = document.getElementById('map-tooltip');
+      if (tt) tt.style.display = 'none';
+      if (typeof showView === 'function') showView('towns');
+      if (typeof selectTown === 'function') {
+        setTimeout(function() { selectTown(townName); }, 100);
+      }
+    });
   });
+
+  // Update map subtitle with total active cases
+  var totalActive = 0;
+  Object.keys(townsAgg).forEach(function(t) { totalActive += townsAgg[t].count; });
+  var subtitle = document.getElementById('map-subtitle');
+  if (subtitle) {
+    subtitle.textContent = totalActive + ' תיקים פתוחים ב-' + Object.keys(townsAgg).length + ' יישובים';
+  }
 }
 
 function openExistingCase(rowEl) {
@@ -5544,6 +6207,53 @@ var staffColors = ['#3498db,#1a4268','#e74c3c,#7b241c','#9b59b6,#4a235a','#f39c1
 function renderStaffCards() {
   var grid = document.getElementById('staff-grid');
   if (!grid) return;
+
+  // ═══ NEW: Count active cases per inspector from cases table ═══
+  var caseCounts = {};
+  document.querySelectorAll('#cases-tbody tr').forEach(function(r) {
+    var cells = r.querySelectorAll('td');
+    if (cells.length < 9) return;
+    var inspName = (cells[8].textContent || '').trim();
+    var status = r.getAttribute('data-status') || 'yellow';
+    // Only count ACTIVE cases (not closed/green)
+    if (status === 'green' || status === 'closed') return;
+    if (!inspName || inspName === '—' || inspName === '') return;
+    caseCounts[inspName] = (caseCounts[inspName] || 0) + 1;
+  });
+
+  // ═══ NEW: Update existing staff with real counts ═══
+  staffList.forEach(function(s) {
+    // Only update inspectors (not other roles like secretary)
+    if (s.role && s.role.indexOf('פקח') !== -1) {
+      s.cases = caseCounts[s.name] || 0;
+    }
+  });
+
+  // ═══ NEW: Auto-add inspectors from field that don't exist yet ═══
+  var existingNames = {};
+  staffList.forEach(function(s) { existingNames[s.name] = true; });
+  Object.keys(caseCounts).forEach(function(name) {
+    if (existingNames[name]) return;
+    // Generate a stable color based on the name
+    var hashH = 0;
+    for (var i = 0; i < name.length; i++) hashH = ((hashH << 5) - hashH + name.charCodeAt(i)) | 0;
+    var color = staffColors[Math.abs(hashH) % staffColors.length];
+    // Find max id
+    var maxId = 0;
+    staffList.forEach(function(x) { if (x.id > maxId) maxId = x.id; });
+    staffList.push({
+      id: maxId + 1,
+      name: name,
+      role: 'פקח (מהשטח)',
+      phone: '',
+      email: '',
+      cases: caseCounts[name],
+      color: color,
+      autoAdded: true
+    });
+  });
+
+  // ═══ Render the cards ═══
   var html = '';
   staffList.forEach(function(s) {
     var initial = s.name.charAt(0);
@@ -5562,9 +6272,14 @@ function renderStaffCards() {
     html += '</div>';
     html += '<div style="padding:18px 24px;">';
     html += '<div style="display:flex;flex-direction:column;gap:10px;">';
-    html += '<div style="display:flex;align-items:center;gap:10px;font-size:13px;"><span style="font-size:16px;">📱</span><strong>' + s.phone + '</strong></div>';
-    html += '<div style="display:flex;align-items:center;gap:10px;font-size:13px;"><span style="font-size:16px;">📧</span><span style="color:var(--teal);">' + s.email + '</span></div>';
-    if (s.cases > 0) html += '<div style="display:flex;align-items:center;gap:10px;font-size:13px;"><span style="font-size:16px;">📋</span><span>' + s.cases + ' תיקים פעילים</span></div>';
+    if (s.phone) html += '<div style="display:flex;align-items:center;gap:10px;font-size:13px;"><span style="font-size:16px;">📱</span><strong>' + s.phone + '</strong></div>';
+    if (s.email) html += '<div style="display:flex;align-items:center;gap:10px;font-size:13px;"><span style="font-size:16px;">📧</span><span style="color:var(--teal);">' + s.email + '</span></div>';
+    // Show case count for ALL inspectors (including 0 cases)
+    if (s.role && s.role.indexOf('פקח') !== -1) {
+      var n = s.cases || 0;
+      var caseColor = n === 0 ? 'var(--muted)' : 'inherit';
+      html += '<div style="display:flex;align-items:center;gap:10px;font-size:13px;color:' + caseColor + ';"><span style="font-size:16px;">📋</span><span>' + n + ' תיקים פעילים</span></div>';
+    }
     html += '</div></div></div>';
   });
   grid.innerHTML = html;
@@ -5615,8 +6330,8 @@ function deleteStaff(id) {
   if (typeof markDirty === 'function') markDirty();
 }
 
-// Render on load
-setTimeout(renderStaffCards, 50);
+// Render on load — wait for cases table to load first (initDashboardPanels uses 300ms)
+setTimeout(renderStaffCards, 500);
 
 // ═══════════════ CUSTOM DOCUMENTS ═══════════════
 var customDocs = [];
@@ -6439,6 +7154,28 @@ if (document.readyState === 'loading') {
     var tbody = document.getElementById('cases-tbody');
     if (!tbody) return;
 
+    // Skip if this case was already promoted to an active case
+    // (prevents duplicate rows after a page reload re-broadcasts mobile cases)
+    if (typeof _isMobileIdPromoted === 'function' && _isMobileIdPromoted(c.id)) {
+      return;
+    }
+
+    // Also skip if a row with the same plate already exists from another source
+    // (safety net in case promotion tracking missed something)
+    if (c.plate) {
+      var existingByPlate = null;
+      Array.prototype.forEach.call(tbody.querySelectorAll('tr'), function(tr) {
+        if (existingByPlate) return;
+        // Skip rows that are themselves mobile-source (those match by data-mobile-id)
+        if (tr.getAttribute('data-mobile-id') === String(c.id)) return;
+        var pb = tr.querySelector('.plate-badge');
+        if (pb && pb.textContent.trim() === String(c.plate).trim()) {
+          existingByPlate = tr;
+        }
+      });
+      if (existingByPlate) return;
+    }
+
     var existing = tbody.querySelector('tr[data-mobile-id="' + cssEscape(c.id) + '"]');
     var tr = existing || document.createElement('tr');
 
@@ -6517,8 +7254,20 @@ if (document.readyState === 'loading') {
     // Trigger autosave so it persists
     if (typeof markDirty === 'function') markDirty();
 
-    // Refresh dashboard counters
-    if (typeof updateAllCounters === 'function') updateAllCounters();
+    // Log the new field activity for the activity feed
+    if (isNew && typeof logActivity === 'function') {
+      logActivity(c.plate || '',
+        'תיק חדש מהשטח — ' + (c.location || ''),
+        c.inspector || '',
+        c.status || 'teal');
+    }
+
+    // Refresh ALL dashboard panels (inspectors, activity feed, map, towns, counters)
+    if (typeof refreshDashboardPanels === 'function') {
+      refreshDashboardPanels();
+    } else if (typeof updateAllCounters === 'function') {
+      updateAllCounters();
+    }
   }
 
   function cssEscape(s) {
@@ -6527,83 +7276,106 @@ if (document.readyState === 'loading') {
   }
 
   function showMobileCaseModal(id) {
+    // Get the case (from cache or Firebase) and immediately promote it
     var c = mobileCasesCache[id];
-    if (!c) {
-      // Try to fetch from Firebase
-      if (fbReady && fbDb) {
-        fbDb.ref('cases/' + id).once('value').then(function(snap) {
-          var data = snap.val();
-          if (data) {
-            mobileCasesCache[id] = data;
-            renderMobileCaseModal(data);
-          }
-        });
-      }
+    if (c) {
+      promoteMobileCase(c);
       return;
     }
-    renderMobileCaseModal(c);
+    if (fbReady && fbDb) {
+      fbDb.ref('cases/' + id).once('value').then(function(snap) {
+        var data = snap.val();
+        if (data) {
+          mobileCasesCache[id] = data;
+          promoteMobileCase(data);
+        } else if (typeof showToast === 'function') {
+          showToast('⚠️ התיק לא נמצא ב-Firebase');
+        }
+      });
+    }
+  }
+
+  function promoteMobileCase(c) {
+    if (!c) return;
+    currentMobileCase = c;
+
+    // Make sure the mobile case modal is hidden (in case it was open)
+    var modal = document.getElementById('mobile-case-modal');
+    if (modal) modal.style.display = 'none';
+
+    // Open the new case form (clears + shows form + switches to case view)
+    if (typeof openNewCase !== 'function') {
+      if (typeof showToast === 'function') showToast('⚠️ לא ניתן לפתוח את הטופס');
+      return;
+    }
+    openNewCase();
+
+    // Tiny delay so openNewCase finishes clearing before we fill
+    setTimeout(function() {
+      var setVal = function(id, val) {
+        var el = document.getElementById(id);
+        if (el && val != null && val !== '') el.value = val;
+      };
+
+      // Map mobile fields to new-case form fields
+      setVal('nf-plate', c.plate);
+      setVal('nf-owner-name', c.owner);
+      setVal('nf-owner-phone', c.phone);
+      setVal('nf-owner-addr', c.address);
+      setVal('nf-location-street', c.locAddress);
+      setVal('nf-found-date', c.date);
+      setVal('nf-inspector', c.inspector);
+
+      // Build a comprehensive notes block with everything we couldn't map directly
+      var noteParts = [];
+      if (c.notes) noteParts.push(c.notes);
+      if (c.contact) {
+        noteParts.push('איש קשר במקום: ' + c.contact +
+          (c.contactPhone ? ' · ' + c.contactPhone : ''));
+      }
+      if (c.lat && c.lon) {
+        noteParts.push('📍 GPS: ' + c.lat + ', ' + c.lon);
+      }
+      if (c.inspector) noteParts.push('— נפתח בשטח ע״י: ' + c.inspector);
+      setVal('nf-notes', noteParts.join('\n'));
+
+      // Try to set the city dropdown to match the mobile location
+      var citySel = document.getElementById('nf-location-city');
+      if (citySel && c.location) {
+        var loc = String(c.location).trim();
+        for (var i = 0; i < citySel.options.length; i++) {
+          var opt = citySel.options[i];
+          if (opt.value === loc || opt.text === loc ||
+              opt.text.indexOf(loc) !== -1 || loc.indexOf(opt.text) !== -1) {
+            citySel.value = opt.value;
+            break;
+          }
+        }
+      }
+
+      // Transfer photos from mobile to new case form
+      if (c.photos && c.photos.length && typeof newCasePhotos !== 'undefined') {
+        c.photos.forEach(function(photoUrl) {
+          newCasePhotos.push({ dataUrl: photoUrl });
+        });
+        if (typeof renderNewCasePhotoThumbs === 'function') {
+          renderNewCasePhotoThumbs();
+        }
+      }
+
+      // Remember the mobile id so we can remove the original row after save
+      window.__pendingMobilePromotion = c.id;
+
+      if (typeof showToast === 'function') {
+        showToast('📋 פרטי השטח נטענו — בדוק, ערוך ולחץ "💾 שמור ופתח תיק"');
+      }
+    }, 150);
   }
 
   function renderMobileCaseModal(c) {
-    currentMobileCase = c;
-    var modal = document.getElementById('mobile-case-modal');
-    if (!modal) return;
-
-    var meta = document.getElementById('mc-modal-meta');
-    if (meta) {
-      var dt = c.date ? new Date(c.date).toLocaleDateString('he-IL') : '';
-      meta.textContent = (c.plate ? 'לוחית ' + c.plate : '') + ' · נפתח ' + dt + ' · ' + (c.inspector || 'פקח לא ידוע');
-    }
-
-    // Photos
-    var photosEl = document.getElementById('mc-modal-photos');
-    if (photosEl) {
-      photosEl.innerHTML = '';
-      var photos = c.photos || [];
-      if (!photos.length) {
-        photosEl.innerHTML = '<div style="color:var(--muted);font-size:12px;padding:20px;">אין תמונות</div>';
-      } else {
-        photos.forEach(function(p) {
-          var img = document.createElement('img');
-          img.src = p;
-          img.style.cssText = 'width:140px;height:140px;border-radius:10px;object-fit:cover;flex-shrink:0;cursor:zoom-in;';
-          img.onclick = function() { window.open(p, '_blank'); };
-          photosEl.appendChild(img);
-        });
-      }
-    }
-
-    // Fields
-    var fields = document.getElementById('mc-modal-fields');
-    if (fields) {
-      var rows = [
-        ['🚗 לוחית רישוי', c.plate],
-        ['👤 בעל הרכב', c.owner],
-        ['📱 נייד בעל הרכב', c.phone],
-        ['🏠 כתובת בעל הרכב', c.address],
-        ['📍 יישוב', c.location],
-        ['🏠 כתובת מיקום הרכב', c.locAddress],
-        ['👤 איש קשר', c.contact],
-        ['📱 נייד איש קשר', c.contactPhone],
-        ['🌐 GPS', (c.lat && c.lon) ? (c.lat + ', ' + c.lon) : ''],
-        ['⚡ סטטוס', c.badge]
-      ];
-      fields.innerHTML = rows.map(function(r) {
-        return '<div>' +
-          '<div style="font-size:10px;color:var(--muted);font-weight:600;margin-bottom:3px;">' + r[0] + '</div>' +
-          '<div style="font-size:13px;font-weight:600;">' + (r[1] || '—') + '</div>' +
-        '</div>';
-      }).join('');
-    }
-
-    // Notes
-    var notes = document.getElementById('mc-modal-notes');
-    if (notes) {
-      notes.innerHTML = '<div style="font-size:10px;color:var(--muted);font-weight:600;margin-bottom:4px;">📝 הערות הפקח</div>' +
-        '<div>' + (c.notes || 'אין הערות') + '</div>';
-    }
-
-    modal.style.display = 'flex';
+    // Kept for backward compatibility but no longer used —
+    // we now go directly to the new case form via promoteMobileCase
+    promoteMobileCase(c);
   }
 
   function openInCaseList() {
