@@ -4120,12 +4120,34 @@ function timeAgo(iso) {
 function renderActivityFeed() {
   var container = document.querySelector('.activity-list');
   if (!container) return;
-  if (!activityFeed.length) {
-    // Keep the demo content visible if no real activity yet
+
+  // ═══ NEW: Filter out activity for plates that no longer exist in the table ═══
+  // Build a set of existing plates from the cases table
+  var existingPlates = {};
+  document.querySelectorAll('#cases-tbody tr').forEach(function(r) {
+    var pb = r.querySelector('.plate-badge');
+    if (pb) {
+      var p = pb.textContent.trim();
+      if (p && p !== '—') existingPlates[p] = true;
+    }
+  });
+  // Filter activity to only include items whose plate is empty (system msgs) or still exists
+  var filteredFeed = activityFeed.filter(function(a) {
+    if (!a.plate) return true; // system messages without a plate are always kept
+    return !!existingPlates[a.plate];
+  });
+
+  if (!filteredFeed.length) {
+    // Show friendly empty state instead of stale demo content
+    container.innerHTML = '<div style="text-align:center;padding:30px 20px;color:var(--muted);font-size:13px;">' +
+      '<div style="font-size:36px;margin-bottom:8px;">📋</div>' +
+      '<div style="font-weight:600;margin-bottom:4px;">אין פעילות אחרונה</div>' +
+      '<div style="font-size:11px;">פעילות חדשה תופיע כאן אוטומטית</div>' +
+      '</div>';
     return;
   }
   var html = '';
-  activityFeed.slice(0, 6).forEach(function(a) {
+  filteredFeed.slice(0, 6).forEach(function(a) {
     html += '<div class="activity-item">' +
       '<div class="ai-dot" style="background:' + a.color + '"></div>' +
       '<div class="ai-content">' +
@@ -5920,12 +5942,17 @@ function closeDeleteModal() {
 function executeDeleteCase() {
   closeDeleteModal();
 
+  // Try to find the row's mobile-id BEFORE deleting, so we can also remove from Firebase
+  var mobileIdToDelete = null;
+
   // Remove from cases list table
   if (deletingPlate) {
     var rows = document.querySelectorAll('#cases-tbody tr');
     for (var r = 0; r < rows.length; r++) {
       var pb = rows[r].querySelector('.plate-badge');
       if (pb && pb.textContent.trim() === deletingPlate) {
+        // Save mobile-id (if any) before removing
+        mobileIdToDelete = rows[r].getAttribute('data-mobile-id');
         rows[r].remove();
         break;
       }
@@ -5946,12 +5973,35 @@ function executeDeleteCase() {
         break;
       }
     }
+
+    // ═══ NEW: Remove from Firebase (so it doesn't come back on reload) ═══
+    if (window.GalilSync && window.GalilSync.isReady && window.GalilSync.isReady()) {
+      // If we have a mobile-id from the row, use it directly
+      if (mobileIdToDelete && window.GalilSync._deleteCase) {
+        window.GalilSync._deleteCase(mobileIdToDelete);
+      } else if (window.GalilSync._findIdByPlate && window.GalilSync._deleteCase) {
+        // Otherwise try to find by plate
+        var idByPlate = window.GalilSync._findIdByPlate(deletingPlate);
+        if (idByPlate) window.GalilSync._deleteCase(idByPlate);
+      }
+    }
+
+    // ═══ NEW: Remove all activity entries about this plate ═══
+    if (typeof activityFeed !== 'undefined' && Array.isArray(activityFeed)) {
+      activityFeed = activityFeed.filter(function(a) {
+        return String(a.plate || '').trim() !== String(deletingPlate).trim();
+      });
+      if (typeof saveActivityFeed === 'function') saveActivityFeed();
+      if (typeof renderActivityFeed === 'function') renderActivityFeed();
+    }
   }
 
   // Update all counters
   updateAllCounters();
   // Full reconciliation: remove any leftover orphans from dashboard / map / towns
   if (typeof syncDashboardWithCases === 'function') syncDashboardWithCases();
+  // ═══ NEW: Refresh staff cards so the inspector's count goes down ═══
+  if (typeof refreshDashboardPanels === 'function') refreshDashboardPanels();
 
   // Navigate back to cases list
   showView('cases-list');
@@ -6967,7 +7017,33 @@ if (document.readyState === 'loading') {
     refreshNow: refreshNow,
     isReady: function() { return fbReady; },
     _showCase: showMobileCaseModal,
-    openInCaseList: openInCaseList
+    openInCaseList: openInCaseList,
+    // Delete a case from Firebase (used when user deletes locally)
+    _deleteCase: function(id) {
+      if (!fbReady || !fbDb || !id) return Promise.resolve(false);
+      return fbDb.ref('cases/' + id).remove()
+        .then(function() {
+          delete mobileCasesCache[id];
+          return true;
+        })
+        .catch(function(err) {
+          console.error('Firebase delete failed:', err);
+          return false;
+        });
+    },
+    // Find Firebase case by plate (returns id or null)
+    _findIdByPlate: function(plate) {
+      if (!plate) return null;
+      var found = null;
+      Object.keys(mobileCasesCache).forEach(function(id) {
+        if (found) return;
+        var c = mobileCasesCache[id];
+        if (c && String(c.plate || '').trim() === String(plate).trim()) {
+          found = id;
+        }
+      });
+      return found;
+    }
   };
 
   function loadCfg() {
