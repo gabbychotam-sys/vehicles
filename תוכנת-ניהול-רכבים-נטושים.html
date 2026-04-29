@@ -6644,9 +6644,24 @@ function loadState() {
       if (typeof renderCustomDocs === 'function') { try { renderCustomDocs(); } catch(e){} }
     }
 
-    // Restore staff list
+    // Restore staff list — merge with defaults so newly added staff aren't lost
     if (Array.isArray(snap.staffList) && typeof staffList !== 'undefined') {
-      staffList = snap.staffList;
+      var loaded = snap.staffList;
+      // Default staff that must always exist (matches the var staffList declaration above).
+      // If a saved snapshot is missing them (e.g. old localStorage from before they were added),
+      // append them so the dropdown / cards stay complete.
+      var defaults = [
+        { id:1, name:'שימי רוזנברג', role:'פקח', phone:'054-669-3634', email:'shimi@galil-elion.org.il', cases:0, color:'#3498db,#1a4268' },
+        { id:2, name:'פרנסיס ברוטמן', role:'פקח', phone:'054-452-7582', email:'francis@galil-elion.org.il', cases:0, color:'#e74c3c,#7b241c' },
+        { id:3, name:'אייל ארצי', role:'פקח', phone:'052-619-1985', email:'eyal@galil-elion.org.il', cases:0, color:'#9b59b6,#4a235a' },
+        { id:4, name:'מורן לוז', role:'מזכירה', phone:'052-379-1659', email:'moranl@galil-elion.org.il', cases:0, color:'#f39c12,#d68910' },
+        { id:5, name:'גבי חותם', role:'מנהל פיקוח', phone:'050-757-4451', email:'gabbyc@galil-elion.org.il', cases:0, color:'#1abc9c,#0e6655' }
+      ];
+      defaults.forEach(function(d) {
+        var exists = loaded.some(function(x) { return x.id === d.id || x.name === d.name; });
+        if (!exists) loaded.push(d);
+      });
+      staffList = loaded;
       if (typeof renderStaffCards === 'function') { try { renderStaffCards(); } catch(e){} }
     }
 
