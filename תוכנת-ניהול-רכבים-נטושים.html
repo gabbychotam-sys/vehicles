@@ -3049,10 +3049,11 @@ try {
         <div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:600;">databaseURL</div>
         <input type="text" id="fb-cfg-dbUrl" style="width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card2);color:var(--text);font-family:monospace;font-size:12px;direction:ltr;" placeholder="https://your-project-default-rtdb.firebaseio.com">
       </div>
-      <div style="display:flex;gap:10px;">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <button class="settings-reset-btn" style="background:rgba(46,125,50,0.1);border-color:rgba(46,125,50,0.25);color:#2e7d32;" onclick="window.GalilSync &amp;&amp; window.GalilSync.saveConfigFromUI()">💾 שמור והתחבר</button>
         <button class="settings-reset-btn" onclick="window.GalilSync &amp;&amp; window.GalilSync.testConnection()">🔌 בדוק חיבור</button>
         <button class="settings-reset-btn" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()">🔄 רענון תיקים מהשטח</button>
+        <button class="settings-reset-btn" style="background:rgba(37,99,235,0.1);border-color:rgba(37,99,235,0.25);color:#2563eb;" onclick="syncAllLocalCasesToFirebase()">☁️ סנכרן את כל התיקים הקיימים לענן</button>
       </div>
       <div style="margin-top:14px;padding:10px 12px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:8px;font-size:11px;color:var(--muted);line-height:1.6;">
         💡 <strong>איך משיגים את הפרטים?</strong> כניסה ל-<a href="https://console.firebase.google.com" target="_blank" style="color:var(--teal);">console.firebase.google.com</a> → פרויקט → ⚙️ Project Settings → Your apps → Web app → Config. ראה הוראות מפורטות בקובץ ההוראות שצורף.
@@ -5517,14 +5518,38 @@ function _newCasePersistRow() {
         inspector: inspector,
         date: foundDate
       });
-      upsertCaseRow(null, {
+      var rowData = {
         plate: CASE.plate,
         date: foundDate,
         owner: CASE.ownerName,
         location: (CASE.location || '').split(',')[0].trim(),
         status: CASE.status || 'yellow',
         inspector: inspector
-      }, fullCaseSnapshot);
+      };
+      upsertCaseRow(null, rowData, fullCaseSnapshot);
+
+      // ═══ NEW: push to Firebase so other managers see this case in real time.
+      // We tag the freshly-inserted row with the Firebase id so future deletes/edits
+      // can find the same record in the cloud. ═══
+      if (window.GalilSync && window.GalilSync.isReady && window.GalilSync.isReady()) {
+        window.GalilSync._pushManualCase(rowData, fullCaseSnapshot).then(function(fbId) {
+          if (fbId) {
+            // Find the row we just inserted (first row in tbody) and tag it
+            var tbody = document.getElementById('cases-tbody');
+            if (tbody) {
+              var fresh = tbody.firstElementChild;
+              // Make sure we found the right row by matching plate
+              if (fresh) {
+                var pb = fresh.querySelector('.plate-badge');
+                if (pb && pb.textContent.trim() === rowData.plate) {
+                  fresh.setAttribute('data-mobile-id', fbId);
+                  fresh.setAttribute('data-source', 'manual');
+                }
+              }
+            }
+          }
+        });
+      }
 
       // Log activity + refresh dashboard panels
       if (typeof logActivity === 'function') {
@@ -6618,6 +6643,37 @@ function manualSave() {
   }, 250);
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   syncAllLocalCasesToFirebase — One-time backfill of locally-stored cases.
+   Triggered by the "☁️ סנכרן את כל התיקים הקיימים לענן" button in settings.
+   Pushes any cases that don't yet have a Firebase id, so other managers
+   (the secretary, etc.) can see them.
+   ════════════════════════════════════════════════════════════════════ */
+function syncAllLocalCasesToFirebase() {
+  if (!window.GalilSync || !window.GalilSync.isReady || !window.GalilSync.isReady()) {
+    alert('Firebase לא מחובר.\nהגדר את החיבור והתחבר תחילה.');
+    return;
+  }
+  if (!confirm('פעולה זו תדחוף את כל התיקים הקיימים שלך ל-Firebase כדי שמשתמשים אחרים יוכלו לראות אותם.\n\nתיקים שכבר סונכרנו יידלגו.\n\nלהמשיך?')) return;
+
+  var btn = event && event.target;
+  var originalText = btn ? btn.textContent : '';
+  if (btn) { btn.textContent = '⏳ מסנכרן...'; btn.disabled = true; }
+
+  window.GalilSync._syncAllLocalCases().then(function(result) {
+    if (btn) { btn.textContent = originalText; btn.disabled = false; }
+    var msg = '✓ סנכרון הסתיים\n\n';
+    msg += '• ' + result.ok + ' תיקים סונכרנו בהצלחה\n';
+    if (result.fail > 0) msg += '• ' + result.fail + ' תיקים נכשלו\n';
+    msg += '• ' + result.skipped + ' תיקים דולגו (כבר מסונכרנים או ללא נתונים)';
+    alert(msg);
+    if (typeof markDirty === 'function') markDirty();
+  }).catch(function(err) {
+    if (btn) { btn.textContent = originalText; btn.disabled = false; }
+    alert('⚠️ שגיאה: ' + (err.message || err));
+  });
+}
+
 function markDirty() {
   if (__isLoading) return;
   setSaveStatus('dirty');
@@ -7088,6 +7144,98 @@ if (document.readyState === 'loading') {
         }
       });
       return found;
+    },
+    // ═══ NEW: Push a manually-created case to Firebase so other managers see it.
+    // rowData = the row-summary fields shown in the table.
+    // fullData = the full case snapshot (for re-opening with all details).
+    // existingId = optional; pass to UPDATE an existing record instead of creating.
+    // Returns a Promise that resolves to the Firebase id (or null on failure). ═══
+    _pushManualCase: function(rowData, fullData, existingId) {
+      if (!fbReady || !fbDb) {
+        console.warn('[GalilSync._pushManualCase] skipped — Firebase not ready');
+        return Promise.resolve(null);
+      }
+      if (!rowData || !rowData.plate) {
+        console.warn('[GalilSync._pushManualCase] skipped — missing plate');
+        return Promise.resolve(null);
+      }
+      var id = existingId || ('manual_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8));
+      var payload = {
+        id:         id,
+        source:     'manual',
+        plate:      rowData.plate,
+        date:       rowData.date || (new Date()).toISOString().split('T')[0],
+        owner:      rowData.owner || '',
+        location:   rowData.location || '',
+        status:     rowData.status || 'yellow',
+        inspector:  rowData.inspector || '',
+        updatedAt:  Date.now(),
+        fullData:   fullData || null
+      };
+      console.log('[GalilSync._pushManualCase] pushing to Firebase:', id, rowData.plate);
+      return fbDb.ref('cases/' + id).set(payload)
+        .then(function() {
+          console.log('[GalilSync._pushManualCase] ✓ pushed:', id);
+          return id;
+        })
+        .catch(function(err) {
+          console.error('[GalilSync._pushManualCase] ✗ FAILED for ' + id + ':', err);
+          return null;
+        });
+    },
+    // ═══ NEW: One-time backfill — pushes all locally-stored cases (rows with
+    // data-case but no data-mobile-id) to Firebase. Used so existing data
+    // carries over when the manual-sync feature is first enabled. ═══
+    _syncAllLocalCases: function() {
+      if (!fbReady || !fbDb) {
+        return Promise.resolve({ ok: 0, fail: 0, skipped: 0 });
+      }
+      var tbody = document.getElementById('cases-tbody');
+      if (!tbody) return Promise.resolve({ ok: 0, fail: 0, skipped: 0 });
+
+      var rows = tbody.querySelectorAll('tr');
+      var promises = [];
+      var skipped = 0;
+
+      Array.prototype.forEach.call(rows, function(tr) {
+        // Skip rows that already have a Firebase id (already synced)
+        if (tr.getAttribute('data-mobile-id')) { skipped++; return; }
+        // Skip rows with no detailed data (demo placeholders)
+        var caseDataStr = tr.getAttribute('data-case');
+        if (!caseDataStr) { skipped++; return; }
+
+        var fullData;
+        try { fullData = JSON.parse(caseDataStr); } catch(e) { skipped++; return; }
+
+        // Build row summary
+        var pb = tr.querySelector('.plate-badge');
+        var ownerEl = tr.querySelector('.owner-name');
+        var locEl = tr.querySelector('.owner-loc');
+        var rowData = {
+          plate:     pb ? pb.textContent.trim() : (fullData.plate || ''),
+          date:      fullData.date || '',
+          owner:     ownerEl ? ownerEl.textContent.trim() : (fullData.ownerName || ''),
+          location:  fullData.location || (locEl ? locEl.textContent.replace(/^📍\s*/, '').trim() : ''),
+          status:    tr.getAttribute('data-status') || fullData.status || 'yellow',
+          inspector: fullData.inspector || ''
+        };
+
+        var newId = 'manual_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        // Tag the row immediately so future syncs don't duplicate it
+        tr.setAttribute('data-mobile-id', newId);
+        tr.setAttribute('data-source', 'manual');
+
+        promises.push(
+          window.GalilSync._pushManualCase(rowData, fullData, newId)
+            .then(function(resultId) { return resultId ? 'ok' : 'fail'; })
+        );
+      });
+
+      return Promise.all(promises).then(function(results) {
+        var ok = results.filter(function(r) { return r === 'ok'; }).length;
+        var fail = results.filter(function(r) { return r === 'fail'; }).length;
+        return { ok: ok, fail: fail, skipped: skipped };
+      });
     }
   };
 
@@ -7257,16 +7405,24 @@ if (document.readyState === 'loading') {
 
     listenerRef.on('child_added', function(snap) {
       var c = snap.val();
-      if (c && c.source === 'mobile') {
+      if (!c) return;
+      if (c.source === 'mobile') {
         mobileCasesCache[c.id] = c;
         addOrUpdateMobileRow(c, true);
+      } else if (c.source === 'manual') {
+        // ═══ NEW: manual case from another manager → render row ═══
+        addOrUpdateManualRow(c, true);
       }
     });
     listenerRef.on('child_changed', function(snap) {
       var c = snap.val();
-      if (c && c.source === 'mobile') {
+      if (!c) return;
+      if (c.source === 'mobile') {
         mobileCasesCache[c.id] = c;
         addOrUpdateMobileRow(c, false);
+      } else if (c.source === 'manual') {
+        // ═══ NEW: manual case edited elsewhere → update row ═══
+        addOrUpdateManualRow(c, false);
       }
     });
     // ═══ NEW: when a case is removed from Firebase (by us, by another browser, or
@@ -7278,7 +7434,8 @@ if (document.readyState === 'loading') {
       console.log('[Firebase] child_removed:', id, c.plate || '');
       // Remove from in-memory cache
       delete mobileCasesCache[id];
-      // Remove the matching row from the cases table (if still present)
+      // Remove the matching row from the cases table (if still present).
+      // Both mobile-source and manual-source rows use the same data-mobile-id attr.
       var tbody = document.getElementById('cases-tbody');
       if (tbody) {
         var row = tbody.querySelector('tr[data-mobile-id="' + cssEscape(id) + '"]');
@@ -7291,6 +7448,65 @@ if (document.readyState === 'loading') {
         }
       }
     });
+  }
+
+  // ═══ NEW: Render or update a manual case row (one that was created in the
+  // management software, not from the mobile app). Looks up an existing row by
+  // its Firebase id and updates it; otherwise creates a new row via upsertCaseRow. ═══
+  function addOrUpdateManualRow(c, isNew) {
+    var tbody = document.getElementById('cases-tbody');
+    if (!tbody) return;
+    if (typeof upsertCaseRow !== 'function') return;
+
+    // Build row data from the Firebase payload
+    var rowData = {
+      plate:     c.plate || '',
+      date:      c.date || '',
+      owner:     c.owner || c.ownerName || '',
+      location:  c.location || '',
+      status:    c.status || 'yellow',
+      inspector: c.inspector || ''
+    };
+    var fullData = c.fullData || c;
+
+    // Check if a row with this Firebase id already exists
+    var existing = tbody.querySelector('tr[data-mobile-id="' + cssEscape(c.id) + '"]');
+
+    if (existing) {
+      // Update existing row in-place using upsertCaseRow's "find by plate" logic
+      var pb = existing.querySelector('.plate-badge');
+      var oldPlate = pb ? pb.textContent.trim() : (rowData.plate || '');
+      upsertCaseRow(oldPlate, rowData, fullData);
+      // Re-set the data-mobile-id so future lookups work
+      var newRow = tbody.querySelector('tr[data-mobile-id="' + cssEscape(c.id) + '"]');
+      if (!newRow) {
+        // upsertCaseRow may have re-rendered; find by plate and tag it
+        Array.prototype.forEach.call(tbody.querySelectorAll('tr'), function(tr) {
+          var p = tr.querySelector('.plate-badge');
+          if (p && p.textContent.trim() === rowData.plate) {
+            tr.setAttribute('data-mobile-id', c.id);
+            tr.setAttribute('data-source', 'manual');
+          }
+        });
+      }
+    } else {
+      // New row from another manager
+      upsertCaseRow(null, rowData, fullData);
+      // Tag the freshly inserted row (it's now the first child) with the Firebase id
+      var fresh = tbody.firstElementChild;
+      if (fresh) {
+        fresh.setAttribute('data-mobile-id', c.id);
+        fresh.setAttribute('data-source', 'manual');
+      }
+      if (isNew && typeof showToast === 'function') {
+        showToast('🔄 תיק חדש סונכרן: ' + (rowData.plate || ''));
+      }
+    }
+
+    // Refresh dashboard widgets
+    if (typeof syncDashboardWithCases === 'function') syncDashboardWithCases();
+    if (typeof updateAllCounters === 'function') updateAllCounters();
+    if (typeof refreshDashboardPanels === 'function') refreshDashboardPanels();
   }
 
   function addOrUpdateMobileRow(c, isNew) {
