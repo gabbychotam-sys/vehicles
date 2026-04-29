@@ -476,6 +476,10 @@
       <p style="margin:4px 0 0;font-size:12px;color:#666;">גליל עליון</p>
     </div>
     <div id="auth-error" style="display:none;background:#fee;border:1px solid #fcc;color:#c00;padding:9px 11px;border-radius:8px;font-size:13px;margin-bottom:12px;"></div>
+    <label style="display:block;font-size:13px;color:#444;margin-bottom:5px;font-weight:500;">בחר את שמך</label>
+    <select id="auth-name-select" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:15px;margin-bottom:12px;box-sizing:border-box;background:#fff;cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;12&quot; height=&quot;8&quot; viewBox=&quot;0 0 12 8&quot;><path fill=&quot;%23666&quot; d=&quot;M6 8L0 0h12z&quot;/></svg>');background-repeat:no-repeat;background-position:left 12px center;padding-left:32px;">
+      <option value="">— בחר —</option>
+    </select>
     <label style="display:block;font-size:13px;color:#444;margin-bottom:5px;font-weight:500;">דוא"ל</label>
     <input id="auth-email" type="email" autocomplete="username" inputmode="email" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:15px;direction:ltr;text-align:left;margin-bottom:12px;box-sizing:border-box;-webkit-appearance:none;" placeholder="name@galil-elion.org.il">
     <label style="display:block;font-size:13px;color:#444;margin-bottom:5px;font-weight:500;">סיסמה</label>
@@ -836,8 +840,30 @@ function initLoginUI() {
   var btn = document.getElementById('auth-login-btn');
   var emailInput = document.getElementById('auth-email');
   var pwdInput = document.getElementById('auth-password');
+  var nameSelect = document.getElementById('auth-name-select');
   var errBox = document.getElementById('auth-error');
   if (!btn) return;
+
+  // Populate the name dropdown from STAFF_LIST (sorted by Hebrew name)
+  if (nameSelect && typeof STAFF_LIST !== 'undefined' && STAFF_LIST.length) {
+    var sorted = STAFF_LIST.slice().sort(function(a, b) {
+      return a.name.localeCompare(b.name, 'he');
+    });
+    sorted.forEach(function(s) {
+      var opt = document.createElement('option');
+      opt.value = s.email || '';
+      opt.textContent = s.name + (s.role ? ' · ' + s.role : '');
+      nameSelect.appendChild(opt);
+    });
+    nameSelect.addEventListener('change', function() {
+      if (nameSelect.value) {
+        emailInput.value = nameSelect.value;
+        // Move focus to password field for fast entry
+        if (pwdInput) pwdInput.focus();
+        clearError();
+      }
+    });
+  }
 
   function showError(msg) {
     if (!errBox) return;
