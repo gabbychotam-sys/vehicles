@@ -7932,17 +7932,44 @@ if (document.readyState === 'loading') {
       if (c.inspector) noteParts.push('— נפתח בשטח ע״י: ' + c.inspector);
       setVal('nf-notes', noteParts.join('\n'));
 
-      // Try to set the city dropdown to match the mobile location
+      // Try to set the city dropdown to match the mobile location.
+      // Compare with normalization so spelling variants (e.g. "קרית" vs "קריית") match.
+      // If no match, add the typed value as a new option so the user's input is preserved.
       var citySel = document.getElementById('nf-location-city');
       if (citySel && c.location) {
         var loc = String(c.location).trim();
+        var norm = function(s) {
+          return String(s || '').trim()
+            .replace(/\s+/g, ' ')           // collapse whitespace
+            .replace(/יי/g, 'י')            // "קריית" → "קרית"
+            .replace(/[״"׳']/g, '');         // drop quote marks
+        };
+        var locN = norm(loc);
+        var matched = false;
         for (var i = 0; i < citySel.options.length; i++) {
           var opt = citySel.options[i];
-          if (opt.value === loc || opt.text === loc ||
-              opt.text.indexOf(loc) !== -1 || loc.indexOf(opt.text) !== -1) {
+          var optN = norm(opt.text);
+          if (optN === locN) {
             citySel.value = opt.value;
+            matched = true;
             break;
           }
+        }
+        if (!matched) {
+          // Insert the typed value as a new option just before "אחר"
+          var newOpt = document.createElement('option');
+          newOpt.value = loc;
+          newOpt.text = loc;
+          var inserted = false;
+          for (var j = 0; j < citySel.options.length; j++) {
+            if (citySel.options[j].text === 'אחר') {
+              citySel.add(newOpt, citySel.options[j]);
+              inserted = true;
+              break;
+            }
+          }
+          if (!inserted) citySel.add(newOpt);
+          citySel.value = loc;
         }
       }
 
@@ -8015,17 +8042,41 @@ if (document.readyState === 'loading') {
         if (c.inspector) noteParts.push('— נפתח בשטח ע״י: ' + c.inspector);
         setVal('nf-notes', noteParts.join('\n'));
 
-        // Try to set the city dropdown to match the mobile location
+        // Try to set the city dropdown to match the mobile location.
+        // Same normalize+fallback logic as in promoteMobileCase.
         var citySel = document.getElementById('nf-location-city');
         if (citySel && c.location) {
           var loc = String(c.location).trim();
+          var norm = function(s) {
+            return String(s || '').trim()
+              .replace(/\s+/g, ' ')
+              .replace(/יי/g, 'י')
+              .replace(/[״"׳']/g, '');
+          };
+          var locN = norm(loc);
+          var matched = false;
           for (var i = 0; i < citySel.options.length; i++) {
             var opt = citySel.options[i];
-            if (opt.value === loc || opt.text === loc ||
-                opt.text.indexOf(loc) !== -1 || loc.indexOf(opt.text) !== -1) {
+            if (norm(opt.text) === locN) {
               citySel.value = opt.value;
+              matched = true;
               break;
             }
+          }
+          if (!matched) {
+            var newOpt = document.createElement('option');
+            newOpt.value = loc;
+            newOpt.text = loc;
+            var inserted = false;
+            for (var j = 0; j < citySel.options.length; j++) {
+              if (citySel.options[j].text === 'אחר') {
+                citySel.add(newOpt, citySel.options[j]);
+                inserted = true;
+                break;
+              }
+            }
+            if (!inserted) citySel.add(newOpt);
+            citySel.value = loc;
           }
         }
 

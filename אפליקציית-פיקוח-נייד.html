@@ -1579,6 +1579,43 @@ function onPhoto(inp) {
   };
   reader.readAsDataURL(inp.files[0]);
   inp.value = '';
+
+  // Auto-capture GPS coordinates on first photo (don't overwrite manual entry)
+  captureGpsIfEmpty();
+}
+
+// Try to fill the lat/lon fields from device GPS — only if they're currently empty,
+// so manual edits aren't overwritten. Requires HTTPS and user permission.
+function captureGpsIfEmpty() {
+  var latInp = document.getElementById('f-lat');
+  var lonInp = document.getElementById('f-lon');
+  if (!latInp || !lonInp) return; // edit form not open
+  if ((latInp.value || '').trim() && (lonInp.value || '').trim()) return; // already filled
+  if (!navigator.geolocation) {
+    toast('המכשיר לא תומך באיתור מיקום');
+    return;
+  }
+  toast('📍 מאתר מיקום...');
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      var lat = pos.coords.latitude.toFixed(6);
+      var lon = pos.coords.longitude.toFixed(6);
+      // Re-check the inputs still exist and are empty (user may have typed in the meantime)
+      latInp = document.getElementById('f-lat');
+      lonInp = document.getElementById('f-lon');
+      if (latInp && !(latInp.value || '').trim()) latInp.value = lat;
+      if (lonInp && !(lonInp.value || '').trim()) lonInp.value = lon;
+      toast('📍 מיקום נקלט');
+    },
+    function(err) {
+      var msg = 'לא ניתן לקלוט מיקום';
+      if (err && err.code === 1) msg = 'הרשאת מיקום נדחתה';
+      else if (err && err.code === 2) msg = 'מיקום לא זמין';
+      else if (err && err.code === 3) msg = 'איתור מיקום נכשל (timeout)';
+      toast('⚠️ ' + msg);
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+  );
 }
 
 function toast(msg) {
