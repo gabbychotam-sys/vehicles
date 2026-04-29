@@ -3698,8 +3698,36 @@ function msDeleteSelected(tbodyId, barId, countId, allCbId) {
   var checked = tb.querySelectorAll('.ms-cb:checked');
   if (checked.length === 0) return;
   if (!confirm('למחוק ' + checked.length + ' רשומות?')) return;
+
+  // ═══ NEW: collect Firebase ids/plates BEFORE removing rows from DOM ═══
+  var fbDeletePromises = [];
+  var fbReady = window.GalilSync && window.GalilSync.isReady && window.GalilSync.isReady();
+
   checked.forEach(function(cb) {
     var row = cb.closest('tr');
+
+    // ═══ NEW: delete from Firebase if applicable (cases table only) ═══
+    if (fbReady && tbodyId === 'cases-tbody') {
+      var mobileId = row.getAttribute('data-mobile-id');
+      var plateEl = row.querySelector('.plate-badge');
+      var plateText = plateEl ? plateEl.textContent.trim() : '';
+
+      // If row has a mobile-id, delete that record directly
+      if (mobileId && window.GalilSync._deleteCase) {
+        console.log('[msDeleteSelected] deleting from Firebase by id:', mobileId);
+        fbDeletePromises.push(window.GalilSync._deleteCase(mobileId));
+      } else if (plateText && window.GalilSync._findIdByPlate && window.GalilSync._deleteCase) {
+        // Otherwise, look up by plate in the mobile cache
+        var idByPlate = window.GalilSync._findIdByPlate(plateText);
+        if (idByPlate) {
+          console.log('[msDeleteSelected] deleting from Firebase by plate:', plateText, '→', idByPlate);
+          fbDeletePromises.push(window.GalilSync._deleteCase(idByPlate));
+        } else {
+          console.log('[msDeleteSelected] no Firebase id found for plate:', plateText, '— local-only delete');
+        }
+      }
+    }
+
     // If it's towed, also remove from the other towed table (dashboard <-> towed page)
     if (tbodyId === 'tw-towed-tbody' || tbodyId === 'towed-tbody') {
       var plate = row.querySelector('.plate-badge');
@@ -3716,6 +3744,18 @@ function msDeleteSelected(tbodyId, barId, countId, allCbId) {
     }
     row.remove();
   });
+
+  // ═══ NEW: log Firebase deletion results so we can see if anything failed ═══
+  if (fbDeletePromises.length > 0) {
+    Promise.all(fbDeletePromises).then(function(results) {
+      var ok = results.filter(function(r) { return r === true; }).length;
+      var fail = results.length - ok;
+      console.log('[msDeleteSelected] Firebase deletes complete: ' + ok + ' ok, ' + fail + ' failed');
+      if (fail > 0) {
+        showToast('⚠️ ' + fail + ' תיקים לא נמחקו מ-Firebase — בדוק חיבור');
+      }
+    });
+  }
   // Update bar
   var bar = document.getElementById(barId);
   if (bar) bar.classList.remove('show');
@@ -7020,14 +7060,19 @@ if (document.readyState === 'loading') {
     openInCaseList: openInCaseList,
     // Delete a case from Firebase (used when user deletes locally)
     _deleteCase: function(id) {
-      if (!fbReady || !fbDb || !id) return Promise.resolve(false);
+      if (!fbReady || !fbDb || !id) {
+        console.warn('[GalilSync._deleteCase] skipped — fbReady=' + fbReady + ' id=' + id);
+        return Promise.resolve(false);
+      }
+      console.log('[GalilSync._deleteCase] deleting from Firebase:', id);
       return fbDb.ref('cases/' + id).remove()
         .then(function() {
+          console.log('[GalilSync._deleteCase] ✓ deleted:', id);
           delete mobileCasesCache[id];
           return true;
         })
         .catch(function(err) {
-          console.error('Firebase delete failed:', err);
+          console.error('[GalilSync._deleteCase] ✗ FAILED for ' + id + ':', err);
           return false;
         });
     },
@@ -7222,6 +7267,28 @@ if (document.readyState === 'loading') {
       if (c && c.source === 'mobile') {
         mobileCasesCache[c.id] = c;
         addOrUpdateMobileRow(c, false);
+      }
+    });
+    // ═══ NEW: when a case is removed from Firebase (by us, by another browser, or
+    // by an admin via the Firebase Console), also remove its row from the table.
+    // Without this, the manager UI would still show stale rows until reload. ═══
+    listenerRef.on('child_removed', function(snap) {
+      var id = snap.key;
+      var c = snap.val() || {};
+      console.log('[Firebase] child_removed:', id, c.plate || '');
+      // Remove from in-memory cache
+      delete mobileCasesCache[id];
+      // Remove the matching row from the cases table (if still present)
+      var tbody = document.getElementById('cases-tbody');
+      if (tbody) {
+        var row = tbody.querySelector('tr[data-mobile-id="' + cssEscape(id) + '"]');
+        if (row) {
+          row.remove();
+          // Refresh counters / dashboard / map after removal
+          if (typeof syncDashboardWithCases === 'function') syncDashboardWithCases();
+          if (typeof updateAllCounters === 'function') updateAllCounters();
+          if (typeof refreshDashboardPanels === 'function') refreshDashboardPanels();
+        }
       }
     });
   }
