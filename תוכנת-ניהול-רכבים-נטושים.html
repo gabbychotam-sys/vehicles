@@ -1778,6 +1778,30 @@ try {
 </head>
 <body class="">
 
+<!-- ════════════════════════════════════════════════════════════════════
+     LOGIN OVERLAY — appears only if Firebase Authentication is enabled.
+     If auth isn't set up yet, this stays hidden and the app works as before.
+     Once enabled (via Firebase Console), this becomes a hard gate.
+     ════════════════════════════════════════════════════════════════════ -->
+<div id="auth-overlay" style="display:none;position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#0f3460 0%,#16213e 100%);align-items:center;justify-content:center;font-family:inherit;">
+  <div style="background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.4);padding:40px 36px;width:380px;max-width:92vw;direction:rtl;">
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="font-size:48px;margin-bottom:8px;">🔐</div>
+      <h2 style="margin:0;font-size:22px;color:#0f3460;font-weight:600;">ניהול רכבים נטושים</h2>
+      <p style="margin:6px 0 0;font-size:13px;color:#666;">מועצה אזורית הגליל העליון</p>
+    </div>
+    <div id="auth-error" style="display:none;background:#fee;border:1px solid #fcc;color:#c00;padding:10px 12px;border-radius:8px;font-size:13px;margin-bottom:14px;"></div>
+    <label style="display:block;font-size:13px;color:#444;margin-bottom:6px;font-weight:500;">דוא"ל</label>
+    <input id="auth-email" type="email" autocomplete="username" style="width:100%;padding:11px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;direction:ltr;text-align:left;margin-bottom:14px;box-sizing:border-box;" placeholder="name@galil-elion.org.il">
+    <label style="display:block;font-size:13px;color:#444;margin-bottom:6px;font-weight:500;">סיסמה</label>
+    <input id="auth-password" type="password" autocomplete="current-password" style="width:100%;padding:11px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;direction:ltr;text-align:left;margin-bottom:18px;box-sizing:border-box;" placeholder="••••••••">
+    <button id="auth-login-btn" style="width:100%;padding:12px;background:#0f3460;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s;">כניסה</button>
+    <div style="margin-top:14px;text-align:center;font-size:12px;color:#888;">
+      שכחת סיסמה? פנה למנהל המערכת
+    </div>
+  </div>
+</div>
+
 <div class="sidebar">
   <div class="sb-brand">
     <div class="sb-brand-logo">
@@ -3031,6 +3055,11 @@ try {
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
         <div style="font-size:15px;font-weight:700;color:var(--text);">📱 סנכרון מאפליקציית הנייד (Firebase)</div>
         <span id="fb-cfg-status" style="font-size:12px;font-weight:700;">לא מוגדר</span>
+      </div>
+      <!-- ═══ NEW: signed-in user badge + logout button ═══ -->
+      <div id="auth-status-row" style="display:none;align-items:center;justify-content:space-between;background:rgba(46,125,50,0.08);border:1px solid rgba(46,125,50,0.18);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:13px;">
+        <span>🔐 מחובר כ-<strong id="auth-status-email" style="font-family:monospace;">—</strong></span>
+        <button onclick="window.GalilSync &amp;&amp; window.GalilSync.logout()" style="background:transparent;border:1px solid rgba(46,125,50,0.3);color:#2e7d32;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer;">התנתק</button>
       </div>
       <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px;">
         הזן את פרטי פרויקט ה-Firebase שלך כדי לקבל אוטומטית תיקים שפקחים פותחים בשטח. כל פקח שמעלה תיק במכשיר הנייד שלו — התיק יופיע כאן ברגע, ברשימת התיקים.
@@ -7088,6 +7117,7 @@ if (document.readyState === 'loading') {
 <!-- ═══════════════════════════════════════════════════════════════════════ -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script>
 (function() {
   'use strict';
@@ -7101,6 +7131,9 @@ if (document.readyState === 'loading') {
     projectId:   "galil-elyon-vehicles"
   };
   var fbApp = null, fbDb = null, fbReady = false;
+  var fbAuth = null;       // Firebase Auth instance (null if auth not used)
+  var authRequired = false; // Flag: true after first failed read = auth is enforced
+  var currentUser = null;   // Currently signed-in user (or null)
   var listenerRef = null;
   var currentMobileCase = null; // for "open in case list" action
   var mobileCasesCache = {}; // id → case object
@@ -7236,8 +7269,142 @@ if (document.readyState === 'loading') {
         var fail = results.filter(function(r) { return r === 'fail'; }).length;
         return { ok: ok, fail: fail, skipped: skipped };
       });
+    },
+    // ═══ NEW: Authentication helpers ═══
+    isAuthenticated: function() { return !!currentUser; },
+    getCurrentUser: function() {
+      if (!currentUser) return null;
+      return { email: currentUser.email, uid: currentUser.uid };
+    },
+    logout: function() {
+      if (!fbAuth) return Promise.resolve(false);
+      return fbAuth.signOut().then(function(){
+        // Force-show login overlay if auth is enforced
+        var overlay = document.getElementById('auth-overlay');
+        if (overlay && authRequired) overlay.style.display = 'flex';
+        return true;
+      });
     }
   };
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  AUTH GATE — soft mode (no auth set up) vs hard mode (auth enforced).
+  //  We don't show the login screen until we know auth is required, which
+  //  we detect by attempting a read; if rules reject it, login is needed.
+  // ═══════════════════════════════════════════════════════════════════
+
+  function handleAuthStateChange(user) {
+    currentUser = user || null;
+    var overlay = document.getElementById('auth-overlay');
+    var statusRow = document.getElementById('auth-status-row');
+    var emailEl = document.getElementById('auth-status-email');
+
+    if (user) {
+      // Logged in — hide login overlay, retry connection
+      if (overlay) overlay.style.display = 'none';
+      authRequired = true; // we know auth works — keep it on for this session
+      // Show "logged in as" badge in settings
+      if (statusRow) statusRow.style.display = 'flex';
+      if (emailEl) emailEl.textContent = user.email || '—';
+      if (listenerRef === null) {
+        try { startListener(); } catch(e){}
+      }
+      console.log('[Auth] signed in as', user.email);
+    } else {
+      // Not logged in
+      if (statusRow) statusRow.style.display = 'none';
+      if (authRequired && overlay) {
+        overlay.style.display = 'flex';
+      }
+    }
+  }
+
+  // Test whether the current Firebase rules require authentication.
+  // We attempt a single small read; if it's denied, we flip into "auth required" mode.
+  function probeAuthRequired() {
+    if (!fbDb) return;
+    fbDb.ref('cases').limitToFirst(1).once('value')
+      .then(function() {
+        // Read succeeded — rules are public (or we're already authenticated)
+        if (!currentUser) {
+          authRequired = false;
+          console.log('[Auth] rules are public — login not required');
+        }
+      })
+      .catch(function(err) {
+        // Read failed (permission denied) — auth is required
+        if (err && (err.code === 'PERMISSION_DENIED' || /permission/i.test(err.message || ''))) {
+          authRequired = true;
+          console.log('[Auth] login required — rules are protected');
+          if (!currentUser) {
+            var overlay = document.getElementById('auth-overlay');
+            if (overlay) overlay.style.display = 'flex';
+          }
+        }
+      });
+  }
+
+  // Wire up login button (runs once on page load)
+  function initLoginUI() {
+    var btn = document.getElementById('auth-login-btn');
+    var emailInput = document.getElementById('auth-email');
+    var pwdInput = document.getElementById('auth-password');
+    var errBox = document.getElementById('auth-error');
+    if (!btn) return;
+
+    function showError(msg) {
+      if (!errBox) return;
+      errBox.textContent = msg;
+      errBox.style.display = 'block';
+    }
+    function clearError() { if (errBox) errBox.style.display = 'none'; }
+
+    function doLogin() {
+      clearError();
+      var email = (emailInput.value || '').trim();
+      var pwd = pwdInput.value || '';
+      if (!email || !pwd) { showError('יש להזין דוא"ל וסיסמה'); return; }
+      if (!fbAuth) { showError('Firebase Authentication לא הופעל. פנה למנהל המערכת.'); return; }
+
+      btn.textContent = 'מתחבר...';
+      btn.disabled = true;
+      fbAuth.signInWithEmailAndPassword(email, pwd)
+        .then(function(){
+          // onAuthStateChanged will hide the overlay
+          btn.textContent = 'כניסה';
+          btn.disabled = false;
+          pwdInput.value = '';
+        })
+        .catch(function(err) {
+          btn.textContent = 'כניסה';
+          btn.disabled = false;
+          var code = (err && err.code) || '';
+          var msg = 'שם משתמש או סיסמה שגויים';
+          if (code === 'auth/user-not-found')      msg = 'המשתמש לא נמצא';
+          else if (code === 'auth/wrong-password') msg = 'סיסמה שגויה';
+          else if (code === 'auth/invalid-email')  msg = 'כתובת דוא"ל לא תקינה';
+          else if (code === 'auth/user-disabled')  msg = 'החשבון הושבת. פנה למנהל המערכת.';
+          else if (code === 'auth/too-many-requests') msg = 'יותר מדי ניסיונות כושלים. נסה שוב מאוחר יותר.';
+          else if (code === 'auth/network-request-failed') msg = 'אין חיבור לאינטרנט';
+          showError(msg);
+          console.error('[Auth] login failed:', err);
+        });
+    }
+
+    btn.addEventListener('click', doLogin);
+    [emailInput, pwdInput].forEach(function(inp) {
+      inp.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') doLogin();
+      });
+    });
+  }
+
+  // Run probe ~3 seconds after Firebase init (gives connection time to settle)
+  function schedulePostInitProbe() {
+    setTimeout(function() {
+      if (fbDb) probeAuthRequired();
+    }, 2500);
+  }
 
   function loadCfg() {
     try {
@@ -7380,14 +7547,30 @@ if (document.readyState === 'loading') {
         projectId: cfg.projectId || ''
       }, appName);
       fbDb = fbApp.database();
+      // ═══ NEW: initialize Auth (no-op if Firebase Authentication isn't enabled). ═══
+      try {
+        if (typeof fbApp.auth === 'function') {
+          fbAuth = fbApp.auth();
+          fbAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(){});
+        }
+      } catch(e) { console.warn('Auth init skipped:', e); }
       fbReady = true;
       setStatus('pending', 'מתחבר...');
+
+      // ═══ NEW: when auth state changes, gate the UI accordingly. ═══
+      if (fbAuth) {
+        fbAuth.onAuthStateChanged(function(user) {
+          handleAuthStateChange(user);
+        });
+      }
 
       // Watch connection
       fbDb.ref('.info/connected').on('value', function(snap) {
         if (snap.val() === true) {
           setStatus('ok', '✓ מסונכרן');
           startListener();
+          // ═══ NEW: probe whether auth is required (only first time) ═══
+          schedulePostInitProbe();
         } else {
           setStatus('pending', 'מתחבר...');
         }
@@ -7843,6 +8026,8 @@ if (document.readyState === 'loading') {
   }
 
   function startup() {
+    // Wire up login UI immediately (overlay stays hidden until needed)
+    initLoginUI();
     // Wait for the main app's loadState to finish before adding rows
     setTimeout(function() {
       injectStatusIndicator();

@@ -460,8 +460,32 @@
 <!-- Firebase SDK (compat v8 — works without ES modules) -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 </head>
 <body>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     FIREBASE AUTH OVERLAY — appears only after auth is enforced.
+     Shown above the existing inspector-pick screen, gating Firebase access.
+     ════════════════════════════════════════════════════════════════════ -->
+<div id="auth-overlay" style="display:none;position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#0f3460 0%,#16213e 100%);align-items:center;justify-content:center;font-family:inherit;padding:16px;box-sizing:border-box;">
+  <div style="background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.4);padding:32px 24px;width:100%;max-width:380px;direction:rtl;">
+    <div style="text-align:center;margin-bottom:22px;">
+      <div style="font-size:44px;margin-bottom:6px;">🔐</div>
+      <h2 style="margin:0;font-size:20px;color:#0f3460;font-weight:600;">פיקוח רכבים</h2>
+      <p style="margin:4px 0 0;font-size:12px;color:#666;">גליל עליון</p>
+    </div>
+    <div id="auth-error" style="display:none;background:#fee;border:1px solid #fcc;color:#c00;padding:9px 11px;border-radius:8px;font-size:13px;margin-bottom:12px;"></div>
+    <label style="display:block;font-size:13px;color:#444;margin-bottom:5px;font-weight:500;">דוא"ל</label>
+    <input id="auth-email" type="email" autocomplete="username" inputmode="email" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:15px;direction:ltr;text-align:left;margin-bottom:12px;box-sizing:border-box;-webkit-appearance:none;" placeholder="name@galil-elion.org.il">
+    <label style="display:block;font-size:13px;color:#444;margin-bottom:5px;font-weight:500;">סיסמה</label>
+    <input id="auth-password" type="password" autocomplete="current-password" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:15px;direction:ltr;text-align:left;margin-bottom:16px;box-sizing:border-box;-webkit-appearance:none;" placeholder="••••••••">
+    <button id="auth-login-btn" style="width:100%;padding:13px;background:#0f3460;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;-webkit-appearance:none;">כניסה</button>
+    <div style="margin-top:14px;text-align:center;font-size:11px;color:#888;">
+      שכחת סיסמה? פנה למנהל המערכת
+    </div>
+  </div>
+</div>
 
 <!-- ═══════════ LOGIN SCREEN (first time only) ═══════════ -->
 <div class="screen" id="scr-login">
@@ -677,6 +701,10 @@ function saveInspector(i) { try { localStorage.setItem(INSPECTOR_KEY, JSON.strin
 
 // ═══ FIREBASE ═══
 var fbApp = null, fbDb = null, fbReady = false;
+// ═══ NEW: Auth state ═══
+var fbAuth = null;
+var authRequired = false;
+var currentAuthUser = null;
 
 function initFirebase() {
   var cfg = loadCfg();
@@ -699,6 +727,17 @@ function initFirebase() {
       });
     }
     fbDb = firebase.database();
+    // ═══ NEW: initialize Auth (no-op if Firebase Authentication isn't enabled). ═══
+    try {
+      if (typeof fbApp.auth === 'function') {
+        fbAuth = fbApp.auth();
+        fbAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(){});
+        fbAuth.onAuthStateChanged(function(user) {
+          handleAuthStateChange(user);
+        });
+      }
+    } catch(e) { console.warn('Auth init skipped:', e); }
+
     fbReady = true;
     setSyncChip('ok', 'מסונכרן');
     // Test connection
@@ -745,10 +784,112 @@ function initFirebase() {
     }).catch(function(err) {
       console.error('[Firebase] reconcile failed:', err);
     });
+    // ═══ NEW: probe whether auth is required (only first time after connect)
+    setTimeout(function() {
+      if (fbDb && !currentAuthUser) probeAuthRequired();
+    }, 2500);
+
   } catch(e) {
     console.error('Firebase init failed:', e);
     setSyncChip('err', 'שגיאת חיבור');
   }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  AUTH GATE — soft mode (no auth set up) vs hard mode (auth enforced).
+// ═══════════════════════════════════════════════════════════════════
+
+function handleAuthStateChange(user) {
+  currentAuthUser = user || null;
+  var overlay = document.getElementById('auth-overlay');
+  if (user) {
+    if (overlay) overlay.style.display = 'none';
+    authRequired = true;
+    console.log('[Auth] signed in as', user.email);
+  } else {
+    if (authRequired && overlay) overlay.style.display = 'flex';
+  }
+}
+
+function probeAuthRequired() {
+  if (!fbDb) return;
+  fbDb.ref('cases').limitToFirst(1).once('value')
+    .then(function() {
+      if (!currentAuthUser) {
+        authRequired = false;
+        console.log('[Auth] rules are public — login not required');
+      }
+    })
+    .catch(function(err) {
+      if (err && (err.code === 'PERMISSION_DENIED' || /permission/i.test(err.message || ''))) {
+        authRequired = true;
+        console.log('[Auth] login required — rules are protected');
+        if (!currentAuthUser) {
+          var overlay = document.getElementById('auth-overlay');
+          if (overlay) overlay.style.display = 'flex';
+        }
+      }
+    });
+}
+
+function initLoginUI() {
+  var btn = document.getElementById('auth-login-btn');
+  var emailInput = document.getElementById('auth-email');
+  var pwdInput = document.getElementById('auth-password');
+  var errBox = document.getElementById('auth-error');
+  if (!btn) return;
+
+  function showError(msg) {
+    if (!errBox) return;
+    errBox.textContent = msg;
+    errBox.style.display = 'block';
+  }
+  function clearError() { if (errBox) errBox.style.display = 'none'; }
+
+  function doLogin() {
+    clearError();
+    var email = (emailInput.value || '').trim();
+    var pwd = pwdInput.value || '';
+    if (!email || !pwd) { showError('יש להזין דוא"ל וסיסמה'); return; }
+    if (!fbAuth) { showError('Firebase Authentication לא הופעל. פנה למנהל המערכת.'); return; }
+
+    btn.textContent = 'מתחבר...';
+    btn.disabled = true;
+    fbAuth.signInWithEmailAndPassword(email, pwd)
+      .then(function(){
+        btn.textContent = 'כניסה';
+        btn.disabled = false;
+        pwdInput.value = '';
+      })
+      .catch(function(err) {
+        btn.textContent = 'כניסה';
+        btn.disabled = false;
+        var code = (err && err.code) || '';
+        var msg = 'שם משתמש או סיסמה שגויים';
+        if (code === 'auth/user-not-found')      msg = 'המשתמש לא נמצא';
+        else if (code === 'auth/wrong-password') msg = 'סיסמה שגויה';
+        else if (code === 'auth/invalid-email')  msg = 'כתובת דוא"ל לא תקינה';
+        else if (code === 'auth/user-disabled')  msg = 'החשבון הושבת. פנה למנהל המערכת.';
+        else if (code === 'auth/too-many-requests') msg = 'יותר מדי ניסיונות כושלים. נסה שוב מאוחר יותר.';
+        else if (code === 'auth/network-request-failed') msg = 'אין חיבור לאינטרנט';
+        showError(msg);
+        console.error('[Auth] login failed:', err);
+      });
+  }
+
+  btn.addEventListener('click', doLogin);
+  [emailInput, pwdInput].forEach(function(inp) {
+    inp.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') doLogin();
+    });
+  });
+}
+
+// Wire up login UI on page load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initLoginUI);
+} else {
+  initLoginUI();
 }
 
 function setSyncChip(state, text) {
