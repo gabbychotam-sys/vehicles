@@ -1791,6 +1791,10 @@ try {
       <p style="margin:6px 0 0;font-size:13px;color:#666;">מועצה אזורית הגליל העליון</p>
     </div>
     <div id="auth-error" style="display:none;background:#fee;border:1px solid #fcc;color:#c00;padding:10px 12px;border-radius:8px;font-size:13px;margin-bottom:14px;"></div>
+    <label style="display:block;font-size:13px;color:#444;margin-bottom:6px;font-weight:500;">בחר את שמך</label>
+    <select id="auth-name-select" style="width:100%;padding:11px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:14px;box-sizing:border-box;background:#fff;cursor:pointer;">
+      <option value="">— בחר —</option>
+    </select>
     <label style="display:block;font-size:13px;color:#444;margin-bottom:6px;font-weight:500;">דוא"ל</label>
     <input id="auth-email" type="email" autocomplete="username" style="width:100%;padding:11px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;direction:ltr;text-align:left;margin-bottom:14px;box-sizing:border-box;" placeholder="name@galil-elion.org.il">
     <label style="display:block;font-size:13px;color:#444;margin-bottom:6px;font-weight:500;">סיסמה</label>
@@ -2041,7 +2045,7 @@ try {
               <div>
                 <div class="ins-name">שימי רוזנברג</div>
                 <div class="ins-area">פקח · 054-669-3634</div>
-                <div style="font-size:10px;color:var(--muted);">pikuach@galil-elion.org.il</div>
+                <div style="font-size:10px;color:var(--muted);">shimi@galil-elion.org.il</div>
               </div>
               <div class="ins-cases"><span>8</span>תיקים</div>
               <div class="ins-status" style="background:var(--green)"></div>
@@ -2051,7 +2055,7 @@ try {
               <div>
                 <div class="ins-name">פרנסיס ברוטמן</div>
                 <div class="ins-area">פקח · 054-452-7582</div>
-                <div style="font-size:10px;color:var(--muted);">pikuach@galil-elion.org.il</div>
+                <div style="font-size:10px;color:var(--muted);">francis@galil-elion.org.il</div>
               </div>
               <div class="ins-cases"><span>9</span>תיקים</div>
               <div class="ins-status" style="background:var(--green)"></div>
@@ -2061,17 +2065,27 @@ try {
               <div>
                 <div class="ins-name">אייל ארצי</div>
                 <div class="ins-area">פקח · 052-619-1985</div>
-                <div style="font-size:10px;color:var(--muted);">pikuach@galil-elion.org.il</div>
+                <div style="font-size:10px;color:var(--muted);">eyal@galil-elion.org.il</div>
               </div>
               <div class="ins-cases"><span>7</span>תיקים</div>
               <div class="ins-status" style="background:var(--green)"></div>
             </div>
-            <div class="inspector-row" style="border-bottom:none;">
+            <div class="inspector-row">
               <div class="ins-avatar" style="background:linear-gradient(135deg,#f39c12,#d68910)">מ</div>
               <div>
                 <div class="ins-name">מורן לוז</div>
                 <div class="ins-area">מזכירה · 052-379-1659</div>
-                <div style="font-size:10px;color:var(--muted);">pikuach@galil-elion.org.il</div>
+                <div style="font-size:10px;color:var(--muted);">moranl@galil-elion.org.il</div>
+              </div>
+              <div class="ins-cases"></div>
+              <div class="ins-status" style="background:var(--green)"></div>
+            </div>
+            <div class="inspector-row" style="border-bottom:none;">
+              <div class="ins-avatar" style="background:linear-gradient(135deg,#1abc9c,#0e6655)">ג</div>
+              <div>
+                <div class="ins-name">גבי חותם</div>
+                <div class="ins-area">מנהל פיקוח · 050-757-4451</div>
+                <div style="font-size:10px;color:var(--muted);">gabbyc@galil-elion.org.il</div>
               </div>
               <div class="ins-cases"></div>
               <div class="ins-status" style="background:var(--green)"></div>
@@ -6340,10 +6354,11 @@ function openExistingCase(rowEl) {
 
 // ═══════════════ STAFF MANAGEMENT ═══════════════
 var staffList = [
-  { id:1, name:'שימי רוזנברג', role:'פקח', phone:'054-669-3634', email:'shimonr@galil-elion.org.il', cases:8, color:'#3498db,#1a4268' },
-  { id:2, name:'פרנסיס ברוטמן', role:'פקח', phone:'054-452-7582', email:'FransisB@galil-elion.org.il', cases:9, color:'#e74c3c,#7b241c' },
-  { id:3, name:'אייל ארצי', role:'פקח', phone:'052-619-1985', email:'EyalA@galil-elion.org.il', cases:7, color:'#9b59b6,#4a235a' },
-  { id:4, name:'מורן לוז', role:'מזכירה', phone:'052-379-1659', email:'moranl@galil-elion.org.il', cases:0, color:'#f39c12,#d68910' }
+  { id:1, name:'שימי רוזנברג', role:'פקח', phone:'054-669-3634', email:'shimi@galil-elion.org.il', cases:8, color:'#3498db,#1a4268' },
+  { id:2, name:'פרנסיס ברוטמן', role:'פקח', phone:'054-452-7582', email:'francis@galil-elion.org.il', cases:9, color:'#e74c3c,#7b241c' },
+  { id:3, name:'אייל ארצי', role:'פקח', phone:'052-619-1985', email:'eyal@galil-elion.org.il', cases:7, color:'#9b59b6,#4a235a' },
+  { id:4, name:'מורן לוז', role:'מזכירה', phone:'052-379-1659', email:'moranl@galil-elion.org.il', cases:0, color:'#f39c12,#d68910' },
+  { id:5, name:'גבי חותם', role:'מנהל פיקוח', phone:'050-757-4451', email:'gabbyc@galil-elion.org.il', cases:0, color:'#1abc9c,#0e6655' }
 ];
 var staffEditId = null;
 var staffColors = ['#3498db,#1a4268','#e74c3c,#7b241c','#9b59b6,#4a235a','#f39c12,#d68910','#1abc9c,#0e6655','#e67e22,#a04000','#2c3e50,#1a252f','#16a085,#0e6251'];
@@ -7349,8 +7364,29 @@ if (document.readyState === 'loading') {
     var btn = document.getElementById('auth-login-btn');
     var emailInput = document.getElementById('auth-email');
     var pwdInput = document.getElementById('auth-password');
+    var nameSelect = document.getElementById('auth-name-select');
     var errBox = document.getElementById('auth-error');
     if (!btn) return;
+
+    // Populate the name dropdown from staffList (sorted by Hebrew name)
+    if (nameSelect && typeof staffList !== 'undefined' && staffList.length) {
+      var sorted = staffList.slice().sort(function(a, b) {
+        return a.name.localeCompare(b.name, 'he');
+      });
+      sorted.forEach(function(s) {
+        var opt = document.createElement('option');
+        opt.value = s.email || '';
+        opt.textContent = s.name + (s.role ? ' · ' + s.role : '');
+        nameSelect.appendChild(opt);
+      });
+      nameSelect.addEventListener('change', function() {
+        if (nameSelect.value) {
+          emailInput.value = nameSelect.value;
+          if (pwdInput) pwdInput.focus();
+          clearError();
+        }
+      });
+    }
 
     function showError(msg) {
       if (!errBox) return;
