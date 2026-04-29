@@ -5390,7 +5390,40 @@ function openNewCase() {
 
   // Bind live input updates to CASE object
   bindNewCaseInputs();
+
+  // Populate the "פקח מטפל" dropdown from the live staffList so it always
+  // reflects the current team (instead of the hardcoded HTML defaults).
+  populateInspectorDropdown();
 }
+
+// Refresh the new-case inspector dropdown from staffList.
+// Keeps the currently selected name if still present.
+function populateInspectorDropdown() {
+  var sel = document.getElementById('nf-inspector');
+  if (!sel || typeof staffList === 'undefined' || !staffList.length) return;
+  var prev = sel.value;
+  // Sort staff alphabetically by Hebrew name
+  var sorted = staffList.slice().sort(function(a, b) {
+    return a.name.localeCompare(b.name, 'he');
+  });
+  // Clear and rebuild
+  sel.innerHTML = '';
+  var blank = document.createElement('option');
+  blank.value = '';
+  blank.text = '— בחר פקח —';
+  sel.appendChild(blank);
+  sorted.forEach(function(s) {
+    var opt = document.createElement('option');
+    opt.value = s.name;
+    opt.text = s.name + (s.role ? ' · ' + s.role : '');
+    sel.appendChild(opt);
+  });
+  // Restore previous selection if still in list
+  if (prev) {
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === prev) { sel.value = prev; break; }
+    }
+  }
 
 function bindNewCaseInputs() {
   var map = {
@@ -7917,7 +7950,24 @@ if (document.readyState === 'loading') {
       setVal('nf-owner-addr', c.address);
       setVal('nf-location-street', c.locAddress);
       setVal('nf-found-date', c.date);
-      setVal('nf-inspector', c.inspector);
+      // Inspector dropdown: select the mobile inspector. If they're not in the
+      // local list, add them on the fly so we don't silently lose the name.
+      (function setInspector() {
+        var sel = document.getElementById('nf-inspector');
+        if (!sel || !c.inspector) return;
+        var name = String(c.inspector).trim();
+        var found = false;
+        for (var i = 0; i < sel.options.length; i++) {
+          if (sel.options[i].value === name) { found = true; break; }
+        }
+        if (!found) {
+          var opt = document.createElement('option');
+          opt.value = name;
+          opt.text = name;
+          sel.appendChild(opt);
+        }
+        sel.value = name;
+      })();
 
       // Build a comprehensive notes block with everything we couldn't map directly
       var noteParts = [];
@@ -8026,7 +8076,23 @@ if (document.readyState === 'loading') {
         setVal('nf-owner-addr', c.address);
         setVal('nf-location-street', c.locAddress);
         setVal('nf-found-date', c.date);
-        setVal('nf-inspector', c.inspector);
+        // Inspector dropdown: select mobile inspector, add if missing
+        (function setInspector() {
+          var sel = document.getElementById('nf-inspector');
+          if (!sel || !c.inspector) return;
+          var name = String(c.inspector).trim();
+          var found = false;
+          for (var i = 0; i < sel.options.length; i++) {
+            if (sel.options[i].value === name) { found = true; break; }
+          }
+          if (!found) {
+            var opt = document.createElement('option');
+            opt.value = name;
+            opt.text = name;
+            sel.appendChild(opt);
+          }
+          sel.value = name;
+        })();
 
         // Build a comprehensive notes block with everything we couldn't map directly
         var noteParts = [];
