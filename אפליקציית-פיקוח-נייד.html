@@ -1607,18 +1607,14 @@ function goBackFromView() {
   try { applyTheme(); } catch(e){}
 
   var insp = loadInspector();
-  if (!insp) {
-    // First-time: show login
-    document.getElementById('scr-home').classList.remove('active');
-    document.getElementById('scr-login').classList.add('active');
-    // Populate inspector dropdown with staff list
-    if (typeof populateInspectorDropdown === 'function') {
-      populateInspectorDropdown();
-    }
-  } else {
+  if (insp) {
     refreshHomeUser();
     renderHome();
   }
+  // If no inspector yet: do nothing here. The Firebase Auth overlay will
+  // appear (since rules require auth), and after a successful sign-in,
+  // handleAuthStateChange auto-identifies the user from STAFF_LIST by email
+  // and jumps straight to the home screen — no separate "pick name" step.
   // Init Firebase (waits for SDK to be loaded)
   if (typeof firebase !== 'undefined') {
     initFirebase();
