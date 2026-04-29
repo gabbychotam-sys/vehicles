@@ -810,6 +810,39 @@ function handleAuthStateChange(user) {
     if (overlay) overlay.style.display = 'none';
     authRequired = true;
     console.log('[Auth] signed in as', user.email);
+
+    // Auto-identify the inspector by email — skip the old "pick your name" screen
+    try {
+      var existing = loadInspector();
+      var emailLower = (user.email || '').toLowerCase();
+      var matched = null;
+      if (typeof STAFF_LIST !== 'undefined') {
+        for (var i = 0; i < STAFF_LIST.length; i++) {
+          if ((STAFF_LIST[i].email || '').toLowerCase() === emailLower) {
+            matched = STAFF_LIST[i];
+            break;
+          }
+        }
+      }
+      if (matched) {
+        // Save (or refresh) inspector profile from the auth identity
+        saveInspector({
+          name: matched.name,
+          email: matched.email || '',
+          phone: matched.phone || '',
+          role: matched.role || ''
+        });
+      }
+      // If we have an inspector (newly matched or already saved), jump straight to home
+      if (matched || existing) {
+        var loginScr = document.getElementById('scr-login');
+        var homeScr = document.getElementById('scr-home');
+        if (loginScr) loginScr.classList.remove('active');
+        if (homeScr)  homeScr.classList.add('active');
+        if (typeof refreshHomeUser === 'function') refreshHomeUser();
+        if (typeof renderHome === 'function') renderHome();
+      }
+    } catch(e) { console.warn('[Auth] auto-identify failed', e); }
   } else {
     if (authRequired && overlay) overlay.style.display = 'flex';
   }
