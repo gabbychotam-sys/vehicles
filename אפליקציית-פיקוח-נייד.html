@@ -706,6 +706,45 @@ function initFirebase() {
       if (snap.val() === true) setSyncChip('ok', 'מסונכרן');
       else setSyncChip('pending', 'מתחבר...');
     });
+
+    // ═══ NEW: Listen for cases removed from Firebase (e.g., deleted by the
+    // management software) and remove them from local storage too. Without
+    // this, deleted cases would reappear in the app on next reload. ═══
+    fbDb.ref('cases').on('child_removed', function(snap) {
+      var id = snap.key;
+      console.log('[Firebase] case removed from server:', id);
+      var before = cases.length;
+      cases = cases.filter(function(c) { return c.id !== id; });
+      if (cases.length < before) {
+        saveDB();
+        if (typeof renderHome === 'function') renderHome();
+        if (typeof toast === 'function') toast('🗑️ תיק נמחק מהמערכת');
+      }
+    });
+
+    // ═══ NEW: On initial connection, reconcile local cases with Firebase.
+    // If a case was previously synced but no longer exists on the server,
+    // it was deleted by management — remove it locally too.
+    // We only remove cases marked `synced: true` so offline drafts are safe. ═══
+    fbDb.ref('cases').once('value').then(function(snap) {
+      var serverCases = snap.val() || {};
+      var before = cases.length;
+      var removed = [];
+      cases = cases.filter(function(c) {
+        if (!c.synced) return true;        // never synced — keep (offline draft)
+        if (serverCases[c.id]) return true; // still on server — keep
+        removed.push(c.id);
+        return false;                       // synced but server-deleted — remove
+      });
+      if (removed.length > 0) {
+        console.log('[Firebase] reconcile: removed ' + removed.length + ' local cases that were deleted on server:', removed);
+        saveDB();
+        if (typeof renderHome === 'function') renderHome();
+        if (typeof toast === 'function') toast('🔄 ' + removed.length + ' תיקים סונכרנו עם המערכת');
+      }
+    }).catch(function(err) {
+      console.error('[Firebase] reconcile failed:', err);
+    });
   } catch(e) {
     console.error('Firebase init failed:', e);
     setSyncChip('err', 'שגיאת חיבור');
@@ -731,6 +770,12 @@ function pushCaseToFirebase(c) {
   return fbDb.ref('cases/' + c.id).set(data)
     .then(function() {
       setSyncChip('ok', 'מסונכרן');
+      // ═══ NEW: mark local case as synced so reconciliation knows it was pushed.
+      // If the server later loses this case, we know it was deleted (not offline). ═══
+      try {
+        c.synced = true;
+        saveDB();
+      } catch(e) {}
       return true;
     })
     .catch(function(err) {
