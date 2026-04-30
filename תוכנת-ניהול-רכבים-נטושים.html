@@ -7202,6 +7202,66 @@ if (document.readyState === 'loading') {
   var currentMobileCase = null; // for "open in case list" action
   var mobileCasesCache = {}; // id → case object
 
+  // Cache reverse-geocoding results so we don't re-hit Nominatim for the
+  // same point. Key = "lat,lon" rounded to 5 decimals (~1 m precision).
+  var geocodeCache = {};
+
+  // Reverse-geocode a lat/lon via Nominatim (OpenStreetMap) and write the
+  // resulting street + house number into the "כתובת / מיקום מדויק" field
+  // of the new-case form — i.e. WHERE THE VEHICLE WAS PHOTOGRAPHED, not the
+  // owner's home address. Only fills the field if it's currently empty so we
+  // never overwrite a value the inspector typed manually.
+  // Free, no API key required. Nominatim asks for ≤1 request/sec.
+  function reverseGeocodeIntoStreet(lat, lon) {
+    if (lat == null || lon == null) return;
+    var streetEl = document.getElementById('nf-location-street');
+    if (!streetEl) return;
+    if ((streetEl.value || '').trim()) return; // don't overwrite manual entry
+
+    var key = (+lat).toFixed(5) + ',' + (+lon).toFixed(5);
+    if (geocodeCache.hasOwnProperty(key)) {
+      streetEl.value = geocodeCache[key];
+      // Trigger oninput so CASE.location stays in sync
+      try { streetEl.dispatchEvent(new Event('input', { bubbles: true })); } catch(e){}
+      return;
+    }
+
+    var url = 'https://nominatim.openstreetmap.org/reverse'
+            + '?format=jsonv2&accept-language=he'
+            + '&zoom=18&addressdetails=1'
+            + '&lat=' + encodeURIComponent(lat)
+            + '&lon=' + encodeURIComponent(lon);
+
+    fetch(url, { headers: { 'Accept': 'application/json' } })
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(data) {
+        if (!data || !data.address) return;
+        var a = data.address;
+        // Build "street + number" from the most specific parts available
+        var road = a.road || a.pedestrian || a.path || a.residential || a.neighbourhood || '';
+        var num  = a.house_number || '';
+        var streetText = (road && num) ? (road + ' ' + num)
+                       : road
+                       ? road
+                       : (a.suburb || a.neighbourhood || a.hamlet || '');
+        if (!streetText) return;
+        geocodeCache[key] = streetText;
+        // Re-check the field — user may have typed in the meantime
+        var el = document.getElementById('nf-location-street');
+        if (el && !(el.value || '').trim()) {
+          el.value = streetText;
+          try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch(e){}
+        }
+      })
+      .catch(function(err) {
+        console.warn('[GeoCode] reverse geocoding failed:', err);
+      });
+  }
+
+  // Expose for use by the case-promotion code further down in this IIFE
+  window._gx_reverseGeocodeIntoStreet = reverseGeocodeIntoStreet;
+
+
   // Public API
   window.GalilSync = {
     init: initFirebase,
@@ -7983,6 +8043,12 @@ if (document.readyState === 'loading') {
       if (c.inspector) noteParts.push('— נפתח בשטח ע״י: ' + c.inspector);
       setVal('nf-notes', noteParts.join('\n'));
 
+      // If we have GPS coords but no street address, reverse-geocode them
+      // and fill the "רחוב ומספר" field automatically.
+      if (c.lat && c.lon && !(c.locAddress && String(c.locAddress).trim())) {
+        reverseGeocodeIntoStreet(c.lat, c.lon);
+      }
+
       // Try to set the city dropdown to match the mobile location.
       // Compare with normalization so spelling variants (e.g. "קרית" vs "קריית") match.
       // If no match, add the typed value as a new option so the user's input is preserved.
@@ -8108,6 +8174,12 @@ if (document.readyState === 'loading') {
         }
         if (c.inspector) noteParts.push('— נפתח בשטח ע״י: ' + c.inspector);
         setVal('nf-notes', noteParts.join('\n'));
+
+        // Reverse-geocode the GPS into a street address if the inspector
+        // didn't fill one in manually on the mobile app.
+        if (c.lat && c.lon && !(c.locAddress && String(c.locAddress).trim())) {
+          reverseGeocodeIntoStreet(c.lat, c.lon);
+        }
 
         // Try to set the city dropdown to match the mobile location.
         // Same normalize+fallback logic as in promoteMobileCase.
