@@ -1775,6 +1775,10 @@ try {
   localStorage.setItem("galilElyon_appState_v1", __s);
 } catch(e) { console.warn("seed failed", e); }
 </script>
+
+<!-- Leaflet (interactive map library, free, no API key) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body class="">
 
@@ -2611,66 +2615,7 @@ try {
     </div>
   </div>
   <div class="content" style="padding:0;position:relative;overflow:hidden;">
-    <div id="map-container" style="width:100%;height:100%;position:relative;background:#e8f0e3;overflow:hidden;">
-      <svg id="map-svg" viewBox="0 0 800 700" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;direction:ltr;">
-        <!-- Water / background -->
-        <rect x="0" y="0" width="800" height="700" fill="#dce8d4"></rect>
-
-        <!-- Roads (simplified) -->
-        <path d="M 100,100 L 400,200 L 600,350 L 700,500" stroke="#c8b888" stroke-width="3" fill="none" opacity="0.6"></path>
-        <path d="M 200,50 L 300,250 L 350,450 L 400,600" stroke="#c8b888" stroke-width="3" fill="none" opacity="0.6"></path>
-        <path d="M 50,300 L 250,350 L 500,300 L 700,250" stroke="#c8b888" stroke-width="2" fill="none" opacity="0.4"></path>
-        <path d="M 150,500 L 400,400 L 650,450" stroke="#c8b888" stroke-width="2" fill="none" opacity="0.4"></path>
-
-        <!-- Region labels -->
-        <text x="400" y="30" text-anchor="middle" font-size="18" font-weight="700" fill="#5d7a4a" font-family="var(--font)">מועצה אזורית גליל עליון</text>
-
-        <!-- Settlement areas (subtle) -->
-        <circle cx="310" cy="90" r="40" fill="#c5dbb5" opacity="0.4"></circle>
-        <circle cx="195" cy="195" r="35" fill="#c5dbb5" opacity="0.4"></circle>
-        <circle cx="530" cy="180" r="30" fill="#c5dbb5" opacity="0.4"></circle>
-        <circle cx="420" cy="310" r="35" fill="#c5dbb5" opacity="0.4"></circle>
-        <circle cx="250" cy="400" r="30" fill="#c5dbb5" opacity="0.4"></circle>
-        <circle cx="600" cy="400" r="30" fill="#c5dbb5" opacity="0.4"></circle>
-        <circle cx="150" cy="550" r="30" fill="#c5dbb5" opacity="0.4"></circle>
-
-        <!-- Settlement names -->
-        <text x="310" y="65" text-anchor="middle" font-size="11" fill="#4a6b3a" font-family="var(--font)">מטולה</text>
-        <text x="195" y="170" text-anchor="middle" font-size="11" fill="#4a6b3a" font-family="var(--font)">קרית שמונה</text>
-        <text x="530" y="155" text-anchor="middle" font-size="10" fill="#4a6b3a" font-family="var(--font)">קיבוץ מנרה</text>
-        <text x="420" y="285" text-anchor="middle" font-size="10" fill="#4a6b3a" font-family="var(--font)">כפר ורדים</text>
-        <text x="250" y="375" text-anchor="middle" font-size="10" fill="#4a6b3a" font-family="var(--font)">חצור הגלילית</text>
-        <text x="600" y="375" text-anchor="middle" font-size="10" fill="#4a6b3a" font-family="var(--font)">ראש פינה</text>
-        <text x="130" y="110" text-anchor="middle" font-size="10" fill="#4a6b3a" font-family="var(--font)">הגושרים</text>
-        <text x="680" y="290" text-anchor="middle" font-size="10" fill="#4a6b3a" font-family="var(--font)">ח׳ מנסורה</text>
-        <text x="460" y="470" text-anchor="middle" font-size="10" fill="#4a6b3a" font-family="var(--font)">עין אל-אסד</text>
-        <text x="350" y="180" text-anchor="middle" font-size="10" fill="#4a6b3a" font-family="var(--font)">כפר בלום</text>
-        <text x="150" y="300" text-anchor="middle" font-size="10" fill="#4a6b3a" font-family="var(--font)">דפנה</text>
-        <text x="500" y="540" text-anchor="middle" font-size="10" fill="#4a6b3a" font-family="var(--font)">פקיעין</text>
-        <text x="300" y="520" text-anchor="middle" font-size="10" fill="#4a6b3a" font-family="var(--font)">שדה אליעזר</text>
-        <text x="620" y="500" text-anchor="middle" font-size="10" fill="#4a6b3a" font-family="var(--font)">עמוקה</text>
-        <text x="100" y="440" text-anchor="middle" font-size="10" fill="#4a6b3a" font-family="var(--font)">יסוד המעלה</text>
-        <text x="700" y="150" text-anchor="middle" font-size="10" fill="#4a6b3a" font-family="var(--font)">שניר</text>
-        <text x="200" y="640" text-anchor="middle" font-size="10" fill="#4a6b3a" font-family="var(--font)">סאסא</text>
-        <text x="550" y="620" text-anchor="middle" font-size="10" fill="#4a6b3a" font-family="var(--font)">יפתח</text>
-        <text x="380" y="600" text-anchor="middle" font-size="10" fill="#4a6b3a" font-family="var(--font)">דלתון</text>
-        <text x="650" y="600" text-anchor="middle" font-size="10" fill="#4a6b3a" font-family="var(--font)">אבירים</text>
-        <text x="480" y="130" text-anchor="middle" font-size="10" fill="#4a6b3a" font-family="var(--font)">יראון</text>
-        <text x="300" y="440" text-anchor="middle" font-size="10" fill="#4a6b3a" font-family="var(--font)">פסוטה</text>
-        <text x="100" y="580" text-anchor="middle" font-size="10" fill="#4a6b3a" font-family="var(--font)">נווה אטי״ב</text>
-
-        <!-- Case markers will be generated by JS -->
-        <g id="map-markers"></g>
-      </svg>
-
-      <!-- Tooltip -->
-      <div id="map-tooltip" style="display:none;position:absolute;background:#fff;border-radius:10px;padding:10px 14px;box-shadow:0 4px 20px rgba(0,0,0,0.2);font-size:12px;min-width:180px;direction:rtl;z-index:100;pointer-events:none;">
-        <div id="tt-plate" style="font-family:monospace;font-weight:700;font-size:14px;margin-bottom:4px;"></div>
-        <div id="tt-owner" style="color:#333;margin-bottom:2px;"></div>
-        <div id="tt-location" style="color:#888;margin-bottom:4px;"></div>
-        <div id="tt-status"></div>
-      </div>
-    </div>
+    <div id="leaflet-map" style="width:100%;height:100%;background:#e8f0e3;"></div>
   </div>
 </div>
 </div>
@@ -6275,162 +6220,165 @@ function getTownCoords(townName) {
   return _townHashCoords(t);
 }
 
-function renderMapMarkers() {
-  var g = document.getElementById('map-markers');
-  if (!g) return;
-  g.innerHTML = '';
+// Reference coordinates for known towns in the council area (lat, lon).
+// Used as a fallback for cases that don't have GPS but only a town name.
+var TOWN_LATLON = {
+  'מטולה':         [33.2790, 35.5781],
+  'קרית שמונה':    [33.2073, 35.5707],
+  'קריית שמונה':   [33.2073, 35.5707],
+  'כפר גלעדי':     [33.2422, 35.5719],
+  'מחניים':        [33.0344, 35.5737],
+  'חצור הגלילית':  [32.9831, 35.5410],
+  'ראש פינה':      [32.9683, 35.5419],
+  'יסוד המעלה':    [33.0247, 35.5917],
+  'הגושרים':       [33.2244, 35.6200],
+  'דפנה':          [33.2356, 35.6483],
+  'שניר':          [33.2369, 35.6311],
+  'כפר בלום':      [33.1853, 35.6111],
+  'קיבוץ מנרה':    [33.2392, 35.5253],
+  'יראון':         [33.0689, 35.4506],
+  'סאסא':          [33.0247, 35.3919],
+  'דלתון':         [32.9847, 35.4781],
+  'יפתח':          [33.1042, 35.5478],
+  'אבירים':        [33.0386, 35.4583],
+  'נווה אטיב':     [33.2581, 35.7561],
+  'נווה אטי״ב':    [33.2581, 35.7561],
+  'שדה אליעזר':    [33.0364, 35.5681],
+  'עמוקה':         [32.9786, 35.4836],
+  'פקיעין':        [32.9856, 35.3306],
+  'עין אל-אסד':    [32.9750, 35.3839],
+  'כפר ורדים':     [32.9858, 35.2925],
+  'ח׳ מנסורה':     [33.0508, 35.5908]
+};
 
-  // Aggregate active cases by town from cases-tbody (single source of truth)
-  var townsAgg = {}; // { townName: { count, hasUrgent, statuses: {red, yellow, orange}, plates: [], rows: [] } }
+var leafletMap = null;
+var leafletMarkers = [];
+
+// Initialize the Leaflet map (called lazily the first time the user views it).
+function initLeafletMap() {
+  if (leafletMap) return leafletMap;
+  if (typeof L === 'undefined') {
+    console.error('[Map] Leaflet library not loaded');
+    return null;
+  }
+  var mapEl = document.getElementById('leaflet-map');
+  if (!mapEl) return null;
+  // Center roughly on the upper-Galilee council
+  leafletMap = L.map(mapEl, { zoomControl: true })
+    .setView([33.10, 35.55], 11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap',
+    maxZoom: 19
+  }).addTo(leafletMap);
+  return leafletMap;
+}
+
+// Build a colored circular marker icon (red/yellow/orange) with a number inside.
+function _buildPinIcon(color, number) {
+  var html = '<div style="background:' + color + ';color:#fff;border:3px solid #fff;'
+           + 'border-radius:50%;width:32px;height:32px;display:flex;align-items:center;'
+           + 'justify-content:center;font-weight:900;font-size:14px;'
+           + 'box-shadow:0 2px 8px rgba(0,0,0,0.4);">' + number + '</div>';
+  return L.divIcon({
+    html: html,
+    className: 'leaflet-case-marker',
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -16]
+  });
+}
+
+// Render the map: one marker per case (using GPS where available, else town
+// fallback). Replaces the old SVG town-aggregated view.
+function renderMapMarkers() {
+  var map = initLeafletMap();
+  if (!map) return;
+  // Make sure the map sizes itself correctly when becoming visible
+  setTimeout(function() { try { map.invalidateSize(); } catch(e){} }, 50);
+
+  // Clear previous markers
+  leafletMarkers.forEach(function(m) { try { map.removeLayer(m); } catch(e){} });
+  leafletMarkers = [];
+
+  // Collect active cases from the table
   var rows = document.querySelectorAll('#cases-tbody tr');
+  var totalActive = 0;
+  var townSet = {};
+
   rows.forEach(function(row) {
     var status = row.dataset.status;
-    // Skip closed/green cases — pin removed when town has 0 active cases
     if (status === 'green' || status === 'closed') return;
 
-    // Read the actual city/town from the location column (6th cell, index 5).
-    // We must NOT use ".owner-loc" first, because for mobile-source rows it
-    // holds the literal label "📱 מהשטח" (a UI hint, not the city), which
-    // would land all those cases on a phantom "מהשטח" pin instead of the
-    // correct town. The location column is the single source of truth.
-    var loc = '';
     var cells = row.querySelectorAll('td');
-    if (cells.length >= 6) {
-      loc = (cells[5].textContent || '').replace('📍', '').trim();
-    }
-    // Fallback only if the location cell is empty for some reason
-    if (!loc) {
-      var locEl = row.querySelector('.owner-loc');
-      var raw = locEl ? locEl.textContent.replace('📍', '').replace('📱', '').trim() : '';
-      // Don't accept the "מהשטח" label as a town name
-      if (raw && raw !== 'מהשטח') loc = raw;
-    }
-    if (!loc || loc === '—') return;
+    var plate = '', owner = '', loc = '', inspector = '';
+    var lat = null, lon = null;
 
-    if (!townsAgg[loc]) {
-      townsAgg[loc] = { count: 0, hasUrgent: false, statuses: {}, plates: [], rows: [] };
-    }
-    townsAgg[loc].count++;
-    townsAgg[loc].statuses[status] = (townsAgg[loc].statuses[status] || 0) + 1;
-    if (status === 'red') townsAgg[loc].hasUrgent = true;
     var plateEl = row.querySelector('.plate-badge');
-    if (plateEl) townsAgg[loc].plates.push(plateEl.textContent.trim());
-    townsAgg[loc].rows.push(row);
-  });
+    if (plateEl) plate = plateEl.textContent.trim();
+    var ownerEl = row.querySelector('.owner-name');
+    if (ownerEl) owner = ownerEl.textContent.trim();
+    if (cells.length >= 6) loc = (cells[5].textContent || '').replace('📍', '').trim();
+    if (cells.length >= 9) inspector = (cells[8].textContent || '').trim();
 
-  // Render one pin per town
-  Object.keys(townsAgg).forEach(function(townName) {
-    var t = townsAgg[townName];
-    var coords = getTownCoords(townName);
-    if (!coords) return;
-
-    // Determine pin color: red if any urgent, orange if any towed, else yellow
-    var color = '#fdd835'; // yellow default
-    if (t.statuses.red) color = '#e53935';
-    else if (t.statuses.orange || t.statuses.towed) color = '#ff9800';
-
-    // Pulse ring if urgent
-    if (t.hasUrgent) {
-      var pulse = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      pulse.setAttribute('cx', coords.x);
-      pulse.setAttribute('cy', coords.y);
-      pulse.setAttribute('r', '22');
-      pulse.setAttribute('fill', color);
-      pulse.setAttribute('class', 'map-marker-pulse');
-      g.appendChild(pulse);
+    // Try GPS from row data attributes (set when the row is created from a
+    // mobile-source case)
+    var rawLat = row.getAttribute('data-lat');
+    var rawLon = row.getAttribute('data-lon');
+    if (rawLat && rawLon) {
+      var pLat = parseFloat(rawLat);
+      var pLon = parseFloat(rawLon);
+      if (!isNaN(pLat) && !isNaN(pLon)) { lat = pLat; lon = pLon; }
     }
-
-    // Main marker — bigger circle to fit number
-    var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    circle.setAttribute('cx', coords.x);
-    circle.setAttribute('cy', coords.y);
-    circle.setAttribute('r', '14');
-    circle.setAttribute('fill', color);
-    circle.setAttribute('stroke', '#fff');
-    circle.setAttribute('stroke-width', '3');
-    circle.setAttribute('class', 'map-marker');
-    circle.style.cursor = 'pointer';
-    g.appendChild(circle);
-
-    // Number label inside circle
-    var label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    label.setAttribute('x', coords.x);
-    label.setAttribute('y', coords.y + 4);
-    label.setAttribute('text-anchor', 'middle');
-    label.setAttribute('font-size', '13');
-    label.setAttribute('font-weight', '900');
-    label.setAttribute('fill', '#fff');
-    label.style.cursor = 'pointer';
-    label.style.pointerEvents = 'none';
-    label.textContent = t.count;
-    g.appendChild(label);
-
-    // Town name label below pin
-    var nameLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    nameLabel.setAttribute('x', coords.x);
-    nameLabel.setAttribute('y', coords.y + 32);
-    nameLabel.setAttribute('text-anchor', 'middle');
-    nameLabel.setAttribute('font-size', '11');
-    nameLabel.setAttribute('font-weight', '700');
-    nameLabel.setAttribute('fill', '#2c3e50');
-    nameLabel.setAttribute('stroke', '#fff');
-    nameLabel.setAttribute('stroke-width', '3');
-    nameLabel.setAttribute('paint-order', 'stroke');
-    nameLabel.style.pointerEvents = 'none';
-    nameLabel.textContent = townName;
-    g.appendChild(nameLabel);
-
-    // Hover tooltip
-    var townDataJson = JSON.stringify({ name: townName, count: t.count, plates: t.plates });
-    circle.addEventListener('mouseenter', function() {
-      var data = JSON.parse(townDataJson);
-      var tt = document.getElementById('map-tooltip');
-      if (!tt) return;
-      tt.style.display = 'block';
-      var ttPlate = document.getElementById('tt-plate');
-      var ttOwner = document.getElementById('tt-owner');
-      var ttLoc = document.getElementById('tt-location');
-      var ttStatus = document.getElementById('tt-status');
-      if (ttPlate) ttPlate.textContent = '📍 ' + data.name;
-      if (ttOwner) ttOwner.textContent = data.count + ' תיקים פעילים';
-      if (ttLoc) ttLoc.textContent = 'לוחיות: ' + data.plates.slice(0, 3).join(', ') + (data.plates.length > 3 ? '...' : '');
-      if (ttStatus) ttStatus.innerHTML = '<span style="color:' + color + ';font-weight:700;">לחץ לצפייה</span>';
-
-      var container = document.getElementById('map-container');
-      var svg = document.getElementById('map-svg');
-      if (container && svg) {
-        var rect = svg.getBoundingClientRect();
-        var cRect = container.getBoundingClientRect();
-        var scaleX = rect.width / 800;
-        var scaleY = rect.height / 700;
-        var px = rect.left - cRect.left + coords.x * scaleX;
-        var py = rect.top - cRect.top + coords.y * scaleY;
-        tt.style.left = (px + 15) + 'px';
-        tt.style.top = (py - 30) + 'px';
+    // Fallback: lookup town in TOWN_LATLON
+    if (lat == null || lon == null) {
+      var townKey = loc;
+      if (TOWN_LATLON[townKey]) {
+        lat = TOWN_LATLON[townKey][0];
+        lon = TOWN_LATLON[townKey][1];
+      } else {
+        // Try fuzzy match
+        for (var k in TOWN_LATLON) {
+          if (k.indexOf(townKey) !== -1 || townKey.indexOf(k) !== -1) {
+            lat = TOWN_LATLON[k][0]; lon = TOWN_LATLON[k][1];
+            break;
+          }
+        }
       }
-    });
-    circle.addEventListener('mouseleave', function() {
-      var tt = document.getElementById('map-tooltip');
-      if (tt) tt.style.display = 'none';
-    });
+    }
+    if (lat == null || lon == null) return; // can't map this case
 
-    // Click → navigate to towns view filtered to this town
-    circle.addEventListener('click', function() {
-      var tt = document.getElementById('map-tooltip');
-      if (tt) tt.style.display = 'none';
-      if (typeof showView === 'function') showView('towns');
-      if (typeof selectTown === 'function') {
-        setTimeout(function() { selectTown(townName); }, 100);
-      }
-    });
+    totalActive++;
+    if (loc) townSet[loc] = true;
+
+    var color = '#fdd835';
+    if (status === 'red') color = '#e53935';
+    else if (status === 'orange' || status === 'towed') color = '#ff9800';
+
+    var icon = _buildPinIcon(color, plate ? plate.slice(-2) : '?');
+    var marker = L.marker([lat, lon], { icon: icon }).addTo(map);
+    var popupHtml = '<div style="direction:rtl;font-family:inherit;min-width:160px;">'
+                  + '<div style="font-family:monospace;font-weight:700;font-size:14px;'
+                  + 'margin-bottom:4px;">🚗 ' + (plate || '—') + '</div>'
+                  + '<div style="color:#333;margin-bottom:2px;">' + (owner || '—') + '</div>'
+                  + '<div style="color:#888;font-size:12px;margin-bottom:4px;">📍 '
+                  + (loc || '—') + '</div>'
+                  + (inspector ? '<div style="font-size:11px;color:#555;">פקח: '
+                                + inspector + '</div>' : '')
+                  + '<a href="https://waze.com/ul?ll=' + lat + ',' + lon + '&navigate=yes"'
+                  + ' target="_blank" rel="noopener"'
+                  + ' style="display:block;margin-top:8px;padding:6px 10px;'
+                  + 'background:#33ccff;color:#fff;border-radius:6px;'
+                  + 'font-size:12px;text-align:center;text-decoration:none;'
+                  + 'font-weight:600;">🚗 נווט עם Waze</a>'
+                  + '</div>';
+    marker.bindPopup(popupHtml);
+    leafletMarkers.push(marker);
   });
 
-  // Update map subtitle with total active cases
-  var totalActive = 0;
-  Object.keys(townsAgg).forEach(function(t) { totalActive += townsAgg[t].count; });
+  // Update subtitle
   var subtitle = document.getElementById('map-subtitle');
   if (subtitle) {
-    subtitle.textContent = totalActive + ' תיקים פתוחים ב-' + Object.keys(townsAgg).length + ' יישובים';
+    subtitle.textContent = totalActive + ' תיקים פתוחים ב-' + Object.keys(townSet).length + ' יישובים';
   }
 }
 
@@ -8014,6 +7962,15 @@ if (document.readyState === 'loading') {
     tr.setAttribute('data-mobile-id', c.id);
     tr.setAttribute('data-status', c.status || 'yellow');
     tr.setAttribute('data-source', 'mobile');
+    // Carry GPS coords on the row so the Leaflet map can plot the case
+    // exactly where the photo was taken, not just the town centroid.
+    if (c.lat != null && c.lon != null && c.lat !== '' && c.lon !== '') {
+      tr.setAttribute('data-lat', c.lat);
+      tr.setAttribute('data-lon', c.lon);
+    } else {
+      tr.removeAttribute('data-lat');
+      tr.removeAttribute('data-lon');
+    }
     tr.style.cursor = 'pointer';
 
     var dt = '';
