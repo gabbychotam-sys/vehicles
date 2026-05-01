@@ -7266,16 +7266,30 @@ if (document.readyState === 'loading') {
     fetch(url, { headers: { 'Accept': 'application/json' } })
       .then(function(r) { return r.ok ? r.json() : null; })
       .then(function(data) {
-        if (!data || !data.address) return;
-        var a = data.address;
-        // Build "street + number" from the most specific parts available
-        var road = a.road || a.pedestrian || a.path || a.residential || a.neighbourhood || '';
+        if (!data) {
+          console.warn('[GeoCode] Nominatim returned no data for', lat, lon);
+          return;
+        }
+        console.log('[GeoCode] Nominatim response:', data);
+        var a = data.address || {};
+        // Build "street + number" from the most specific parts available.
+        // Fall back through every plausible field so the manager always
+        // gets *something* in the address box (better than empty).
+        var road = a.road || a.pedestrian || a.path || a.footway
+                || a.cycleway || a.residential || a.living_street
+                || a.tourism || a.amenity || a.shop || '';
         var num  = a.house_number || '';
-        var streetText = (road && num) ? (road + ' ' + num)
-                       : road
-                       ? road
-                       : (a.suburb || a.neighbourhood || a.hamlet || '');
-        // City: prefer city → town → village → municipality → county
+        var streetText = '';
+        if (road && num) streetText = road + ' ' + num;
+        else if (road) streetText = road;
+        else if (a.neighbourhood) streetText = a.neighbourhood;
+        else if (a.suburb) streetText = a.suburb;
+        else if (a.hamlet) streetText = a.hamlet;
+        else if (a.quarter) streetText = a.quarter;
+        else if (data.name) streetText = data.name;     // POI name as last resort
+        else if (data.display_name) streetText = data.display_name.split(',')[0];
+
+        // City: prefer city → town → village → municipality → suburb → county
         var cityText = a.city || a.town || a.village || a.municipality
                      || a.suburb || a.county || '';
         var result = { street: streetText, city: cityText };
