@@ -1034,25 +1034,68 @@ select.edit-input { cursor:pointer; }
 @media print {
   body > * { display:none !important; }
   #print-target { display:block !important; }
+  /* Force exact A4 page size for window-envelope alignment */
+  @page { size: A4; margin: 0; }
 }
 #print-target { display:none; }
 
-/* Print letter styles */
+/* Print letter styles
+   ─────────────────────────────────────────────────────────────
+   The recipient address block (.pl-to) is absolutely positioned
+   so that when the page is Z-folded into thirds and inserted into
+   a standard Israeli DL window envelope (220×110mm), the name and
+   street address appear precisely inside the envelope's window.
+   The window on a DL envelope sits ~18mm from the left edge and
+   ~50mm from the bottom; the top third of the A4 page lands on
+   the visible side of the folded letter, so the address sits in
+   that band of the page. */
 #print-target .pl-page {
-  width:210mm; min-height:297mm; background:#fff;
+  width:210mm; height:297mm; background:#fff;
   font-family:'Times New Roman',serif; font-size:11pt;
   color:#111; line-height:1.85; direction:rtl;
   display:flex; flex-direction:column;
+  position:relative;
+  page-break-after: always;
 }
 #print-target .pl-header { padding:6mm 15mm 4mm; border-bottom:3px solid #41922e; display:flex; align-items:center; justify-content:space-between; }
 #print-target .pl-logo { height:18mm; }
 #print-target .pl-hinfo { text-align:left; font-family:Arial,sans-serif; font-size:9pt; color:#41922e; line-height:1.6; }
 #print-target .pl-hinfo .dept { font-weight:700; font-size:11pt; }
-#print-target .pl-body { flex:1; padding:7mm 15mm 5mm; }
+#print-target .pl-body {
+  flex:1;
+  padding:7mm 15mm 5mm;
+  /* Reserve vertical space so body text doesn't collide with the
+     absolutely positioned recipient block above */
+  padding-top: 50mm;
+}
 #print-target .pl-date { text-align:left; font-size:10pt; color:#444; margin-bottom:5mm; font-family:Arial,sans-serif; }
-#print-target .pl-to { margin-bottom:4mm; font-family:Arial,sans-serif; }
-#print-target .pl-name { font-weight:700; font-size:12pt; }
-#print-target .pl-addr { font-size:10pt; color:#555; }
+/* Recipient address — positioned to align with the DL window envelope */
+#print-target .pl-to {
+  position: absolute;
+  top: 50mm;          /* distance from the top of the page */
+  left: 20mm;         /* distance from the left edge — matches window position */
+  width: 90mm;        /* same width as a standard DL window */
+  min-height: 35mm;
+  padding: 5mm 6mm;
+  background:#fff;
+  font-family:Arial,sans-serif;
+  /* A subtle dashed frame to make the address area easy to see in the
+     on-screen preview; it disappears when printed because we lift it
+     in @media print below. */
+  border: 1px dashed #ccc;
+  z-index: 10;
+}
+#print-target .pl-to .pl-tolabel {
+  font-size: 8pt; color:#888; font-weight: 600;
+  letter-spacing: 1px; margin-bottom: 2mm;
+}
+#print-target .pl-name { font-weight:700; font-size:12pt; line-height:1.5; }
+#print-target .pl-addr { font-size:11pt; color:#222; line-height:1.5; margin-top: 2mm; }
+@media print {
+  /* Hide the visual frame when actually printing — keep just the text */
+  #print-target .pl-to { border: none; padding: 0; }
+  #print-target .pl-to .pl-tolabel { display: none; }
+}
 #print-target .pl-stamp { display:inline-block; border:2.5px solid #1a1a8c; color:#1a1a8c; font-weight:700; font-size:11pt; letter-spacing:5px; padding:3px 14px; margin:4mm 0; font-family:Arial,sans-serif; }
 #print-target .pl-regnum { font-size:9pt; color:#1a1a8c; font-weight:700; font-family:Arial,sans-serif; margin-right:8px; }
 #print-target .pl-subject { font-weight:700; font-size:11.5pt; margin:3mm 0 4mm; padding-bottom:2mm; border-bottom:1px solid #ddd; }
@@ -3578,8 +3621,9 @@ function printLetter() {
       <div class="pl-body">
         <div class="pl-date">תאריך: <strong>${fmtDate(date)}</strong></div>
         <div class="pl-to">
-          <div class="pl-name">${c.ownerName} &nbsp; ת"ז: ${c.ownerId}</div>
-          <div class="pl-addr">${c.ownerAddr}</div>
+          <div class="pl-tolabel">אל:</div>
+          <div class="pl-name">${c.ownerName}</div>
+          <div class="pl-addr">${c.ownerAddr || ''}</div>
         </div>
         <div style="margin:4mm 0"><span class="pl-stamp">ב ד ו א ר &nbsp; ר ש ו ם</span> <span class="pl-regnum">${regnum}</span></div>
         <div class="pl-subject">${LETTER_META[lid].title.replace(/נספח [א-ת]׳ — /,'הנדון: ')}</div>
