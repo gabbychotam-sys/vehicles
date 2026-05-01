@@ -2249,7 +2249,12 @@ try {
               <div class="edit-group"><div class="edit-label">יישוב</div>
                 <select class="edit-input" id="nf-location-city"><option>מטולה</option><option>קריית שמונה</option><option>כפר גלעדי</option><option>מחניים</option><option>חצור הגלילית</option><option>ראש פינה</option><option>יסוד המעלה</option><option>אחר</option></select>
               </div>
-              <div class="edit-group"><div class="edit-label">כתובת / מיקום מדויק</div><input class="edit-input" id="nf-location-street" type="text" placeholder="רחוב ומספר"></div>
+              <div class="edit-group"><div class="edit-label">כתובת / מיקום מדויק</div><input class="edit-input" id="nf-location-street" type="text" placeholder="רחוב ומספר">
+                <a id="nf-map-link" href="#" target="_blank" rel="noopener"
+                   style="display:none;margin-top:8px;padding:10px 14px;background:linear-gradient(135deg,#1abc9c,#0e6655);
+                          color:#fff;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;
+                          text-align:center;box-shadow:0 2px 6px rgba(26,188,156,0.3);">🗺️ פתח מיקום הרכב במפת גוגל</a>
+              </div>
               <div class="edit-group"><div class="edit-label">פקח מטפל</div>
                 <select class="edit-input" id="nf-inspector"><option>שימי רוזנברג</option><option>פרנסיס ברוטמן</option><option>אייל ארצי</option></select>
               </div>
@@ -5383,6 +5388,9 @@ function openNewCase() {
   var nfIds = ['nf-plate','nf-vehicle-type','nf-owner-name','nf-owner-id','nf-owner-addr','nf-owner-phone','nf-location-street','nf-notes'];
   nfIds.forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
   var nfDate = document.getElementById('nf-found-date'); if (nfDate) nfDate.value = '';
+  // Hide the GPS map link by default — only mobile-created cases should show it
+  var mapLink = document.getElementById('nf-map-link');
+  if (mapLink) mapLink.style.display = 'none';
 
   // Show form, hide existing case content
   document.getElementById('new-case-form').style.display = '';
@@ -7285,6 +7293,20 @@ if (document.readyState === 'loading') {
   // Expose for use by the case-promotion code further down in this IIFE
   window._gx_reverseGeocodeIntoStreet = reverseGeocodeIntoStreet;
 
+  // Show / hide the green "open in Google Maps" link beneath the
+  // "כתובת / מיקום מדויק" field on the new-case form, so the manager can
+  // quickly see exactly where the photo was taken.
+  function updateNewCaseMapLink(lat, lon) {
+    var link = document.getElementById('nf-map-link');
+    if (!link) return;
+    if (lat == null || lon == null || lat === '' || lon === '') {
+      link.style.display = 'none';
+      return;
+    }
+    link.href = 'https://www.google.com/maps?q=' + encodeURIComponent(lat + ',' + lon);
+    link.style.display = 'block';
+  }
+
 
   // Public API
   window.GalilSync = {
@@ -8067,6 +8089,10 @@ if (document.readyState === 'loading') {
       if (c.inspector) noteParts.push('— נפתח בשטח ע״י: ' + c.inspector);
       setVal('nf-notes', noteParts.join('\n'));
 
+      // Show the "open in Google Maps" button on the new-case form when
+      // the case has GPS coordinates from the mobile app.
+      updateNewCaseMapLink(c.lat, c.lon);
+
       // If we have GPS coords but no street address, reverse-geocode them
       // and fill the "רחוב ומספר" field automatically.
       if (c.lat && c.lon && !(c.locAddress && String(c.locAddress).trim())) {
@@ -8198,6 +8224,9 @@ if (document.readyState === 'loading') {
         }
         if (c.inspector) noteParts.push('— נפתח בשטח ע״י: ' + c.inspector);
         setVal('nf-notes', noteParts.join('\n'));
+
+        // Show the map button on the form when GPS coords are available.
+        updateNewCaseMapLink(c.lat, c.lon);
 
         // Reverse-geocode the GPS into a street address if the inspector
         // didn't fill one in manually on the mobile app.
