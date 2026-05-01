@@ -4530,7 +4530,7 @@ function upsertCaseRow(oldPlate, c, fullData) {
       try { existing.setAttribute('data-case', JSON.stringify(fullData)); } catch(e){}
     }
     existing.style.cursor = 'pointer';
-    existing.onclick = function() { openCaseFromRow(this); };
+    existing.setAttribute('onclick', 'openCaseFromRow(this)');
     tr = existing;
     // Brief flash to indicate update
     tr.style.background = 'rgba(46,125,50,0.18)';
@@ -4546,7 +4546,7 @@ function upsertCaseRow(oldPlate, c, fullData) {
       try { tr.setAttribute('data-case', JSON.stringify(fullData)); } catch(e){}
     }
     tr.style.cursor = 'pointer';
-    tr.onclick = function() { openCaseFromRow(this); };
+    tr.setAttribute('onclick', 'openCaseFromRow(this)');
     tbody.insertBefore(tr, tbody.firstChild);
     // Brief highlight on insert
     tr.style.background = 'rgba(46,125,50,0.18)';
@@ -6766,6 +6766,15 @@ function loadState() {
         }
       });
     }
+    // After restoring table HTML, remove mobile-source rows so Firebase
+    // re-adds them with fresh onclick handlers (innerHTML restore loses handlers).
+    // Manual case rows already have inline onclick via setAttribute.
+    var casesTbody = document.getElementById('cases-tbody');
+    if (casesTbody) {
+      Array.prototype.forEach.call(casesTbody.querySelectorAll('tr[data-mobile-id]'), function(tr) {
+        tr.parentNode.removeChild(tr);
+      });
+    }
 
     // Restore MAP_CASES (replace contents, keep same array reference)
     if (Array.isArray(snap.mapCases) && typeof MAP_CASES !== 'undefined') {
@@ -8131,8 +8140,8 @@ if (document.readyState === 'loading') {
         '<button class="row-action" onclick="event.stopPropagation();window.GalilSync._showCase(\'' + safe(c.id) + '\')">📋 פרטים</button>' +
       '</td>';
 
-    // Click row to open details
-    tr.onclick = function() { showMobileCaseModal(c.id); };
+    // Click row to open details (use setAttribute so it survives loadState innerHTML restore)
+    tr.setAttribute('onclick', 'window.GalilSync && window.GalilSync._showCase("' + safe(c.id) + '")');
 
     if (!existing) {
       tbody.insertBefore(tr, tbody.firstChild);
