@@ -6288,14 +6288,24 @@ function renderMapMarkers() {
     // Skip closed/green cases — pin removed when town has 0 active cases
     if (status === 'green' || status === 'closed') return;
 
-    var locEl = row.querySelector('.owner-loc');
-    var loc = locEl ? locEl.textContent.replace('📍', '').trim() : '';
-    if (!loc) {
-      // Try owner-loc fallback: 6th cell (location column)
-      var cells = row.querySelectorAll('td');
-      if (cells.length >= 6) loc = (cells[5].textContent || '').replace('📍', '').trim();
+    // Read the actual city/town from the location column (6th cell, index 5).
+    // We must NOT use ".owner-loc" first, because for mobile-source rows it
+    // holds the literal label "📱 מהשטח" (a UI hint, not the city), which
+    // would land all those cases on a phantom "מהשטח" pin instead of the
+    // correct town. The location column is the single source of truth.
+    var loc = '';
+    var cells = row.querySelectorAll('td');
+    if (cells.length >= 6) {
+      loc = (cells[5].textContent || '').replace('📍', '').trim();
     }
-    if (!loc) return;
+    // Fallback only if the location cell is empty for some reason
+    if (!loc) {
+      var locEl = row.querySelector('.owner-loc');
+      var raw = locEl ? locEl.textContent.replace('📍', '').replace('📱', '').trim() : '';
+      // Don't accept the "מהשטח" label as a town name
+      if (raw && raw !== 'מהשטח') loc = raw;
+    }
+    if (!loc || loc === '—') return;
 
     if (!townsAgg[loc]) {
       townsAgg[loc] = { count: 0, hasUrgent: false, statuses: {}, plates: [], rows: [] };
