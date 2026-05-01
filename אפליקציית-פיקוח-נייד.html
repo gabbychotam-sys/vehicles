@@ -1368,7 +1368,18 @@ function renderView() {
   h += F('איש קשר', '<div class="field-value">' + (c.contact||'—') + '</div>');
   h += F('📱 נייד איש קשר', '<div class="phone-row"><div class="field-value" style="flex:1">' + (c.contactPhone||'—') + '</div>' + (c.contactPhone ? '<a href="tel:'+c.contactPhone+'" class="call-btn">📞</a>' : '') + '</div>');
   h += F('כתובת', '<div class="field-value" style="font-size:22px">' + (c.locAddress||'—') + '</div>');
-  if (c.lat && c.lon) h += F('קורדינטות GPS', '<div class="coord-row"><div class="field-value">' + c.lat + '</div><div class="field-value">' + c.lon + '</div></div>');
+  if (c.lat && c.lon) {
+    var gmapsUrl = 'https://www.google.com/maps?q=' + encodeURIComponent(c.lat + ',' + c.lon);
+    h += F('📍 מיקום הרכב במפה',
+      '<a href="' + gmapsUrl + '" target="_blank" rel="noopener" '
+      + 'style="display:flex;align-items:center;justify-content:center;gap:8px;'
+      + 'padding:14px;background:linear-gradient(135deg,#1abc9c,#0e6655);'
+      + 'color:#fff;border-radius:10px;font-size:17px;font-weight:600;'
+      + 'text-decoration:none;box-shadow:0 2px 8px rgba(26,188,156,0.3);">'
+      + '🗺️ פתח במפת גוגל</a>'
+      + '<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px;direction:ltr;">'
+      + c.lat + ', ' + c.lon + '</div>');
+  }
   h += '</div>';
 
   h += '<div class="card"><div class="card-title">⚡ מה נעשה</div><div class="field-value" style="font-size:22px">' + (c.badge||'—') + '</div></div>';
@@ -1606,6 +1617,10 @@ function captureGpsIfEmpty() {
       if (latInp && !(latInp.value || '').trim()) latInp.value = lat;
       if (lonInp && !(lonInp.value || '').trim()) lonInp.value = lon;
       toast('📍 מיקום נקלט');
+      // Try to translate the GPS into a street address and fill the
+      // "כתובת" field (f-locaddr) — only if it's still empty so manual
+      // input is preserved.
+      reverseGeocodeFillStreet(lat, lon);
     },
     function(err) {
       var msg = 'לא ניתן לקלוט מיקום';
@@ -1616,6 +1631,42 @@ function captureGpsIfEmpty() {
     },
     { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
   );
+}
+
+// Reverse-geocode the given lat/lon via Nominatim (OpenStreetMap, free, no key)
+// and fill the "כתובת" field (f-locaddr) if it's currently empty. Used after
+// auto-capturing GPS so the inspector sees a real street name, not just numbers.
+function reverseGeocodeFillStreet(lat, lon) {
+  var addrEl = document.getElementById('f-locaddr');
+  if (!addrEl) return;
+  if ((addrEl.value || '').trim()) return; // don't overwrite manual entry
+
+  var url = 'https://nominatim.openstreetmap.org/reverse'
+          + '?format=jsonv2&accept-language=he'
+          + '&zoom=18&addressdetails=1'
+          + '&lat=' + encodeURIComponent(lat)
+          + '&lon=' + encodeURIComponent(lon);
+  fetch(url, { headers: { 'Accept': 'application/json' } })
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(data) {
+      if (!data || !data.address) return;
+      var a = data.address;
+      var road = a.road || a.pedestrian || a.path || a.residential || a.neighbourhood || '';
+      var num  = a.house_number || '';
+      var streetText = (road && num) ? (road + ' ' + num)
+                     : road
+                     ? road
+                     : (a.suburb || a.neighbourhood || a.hamlet || '');
+      if (!streetText) return;
+      var el = document.getElementById('f-locaddr');
+      if (el && !(el.value || '').trim()) {
+        el.value = streetText;
+        toast('🏠 כתובת נקלטה: ' + streetText);
+      }
+    })
+    .catch(function(err) {
+      console.warn('[GeoCode] reverse geocoding failed:', err);
+    });
 }
 
 function toast(msg) {
