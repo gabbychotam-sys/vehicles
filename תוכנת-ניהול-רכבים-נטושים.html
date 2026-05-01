@@ -6766,15 +6766,6 @@ function loadState() {
         }
       });
     }
-    // After restoring table HTML, remove mobile-source rows so Firebase
-    // re-adds them with fresh onclick handlers (innerHTML restore loses handlers).
-    // Manual case rows already have inline onclick via setAttribute.
-    var casesTbody = document.getElementById('cases-tbody');
-    if (casesTbody) {
-      Array.prototype.forEach.call(casesTbody.querySelectorAll('tr[data-mobile-id]'), function(tr) {
-        tr.parentNode.removeChild(tr);
-      });
-    }
 
     // Restore MAP_CASES (replace contents, keep same array reference)
     if (Array.isArray(snap.mapCases) && typeof MAP_CASES !== 'undefined') {
@@ -7623,18 +7614,24 @@ if (document.readyState === 'loading') {
       // Show "logged in as" badge in settings
       if (statusRow) statusRow.style.display = 'flex';
       if (emailEl) emailEl.textContent = user.email || '—';
-      if (listenerRef === null) {
-        try { startListener(); } catch(e){}
-      }
+      // Restart listener after login so child_added re-fires for all
+      // existing cases (Firebase doesn't auto-replay events after auth).
+      if (listenerRef) { try { listenerRef.off(); } catch(e){} listenerRef = null; }
+      try { startListener(); } catch(e){}
       console.log('[Auth] signed in as', user.email);
 
-      // Auto-refresh field cases on every login so the manager always sees
-      // up-to-date data without having to click the manual refresh button.
-      // Slight delay so Firebase has a chance to finish reconnecting and
-      // the listener is wired up first.
-      setTimeout(function() {
-        try { refreshNow(); } catch(e) { console.warn('[Auth] auto-refresh failed:', e); }
-      }, 800);
+      // Auto-refresh with retry — Firebase DB connection may not be ready
+      // immediately when auth fires, so retry until fbReady is true.
+      var _refreshAttempts = 0;
+      var _autoRefresh = function() {
+        if (fbReady && fbDb) {
+          try { refreshNow(); } catch(e) { console.warn('[Auth] auto-refresh failed:', e); }
+        } else if (_refreshAttempts < 8) {
+          _refreshAttempts++;
+          setTimeout(_autoRefresh, 800);
+        }
+      };
+      setTimeout(_autoRefresh, 600);
     } else {
       // Not logged in
       if (statusRow) statusRow.style.display = 'none';
@@ -8140,7 +8137,7 @@ if (document.readyState === 'loading') {
         '<button class="row-action" onclick="event.stopPropagation();window.GalilSync._showCase(\'' + safe(c.id) + '\')">📋 פרטים</button>' +
       '</td>';
 
-    // Click row to open details (use setAttribute so it survives loadState innerHTML restore)
+    // Click row to open details (setAttribute survives loadState innerHTML restore)
     tr.setAttribute('onclick', 'window.GalilSync && window.GalilSync._showCase("' + safe(c.id) + '")');
 
     if (!existing) {
