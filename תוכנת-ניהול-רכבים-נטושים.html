@@ -2249,11 +2249,29 @@ try {
               <div class="edit-group"><div class="edit-label">יישוב</div>
                 <select class="edit-input" id="nf-location-city"><option>מטולה</option><option>קריית שמונה</option><option>כפר גלעדי</option><option>מחניים</option><option>חצור הגלילית</option><option>ראש פינה</option><option>יסוד המעלה</option><option>אחר</option></select>
               </div>
-              <div class="edit-group"><div class="edit-label">כתובת / מיקום מדויק</div><input class="edit-input" id="nf-location-street" type="text" placeholder="רחוב ומספר">
-                <a id="nf-map-link" href="#" target="_blank" rel="noopener"
-                   style="display:none;margin-top:8px;padding:10px 14px;background:linear-gradient(135deg,#1abc9c,#0e6655);
-                          color:#fff;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;
-                          text-align:center;box-shadow:0 2px 6px rgba(26,188,156,0.3);">🗺️ פתח מיקום הרכב במפת גוגל</a>
+              <div class="edit-group"><div class="edit-label">ניווט למיקום הרכב</div>
+                <input type="hidden" id="nf-location-street">
+                <div id="nf-nav-buttons" style="display:none;gap:8px;flex-direction:column;">
+                  <a id="nf-waze-link" href="#" target="_blank" rel="noopener"
+                     style="display:flex;align-items:center;justify-content:center;gap:8px;
+                            padding:14px;background:linear-gradient(135deg,#33ccff,#0099cc);
+                            color:#fff;border-radius:10px;font-size:14px;font-weight:600;
+                            text-decoration:none;box-shadow:0 2px 8px rgba(51,204,255,0.3);">
+                    🚗 נווט עם Waze
+                  </a>
+                  <a id="nf-map-link" href="#" target="_blank" rel="noopener"
+                     style="display:flex;align-items:center;justify-content:center;gap:8px;
+                            padding:14px;background:linear-gradient(135deg,#1abc9c,#0e6655);
+                            color:#fff;border-radius:10px;font-size:14px;font-weight:600;
+                            text-decoration:none;box-shadow:0 2px 8px rgba(26,188,156,0.3);">
+                    🗺️ פתח במפת גוגל
+                  </a>
+                </div>
+                <div id="nf-nav-empty" style="padding:14px;background:#f8f9fa;border:1px dashed #ddd;
+                                              border-radius:10px;text-align:center;font-size:13px;
+                                              color:#888;">
+                  אין מיקום GPS לתיק זה
+                </div>
               </div>
               <div class="edit-group"><div class="edit-label">פקח מטפל</div>
                 <select class="edit-input" id="nf-inspector"><option>שימי רוזנברג</option><option>פרנסיס ברוטמן</option><option>אייל ארצי</option></select>
@@ -5388,9 +5406,12 @@ function openNewCase() {
   var nfIds = ['nf-plate','nf-vehicle-type','nf-owner-name','nf-owner-id','nf-owner-addr','nf-owner-phone','nf-location-street','nf-notes'];
   nfIds.forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
   var nfDate = document.getElementById('nf-found-date'); if (nfDate) nfDate.value = '';
-  // Hide the GPS map link by default — only mobile-created cases should show it
-  var mapLink = document.getElementById('nf-map-link');
-  if (mapLink) mapLink.style.display = 'none';
+  // Hide the GPS nav buttons by default — only mobile-created cases should show them.
+  // Show the placeholder "no GPS" box instead.
+  var navBox = document.getElementById('nf-nav-buttons');
+  if (navBox) navBox.style.display = 'none';
+  var emptyBox = document.getElementById('nf-nav-empty');
+  if (emptyBox) emptyBox.style.display = 'block';
 
   // Show form, hide existing case content
   document.getElementById('new-case-form').style.display = '';
@@ -7354,18 +7375,25 @@ if (document.readyState === 'loading') {
   // Expose for use by the case-promotion code further down in this IIFE
   window._gx_reverseGeocodeIntoStreet = reverseGeocodeIntoStreet;
 
-  // Show / hide the green "open in Google Maps" link beneath the
-  // "כתובת / מיקום מדויק" field on the new-case form, so the manager can
-  // quickly see exactly where the photo was taken.
+  // Show / hide the navigation buttons (Waze + Google Maps) below the
+  // city dropdown, so the manager can navigate straight to where the
+  // photo was taken. Both links share the same lat/lon.
   function updateNewCaseMapLink(lat, lon) {
-    var link = document.getElementById('nf-map-link');
-    if (!link) return;
-    if (lat == null || lon == null || lat === '' || lon === '') {
-      link.style.display = 'none';
+    var navBox = document.getElementById('nf-nav-buttons');
+    var emptyBox = document.getElementById('nf-nav-empty');
+    var mapLink = document.getElementById('nf-map-link');
+    var wazeLink = document.getElementById('nf-waze-link');
+    if (!navBox || !mapLink || !wazeLink) return;
+    var hasCoords = !(lat == null || lon == null || lat === '' || lon === '');
+    if (!hasCoords) {
+      navBox.style.display = 'none';
+      if (emptyBox) emptyBox.style.display = 'block';
       return;
     }
-    link.href = 'https://www.google.com/maps?q=' + encodeURIComponent(lat + ',' + lon);
-    link.style.display = 'block';
+    mapLink.href  = 'https://www.google.com/maps?q=' + encodeURIComponent(lat + ',' + lon);
+    wazeLink.href = 'https://waze.com/ul?ll=' + encodeURIComponent(lat + ',' + lon) + '&navigate=yes';
+    navBox.style.display = 'flex';
+    if (emptyBox) emptyBox.style.display = 'none';
   }
 
 
