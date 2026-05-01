@@ -7236,25 +7236,24 @@ if (document.readyState === 'loading') {
 
   // Cache reverse-geocoding results so we don't re-hit Nominatim for the
   // same point. Key = "lat,lon" rounded to 5 decimals (~1 m precision).
+  // Each entry: { street: "...", city: "..." }
   var geocodeCache = {};
 
   // Reverse-geocode a lat/lon via Nominatim (OpenStreetMap) and write the
   // resulting street + house number into the "כתובת / מיקום מדויק" field
-  // of the new-case form — i.e. WHERE THE VEHICLE WAS PHOTOGRAPHED, not the
-  // owner's home address. Only fills the field if it's currently empty so we
-  // never overwrite a value the inspector typed manually.
+  // AND the resolved city into the "יישוב" dropdown of the new-case form —
+  // i.e. WHERE THE VEHICLE WAS PHOTOGRAPHED, not the owner's home address.
+  // Only fills fields that are currently empty / set to default so we never
+  // overwrite a value the inspector typed manually.
   // Free, no API key required. Nominatim asks for ≤1 request/sec.
   function reverseGeocodeIntoStreet(lat, lon) {
     if (lat == null || lon == null) return;
     var streetEl = document.getElementById('nf-location-street');
-    if (!streetEl) return;
-    if ((streetEl.value || '').trim()) return; // don't overwrite manual entry
+    var citySel  = document.getElementById('nf-location-city');
 
     var key = (+lat).toFixed(5) + ',' + (+lon).toFixed(5);
     if (geocodeCache.hasOwnProperty(key)) {
-      streetEl.value = geocodeCache[key];
-      // Trigger oninput so CASE.location stays in sync
-      try { streetEl.dispatchEvent(new Event('input', { bubbles: true })); } catch(e){}
+      applyGeocodeResult(geocodeCache[key], streetEl, citySel);
       return;
     }
 
@@ -7276,18 +7275,66 @@ if (document.readyState === 'loading') {
                        : road
                        ? road
                        : (a.suburb || a.neighbourhood || a.hamlet || '');
-        if (!streetText) return;
-        geocodeCache[key] = streetText;
-        // Re-check the field — user may have typed in the meantime
-        var el = document.getElementById('nf-location-street');
-        if (el && !(el.value || '').trim()) {
-          el.value = streetText;
-          try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch(e){}
-        }
+        // City: prefer city → town → village → municipality → county
+        var cityText = a.city || a.town || a.village || a.municipality
+                     || a.suburb || a.county || '';
+        var result = { street: streetText, city: cityText };
+        geocodeCache[key] = result;
+        applyGeocodeResult(result, streetEl, citySel);
       })
       .catch(function(err) {
         console.warn('[GeoCode] reverse geocoding failed:', err);
       });
+  }
+
+  // Write a {street, city} result into the form, only into fields that are
+  // currently blank so we never clobber what the user typed.
+  function applyGeocodeResult(result, streetEl, citySel) {
+    if (!result) return;
+    // Street
+    var sEl = streetEl || document.getElementById('nf-location-street');
+    if (sEl && result.street && !(sEl.value || '').trim()) {
+      sEl.value = result.street;
+      try { sEl.dispatchEvent(new Event('input', { bubbles: true })); } catch(e){}
+    }
+    // City — match against the dropdown using the same Hebrew normalization
+    // used elsewhere (e.g. "קרית"/"קריית"). If no match, add as a new option.
+    var cEl = citySel || document.getElementById('nf-location-city');
+    if (cEl && result.city && (!cEl.value || cEl.value === cEl.options[0].value)) {
+      var city = String(result.city).trim();
+      var norm = function(s) {
+        return String(s || '').trim()
+          .replace(/\s+/g, ' ')
+          .replace(/יי/g, 'י')
+          .replace(/[״"׳']/g, '');
+      };
+      var cityN = norm(city);
+      var matched = false;
+      for (var i = 0; i < cEl.options.length; i++) {
+        if (norm(cEl.options[i].text) === cityN) {
+          cEl.value = cEl.options[i].value;
+          matched = true;
+          break;
+        }
+      }
+      if (!matched) {
+        var newOpt = document.createElement('option');
+        newOpt.value = city;
+        newOpt.text = city;
+        // Insert just before "אחר" if it exists
+        var inserted = false;
+        for (var j = 0; j < cEl.options.length; j++) {
+          if (cEl.options[j].text === 'אחר') {
+            cEl.add(newOpt, cEl.options[j]);
+            inserted = true;
+            break;
+          }
+        }
+        if (!inserted) cEl.add(newOpt);
+        cEl.value = city;
+      }
+      try { cEl.dispatchEvent(new Event('change', { bubbles: true })); } catch(e){}
+    }
   }
 
   // Expose for use by the case-promotion code further down in this IIFE
