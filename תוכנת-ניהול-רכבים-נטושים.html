@@ -7527,6 +7527,14 @@ if (document.readyState === 'loading') {
         try { startListener(); } catch(e){}
       }
       console.log('[Auth] signed in as', user.email);
+
+      // Auto-refresh field cases on every login so the manager always sees
+      // up-to-date data without having to click the manual refresh button.
+      // Slight delay so Firebase has a chance to finish reconnecting and
+      // the listener is wired up first.
+      setTimeout(function() {
+        try { refreshNow(); } catch(e) { console.warn('[Auth] auto-refresh failed:', e); }
+      }, 800);
     } else {
       // Not logged in
       if (statusRow) statusRow.style.display = 'none';
@@ -7809,6 +7817,15 @@ if (document.readyState === 'loading') {
           startListener();
           // ═══ NEW: probe whether auth is required (only first time) ═══
           schedulePostInitProbe();
+          // Auto-refresh field cases on every (re)connection so the
+          // manager UI catches up with whatever happened while it was
+          // disconnected. Skipped if auth is required and we aren't
+          // signed in yet — handleAuthStateChange will do it after login.
+          if (!authRequired || currentUser) {
+            setTimeout(function() {
+              try { refreshNow(); } catch(e){}
+            }, 800);
+          }
         } else {
           setStatus('pending', 'מתחבר...');
         }
