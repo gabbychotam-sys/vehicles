@@ -5034,7 +5034,8 @@ function previewDocBeforePrint() {
   w.document.write('</head><body style="padding-top:60px;">');
   w.document.write('<div class="no-print"><span>👁️ תצוגה לפני הדפסה</span><div><button onclick="window.print()">🖨️ הדפס עכשיו</button><button class="btn-close" onclick="window.close()">✕ סגור</button></div></div>');
   w.document.write(content);
-  w.document.write('</body></html>');
+  w.document.write('<div id="print-target"></div>
+</body></html>');
   w.document.close();
 }
 
@@ -5043,7 +5044,8 @@ function printDocPreview() {
   var w = window.open('','','width=800,height=600');
   w.document.write('<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8"><title>הדפסה</title>');
   w.document.write('<style>' + getDocPrintStyles() + '</style>');
-  w.document.write('</head><body>' + content + '</body></html>');
+  w.document.write('</head><body>' + content + '<div id="print-target"></div>
+</body></html>');
   w.document.close();
   w.print();
 }
@@ -8495,4 +8497,5 @@ if (document.readyState === 'loading') {
 </script>
 
 
+<div id="print-target"></div>
 </body></html>
