@@ -1316,6 +1316,89 @@ select.edit-input { cursor:pointer; }
   padding-right: 24px; margin: 8px 0;
 }
 .doc-preview-content li { margin-bottom: 6px; }
+
+/* ─── Templated letter preview (with logo + footer + recipient block) ───
+   When openDocPreview wraps the content in the full A4 template, we render
+   the page at scale inside the modal so the user sees exactly what will be
+   printed: logo, fold marks, recipient address, body text, and footer. */
+.doc-preview-content.doc-preview-with-template {
+  padding: 20px;
+  background: #f0f0f0;
+}
+.doc-preview-content.doc-preview-with-template .gx-page {
+  width: 210mm; min-height: 297mm; margin: 0 auto;
+  background: #fff; position: relative;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+  font-family: 'Rubik', 'Arial Hebrew', Arial, sans-serif;
+  direction: rtl; font-size: 11.5pt; line-height: 1.85; color: #111;
+  overflow: hidden;
+}
+.doc-preview-content.doc-preview-with-template .gx-header {
+  padding: 12mm 15mm 6mm; display: flex;
+  align-items: flex-start; justify-content: space-between;
+}
+.doc-preview-content.doc-preview-with-template .gx-logo { height: 22mm; }
+.doc-preview-content.doc-preview-with-template .gx-hinfo {
+  text-align: left; font-size: 9pt; color: #41922e; line-height: 1.6;
+}
+.doc-preview-content.doc-preview-with-template .gx-hinfo .dept {
+  font-weight: 700; font-size: 13pt; margin-bottom: 1mm;
+}
+.doc-preview-content.doc-preview-with-template .gx-fold {
+  position: absolute; left: 0; width: 7mm; height: 0;
+  border-top: 1px dashed #aaa;
+}
+.doc-preview-content.doc-preview-with-template .gx-fold::after {
+  content: '— קו קיפול'; position: absolute;
+  left: 8mm; top: -8px; font-size: 7pt; color: #999;
+  white-space: nowrap;
+}
+.doc-preview-content.doc-preview-with-template .gx-fold-1 { top: 99mm; }
+.doc-preview-content.doc-preview-with-template .gx-fold-2 { top: 198mm; }
+.doc-preview-content.doc-preview-with-template .gx-to {
+  position: absolute; top: 50mm; left: 20mm; width: 90mm;
+  min-height: 32mm; padding: 5mm 6mm; background: #fff;
+  border: 1px dashed #ccc; z-index: 5;
+}
+.doc-preview-content.doc-preview-with-template .gx-to .gx-tolabel {
+  font-size: 8pt; color: #888; font-weight: 600;
+  letter-spacing: 1px; margin-bottom: 2mm;
+}
+.doc-preview-content.doc-preview-with-template .gx-to .gx-name {
+  font-weight: 700; font-size: 13pt; line-height: 1.4;
+}
+.doc-preview-content.doc-preview-with-template .gx-to .gx-id {
+  font-size: 10pt; color: #444; margin-top: 1mm; font-weight: 600;
+}
+.doc-preview-content.doc-preview-with-template .gx-to .gx-addr {
+  font-size: 11pt; color: #222; margin-top: 2mm; line-height: 1.5;
+}
+.doc-preview-content.doc-preview-with-template .gx-body {
+  padding: 84mm 18mm 46mm;
+  font-size: 10pt; line-height: 1.5;
+}
+.doc-preview-content.doc-preview-with-template .gx-body p { margin: 0 0 2mm 0; }
+.doc-preview-content.doc-preview-with-template .gx-body ol,
+.doc-preview-content.doc-preview-with-template .gx-body ul { margin: 0 0 2mm 0; padding-right: 18px; }
+.doc-preview-content.doc-preview-with-template .gx-body li { margin-bottom: 1mm; }
+.doc-preview-content.doc-preview-with-template .gx-body h5 { margin: 0 0 2.5mm 0; font-size: 11pt; }
+.doc-preview-content.doc-preview-with-template .gx-body.editing {
+  background: #fffef5;
+  outline: 2px dashed var(--teal);
+  outline-offset: -4px;
+}
+.doc-preview-content.doc-preview-with-template .gx-footer {
+  position: absolute; bottom: 0; right: 0; left: 0;
+}
+.doc-preview-content.doc-preview-with-template .gx-footer-img {
+  width: 100%; display: block;
+}
+.doc-preview-content.doc-preview-with-template .gx-contact-bar {
+  background: #41922e; padding: 3mm 15mm; color: #fff;
+  font-size: 9pt;
+  display: flex; justify-content: space-around; align-items: center;
+  flex-wrap: wrap; gap: 8mm; direction: rtl;
+}
 .doc-preview-footer {
   padding: 14px 24px; border-top: 1px solid rgba(0,0,0,0.08);
   display: flex; gap: 10px; justify-content: flex-start; align-items: center;
@@ -1962,6 +2045,7 @@ try {
       <div class="tb-date" id="live-date">יום שני, 27 אפריל 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <div class="tb-notif">🔔<div class="notif-dot"></div></div>
+      <button onclick="window.insertDemoCase&amp;&amp;window.insertDemoCase()" style="background:#9c27b0;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px;" title="מוסיף תיק דוגמה דרך Firebase כדי שתוכל לראות איך תיק מהשטח נראה">🧪 הוסף תיק דוגמה</button>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -4530,7 +4614,7 @@ function upsertCaseRow(oldPlate, c, fullData) {
       try { existing.setAttribute('data-case', JSON.stringify(fullData)); } catch(e){}
     }
     existing.style.cursor = 'pointer';
-    existing.setAttribute('onclick', 'openCaseFromRow(this)');
+    existing.onclick = function() { openCaseFromRow(this); };
     tr = existing;
     // Brief flash to indicate update
     tr.style.background = 'rgba(46,125,50,0.18)';
@@ -4546,7 +4630,7 @@ function upsertCaseRow(oldPlate, c, fullData) {
       try { tr.setAttribute('data-case', JSON.stringify(fullData)); } catch(e){}
     }
     tr.style.cursor = 'pointer';
-    tr.setAttribute('onclick', 'openCaseFromRow(this)');
+    tr.onclick = function() { openCaseFromRow(this); };
     tbody.insertBefore(tr, tbody.firstChild);
     // Brief highlight on insert
     tr.style.background = 'rgba(46,125,50,0.18)';
@@ -4761,26 +4845,31 @@ const DOC_TEMPLATES = {
     title: 'נספח א׳ — מכתב ראשון בדואר רשום',
     content: function() {
       var c = CASE;
-      var f = function(v, placeholder){ return v ? '<strong>'+v+'</strong>' : '<span class="field-blank">'+placeholder+'</span>'; };
+      // Helper: bold the value if present, else show a short blank line.
+      // Most fields here come from the case file (vehicle, color, plate,
+      // location), so only the rare "missing" case shows a blank.
+      var f = function(v, placeholder){ return v ? '<strong>'+v+'</strong>' : '<span class="field-blank">'+(placeholder||'________')+'</span>'; };
       var locParts = (c.location||'').split(', ');
       var city = locParts[0] || '';
       var street = locParts.slice(1).join(', ') || '';
+      // Auto-fill today's date in Hebrew format (DD/MM/YYYY)
+      var today = new Date();
+      var todayStr = today.getDate().toString().padStart(2,'0') + '/' +
+                     (today.getMonth()+1).toString().padStart(2,'0') + '/' +
+                     today.getFullYear();
+      // Note: when this template is wrapped by wrapDocInPageTemplate, the
+      // recipient block (name, ID, address) appears at the top in the envelope
+      // window — so we don't repeat it here in the body.
       return `
-<div class="letter-head">
-  <h4>נספח א׳</h4>
-  <p>מחלקת פיקוח, מועצה אזורית הגליל העליון</p>
-</div>
-<p>תאריך <span class="field-blank">______________</span></p>
-<p>לכבוד<br>${f(c.ownerName,'______________')}</p>
-${c.ownerAddr ? '<p>'+c.ownerAddr+'</p>' : ''}
-<p style="text-align:center;letter-spacing:8px;font-weight:700;">ב ד ו א ר &nbsp; ר ש ו ם</p>
-<h5>הנדון: התראה בעניין רכב נטוש שהושאר ברשות הרבים</h5>
-<p>א/ג.נ,</p>
-<p>בשם מועצה אזורית הגליל העליון (להלן: "המועצה") ומתוקף סמכותנו לפי חוק שמירת הניקיון, תשמ"ד-1984 (להלן: "החוק") הננו לפנות אליך כדלקמן:</p>
-<ol>
-  <li>רכב מסוג ${f(c.vehicleType,'________')}, בצבע ${f(c.color,'________')} נושא לוחית רישוי שמספרה ${f(c.plate,'________')}, הרשום בבעלותך, נמצא ב${f(street,'________')} ${f(city,'________')} במועצה האזורית הגליל העליון (להלן: "רכבך").</li>
+<p style="text-align:left;margin:0 0 2mm 0;">תאריך: <strong>${todayStr}</strong></p>
+<p style="text-align:center;letter-spacing:8px;font-weight:700;margin:3mm 0;">ב ד ו א ר &nbsp; ר ש ו ם</p>
+<h5 style="margin:0 0 2mm 0;">הנדון: התראה בעניין רכב נטוש שהושאר ברשות הרבים</h5>
+<p style="margin:0 0 2mm 0;">א/ג.נ,</p>
+<p style="margin:0 0 2mm 0;">בשם מועצה אזורית הגליל העליון (להלן: "המועצה") ומתוקף סמכותנו לפי חוק שמירת הניקיון, תשמ"ד-1984 (להלן: "החוק") הננו לפנות אליך כדלקמן:</p>
+<ol style="margin:0 0 2mm 0;padding-right:18px;">
+  <li>רכב מסוג ${f(c.vehicleType)}, בצבע ${f(c.color)} נושא לוחית רישוי שמספרה ${f(c.plate)}, הרשום בבעלותך, נמצא ב${f(street)} ${f(city)} במועצה האזורית הגליל העליון (להלן: "רכבך").</li>
   <li>רכבך, במצבו הנוכחי, נחזה להיות רכב נטוש כהגדרתו בחוק בשל אחד או יותר מן הממצאים הבאים:
-    <ul>
+    <ul style="margin:2mm 0;">
       <li>הוא אינו נושא לוחית רישוי.</li>
       <li>אין לו רישיון רכב תקף במשך שלושים ימים לפחות.</li>
       <li>ניכר כי הוא מושאר במקום אחד או שאינו מוזז ממקומו מרחק של ממש, ובנסיבות העניין סביר להניח כי אינו משמש למטרות נסיעה באופן תדיר.</li>
@@ -4793,8 +4882,8 @@ ${c.ownerAddr ? '<p>'+c.ownerAddr+'</p>' : ''}
   <li>לפניות בנושא זה יש ליצור קשר בהקדם עם מוקד מועצה אזורית הגליל העליון. טלפון: <strong>8669*</strong></li>
   <li>בכל פניה יש לציין מספר טלפון, כתובת למשלוח דואר ופרטי התקשרות נוספים.</li>
 </ol>
-<p style="margin-top:24px;">בכבוד רב,</p>
-<p>מחלקת פיקוח<br>מועצה אזורית הגליל העליון</p>`;
+<p style="margin:3mm 0 1mm 0;">בכבוד רב,</p>
+<p style="margin:0;"><strong>גבי חותם</strong><br>מנהל מחלקת פיקוח<br>מועצה אזורית הגליל העליון</p>`;
     }
   },
   nispach_b: {
@@ -4802,6 +4891,17 @@ ${c.ownerAddr ? '<p>'+c.ownerAddr+'</p>' : ''}
     content: function() {
       var c = CASE;
       var f = function(v, placeholder){ return v ? '<strong>'+v+'</strong>' : '<span class="field-blank">'+placeholder+'</span>'; };
+      // Auto-fill today's date and the 30-day deadline (when the resident
+      // must remove the vehicle by). The yellow sticker is placed on the
+      // car today, so "today + 30 days" is the eviction date.
+      var today = new Date();
+      var todayStr = today.getDate().toString().padStart(2,'0') + '/' +
+                     (today.getMonth()+1).toString().padStart(2,'0') + '/' +
+                     today.getFullYear();
+      var deadline = new Date(today); deadline.setDate(deadline.getDate() + 30);
+      var deadlineStr = deadline.getDate().toString().padStart(2,'0') + '/' +
+                        (deadline.getMonth()+1).toString().padStart(2,'0') + '/' +
+                        deadline.getFullYear();
       return `
 <div class="letter-head" style="border-bottom-color:#fdd835;">
   <h4>נספח ב׳</h4>
@@ -4813,7 +4913,7 @@ ${c.ownerAddr ? '<p>'+c.ownerAddr+'</p>' : ''}
   <div style="margin:16px 0;text-align:right;">
     <p>רכב מספר ${f(c.plate,'______________')} מסוג ${f(c.vehicleType,'______________')}</p>
     <p>חונה כאן מזה מספר חודשים.</p>
-    <p>הנך מתבקש/ת לפנות את הרכב עד לתאריך: <span class="field-blank">______________</span></p>
+    <p>הנך מתבקש/ת לפנות את הרכב עד לתאריך: <strong>${deadlineStr}</strong></p>
     <p>אי פינוי הרכב עד למועד הנקוב יוביל לגרירתו על ידי המועצה האזורית הגליל העליון.</p>
     <p>הודעה זו הודבקה על ידנו על רכבך וצולמה.</p>
     <p><strong>כל הוצאות הפינוי והגרירה יחולו על בעל הרכב.</strong></p>
@@ -4821,7 +4921,7 @@ ${c.ownerAddr ? '<p>'+c.ownerAddr+'</p>' : ''}
   <p style="font-size:12px;">לפרטים נוספים ועזרה: מוקד מועצה אזורית הגליל העליון <strong>*8669</strong></p>
   <div style="margin-top:16px;text-align:right;border-top:1px dashed #fdd835;padding-top:12px;">
     <p>מחלקת פיקוח | מועצה אזורית הגליל העליון</p>
-    <p>הודבק בתאריך: <span class="field-blank">________</span> בשעה: <span class="field-blank">________</span></p>
+    <p>הודבק בתאריך: <strong>${todayStr}</strong> בשעה: <span class="field-blank">________</span></p>
   </div>
 </div>`;
     }
@@ -4830,25 +4930,25 @@ ${c.ownerAddr ? '<p>'+c.ownerAddr+'</p>' : ''}
     title: 'נספח ד׳ — מכתב שני בדואר רשום',
     content: function() {
       var c = CASE;
-      var f = function(v, placeholder){ return v ? '<strong>'+v+'</strong>' : '<span class="field-blank">'+placeholder+'</span>'; };
-      var locParts = (c.location||'').split(', ');
+      var f = function(v, placeholder){ return v ? '<strong>'+v+'</strong>' : '<span class="field-blank">'+(placeholder||'________')+'</span>'; };
       var locDisplay = c.location ? '<strong>'+c.location+'</strong>' : '<span class="field-blank">________</span>';
+      var today = new Date();
+      var todayStr = today.getDate().toString().padStart(2,'0') + '/' +
+                     (today.getMonth()+1).toString().padStart(2,'0') + '/' +
+                     today.getFullYear();
+      // Recipient block (name, ID, address) is rendered by wrapDocInPageTemplate
+      // — we don't repeat it here in the body.
       return `
-<div class="letter-head">
-  <h4>נספח ד׳</h4>
-  <p>מחלקת פיקוח, מועצה אזורית הגליל העליון</p>
-</div>
-<p>תאריך: <span class="field-blank">______________</span></p>
-<p>לכבוד<br>${f(c.ownerName,'______________')} ${c.ownerId ? 'ת"ז: <strong>'+c.ownerId+'</strong>' : ''}<br>${c.ownerAddr ? c.ownerAddr : '<span class="field-blank">______________</span>'}</p>
-<p style="text-align:center;letter-spacing:8px;font-weight:700;">ב ד ו א ר &nbsp; ר ש ו ם</p>
-<h5>הנדון: התראה בעניין רכב נטוש שהושאר ברשות הרבים</h5>
-<p>א/ג.נ,</p>
-<p>בשם מועצה אזורית הגליל העליון (להלן: "המועצה") ומתוקף סמכותנו לפי חוק שמירת הניקיון, תשמ"ד-1984 (להלן: "החוק") הננו לפנות אליך כדלקמן:</p>
-<ol>
-  <li>רכב מסוג ${f(c.vehicleType,'________')}, בצבע ${f(c.color,'________')} נושא לוחית רישוי שמספרה ${f(c.plate,'________')},</li>
-  <li>הרשום בבעלותך, נמצא ${locDisplay}. במועצה האזורית הגליל העליון (להלן: "רכבך").</li>
+<p style="text-align:left;margin:0 0 2mm 0;">תאריך: <strong>${todayStr}</strong></p>
+<p style="text-align:center;letter-spacing:8px;font-weight:700;margin:3mm 0;">ב ד ו א ר &nbsp; ר ש ו ם</p>
+<h5 style="margin:0 0 2mm 0;">הנדון: התראה בעניין רכב נטוש שהושאר ברשות הרבים</h5>
+<p style="margin:0 0 2mm 0;">א/ג.נ,</p>
+<p style="margin:0 0 2mm 0;">בשם מועצה אזורית הגליל העליון (להלן: "המועצה") ומתוקף סמכותנו לפי חוק שמירת הניקיון, תשמ"ד-1984 (להלן: "החוק") הננו לפנות אליך כדלקמן:</p>
+<ol style="margin:0 0 2mm 0;padding-right:18px;">
+  <li>רכב מסוג ${f(c.vehicleType)}, בצבע ${f(c.color)} נושא לוחית רישוי שמספרה ${f(c.plate)},</li>
+  <li>הרשום בבעלותך, נמצא ${locDisplay} במועצה האזורית הגליל העליון (להלן: "רכבך").</li>
   <li>רכבך, במצבו הנוכחי, נחזה להיות רכב נטוש כהגדרתו בחוק בשל אחד או יותר מן הממצאים הבאים:
-    <ul>
+    <ul style="margin:2mm 0;">
       <li>הוא אינו נושא לוחית רישוי.</li>
       <li>אין לו רישיון רכב תקף במשך שלושים ימים לפחות.</li>
       <li>ניכר כי הוא מושאר במקום אחד או שאינו מוזז ממקומו מרחק של ממש, ובנסיבות העניין סביר להניח כי אינו משמש למטרות נסיעה באופן תדיר.</li>
@@ -4859,15 +4959,20 @@ ${c.ownerAddr ? '<p>'+c.ownerAddr+'</p>' : ''}
   <li>כמו כן, באם לא תסור למשרדי הפיקוח בתוך 45 יום מקבלת דרישה זו על מנת לפנות את רכבך מהמגרש, הרי שהמועצה תהא רשאית למכרו ולחייבך בהוצאות הכרוכות בכך בהתאם להוראות הדין.</li>
   <li>לפניות בנושא זה יש ליצור קשר בהקדם עם מוקד מועצה אזורית הגליל העליון. טלפון: <strong>8669*</strong></li>
 </ol>
-<p>בכל פניה יש לציין מספר טלפון, כתובת למשלוח דואר ופרטי התקשרות נוספים.</p>
-<p style="margin-top:24px;">בכבוד רב,</p>
-<p>מחלקת פיקוח<br>מועצה אזורית הגליל העליון</p>`;
+<p style="margin:0 0 2mm 0;">בכל פניה יש לציין מספר טלפון, כתובת למשלוח דואר ופרטי התקשרות נוספים.</p>
+<p style="margin:3mm 0 1mm 0;">בכבוד רב,</p>
+<p style="margin:0;"><strong>גבי חותם</strong><br>מנהל מחלקת פיקוח<br>מועצה אזורית הגליל העליון</p>`;
     }
   },
   nispach_e: {
     title: 'נספח ה׳ — מדבקה אדומה (התראה שנייה)',
     content: function() {
       var c = CASE;
+      // Auto-fill today's date — the red sticker is placed today.
+      var today = new Date();
+      var todayStr = today.getDate().toString().padStart(2,'0') + '/' +
+                     (today.getMonth()+1).toString().padStart(2,'0') + '/' +
+                     today.getFullYear();
       return `
 <div class="letter-head" style="border-bottom-color:#e53935;">
   <h4>נספח ה׳</h4>
@@ -4886,7 +4991,7 @@ ${c.ownerAddr ? '<p>'+c.ownerAddr+'</p>' : ''}
   <div style="margin-top:16px;text-align:right;border-top:1px dashed #e53935;padding-top:12px;">
     <p>בכבוד רב,</p>
     <p>מחלקת פיקוח | מועצה אזורית הגליל העליון</p>
-    <p>הודבק בתאריך: <span class="field-blank">________</span> בשעה: <span class="field-blank">________</span></p>
+    <p>הודבק בתאריך: <strong>${todayStr}</strong> בשעה: <span class="field-blank">________</span></p>
   </div>
 </div>`;
     }
@@ -4895,35 +5000,42 @@ ${c.ownerAddr ? '<p>'+c.ownerAddr+'</p>' : ''}
     title: 'מכתב בקשה לפינוי גרוטאה',
     content: function() {
       var c = CASE;
-      var f = function(v, placeholder){ return v ? '<strong>'+v+'</strong>' : '<span class="field-blank">'+placeholder+'</span>'; };
+      var f = function(v, placeholder){ return v ? '<strong>'+v+'</strong>' : '<span class="field-blank">'+(placeholder||'________')+'</span>'; };
+      var today = new Date();
+      var todayStr = today.getDate().toString().padStart(2,'0') + '/' +
+                     (today.getMonth()+1).toString().padStart(2,'0') + '/' +
+                     today.getFullYear();
+      // Junk vehicle eviction deadline: 14 days from today (legal minimum
+      // under the Cleanliness Act for junk vehicles, vs. 30 days for
+      // abandoned-but-still-registered vehicles).
+      var deadline = new Date(today); deadline.setDate(deadline.getDate() + 14);
+      var deadlineStr = deadline.getDate().toString().padStart(2,'0') + '/' +
+                        (deadline.getMonth()+1).toString().padStart(2,'0') + '/' +
+                        deadline.getFullYear();
+      // Recipient block (name, ID, address) is rendered by wrapDocInPageTemplate
+      // — we don't repeat it here in the body.
       return `
-<div class="letter-head">
-  <h4>מכתב בקשה לפינוי גרוטאה</h4>
-  <p>מחלקת פיקוח, מועצה אזורית הגליל העליון</p>
-</div>
-<p>תאריך: <span class="field-blank">______________</span></p>
-<p>מכתב רשום לכבוד:</p>
-<p>שם: ${f(c.ownerName,'______________')} ${c.ownerId ? 'ת.ז: <strong>'+c.ownerId+'</strong>' : 'ת.ז: <span class="field-blank">______________</span>'}</p>
-<p>כתובת: ${c.ownerAddr ? '<strong>'+c.ownerAddr+'</strong>' : '<span class="field-blank">______________________________</span>'}</p>
-<p>שלום רב,</p>
-<h5>הנדון: השארת רכב ברשות הרבים</h5>
-<p>רכב מספר ${f(c.plate,'______________')} מסוג ${f(c.vehicleType,'______________')} נטוש במקום ${f(c.location,'______________')} מזה מספר חודשים.</p>
-<p>בהתאם לחוק הניקיון התשמ"ד 1984 (סעיף 8.א.א):</p>
-<p style="padding:10px 16px;background:#f5f5f5;border-radius:8px;font-style:italic;">"הושאר רכב ברשות הרבים במקום אחד במשך תקופה העולה על שישים ימים, רשאית הרשות המוסמכת להורות על גרירתו מהמקום".</p>
-<p>הוראות חוק זה עוסקות בידוע בעל הרכב (סעיפים 8.א.ב. + ג) ופרוט הצעדים המותרים לרשות בנוגע למכירת הרכב או החזרתו לבעליו (סעיפים 8.ב.א + ב. + ג.).</p>
-<p>בהתאם לסעיף 8.א.ב., אני כנושא משרה במועצה אזורית הגליל העליון, מבקש ממך לפנות את הרכב הנ"ל מרשות הרבים.</p>
-<p>הנך מתבקשת לפנות את הרכב עד לתאריך: <span class="field-blank">______________</span></p>
-<p>במידה ולא יפונה הרכב עד לתאריך הנ"ל, ייגרר ע"י הרשות מועצה אזורית הגליל העליון.</p>
-<p>המועצה תמכור את הרכב ותחליט הוצאותיה המלאות לצורך כך.</p>
-<p>הודעה זו תודבק לרכבך ותצולם.</p>
-<p>לקבלת פרטים נוספים ועזרה ניתן להתקשר למוקד - <strong>8669*</strong>.</p>
-<p style="margin-top:24px;">בברכה,</p>
-<p><strong>גבי חותם</strong><br>מנהל מחלקת פיקוח</p>
-<div style="margin-top:16px;padding-top:12px;border-top:1px solid #eee;font-size:11px;color:#999;">
-  <p><strong>העתק:</strong></p>
-  <p>יערה קדוש – מנכ"לית מועצה אזורית הגליל העליון.</p>
-  <p>מאיה גורדון – מנהל אגף מוניציפאלי מועצה אזורית הגליל העליון.</p>
-  <p>עו"ד אריק שרמן – יועמ"ש מועצה אזורית הגליל העליון.</p>
+<p style="text-align:left;margin:0 0 2mm 0;">תאריך: <strong>${todayStr}</strong></p>
+<p style="text-align:center;letter-spacing:8px;font-weight:700;margin:3mm 0;">מ כ ת ב &nbsp; ר ש ו ם</p>
+<p style="margin:0 0 2mm 0;">שלום רב,</p>
+<h5 style="margin:0 0 2mm 0;">הנדון: השארת רכב ברשות הרבים</h5>
+<p style="margin:0 0 2mm 0;">רכב מספר ${f(c.plate)} מסוג ${f(c.vehicleType)} נטוש במקום ${f(c.location)} מזה מספר חודשים.</p>
+<p style="margin:0 0 2mm 0;">בהתאם לחוק הניקיון התשמ"ד 1984 (סעיף 8.א.א):</p>
+<p style="padding:3mm 5mm;background:#f5f5f5;border-radius:2mm;font-style:italic;margin:0 0 2mm 0;">"הושאר רכב ברשות הרבים במקום אחד במשך תקופה העולה על שישים ימים, רשאית הרשות המוסמכת להורות על גרירתו מהמקום".</p>
+<p style="margin:0 0 2mm 0;">הוראות חוק זה עוסקות בידוע בעל הרכב (סעיפים 8.א.ב. + ג) ופרוט הצעדים המותרים לרשות בנוגע למכירת הרכב או החזרתו לבעליו (סעיפים 8.ב.א + ב. + ג.).</p>
+<p style="margin:0 0 2mm 0;">בהתאם לסעיף 8.א.ב., אני כנושא משרה במועצה אזורית הגליל העליון, מבקש ממך לפנות את הרכב הנ"ל מרשות הרבים.</p>
+<p style="margin:0 0 2mm 0;">הנך מתבקש/ת לפנות את הרכב עד לתאריך: <strong>${deadlineStr}</strong></p>
+<p style="margin:0 0 2mm 0;">במידה ולא יפונה הרכב עד לתאריך הנ"ל, ייגרר ע"י הרשות מועצה אזורית הגליל העליון.</p>
+<p style="margin:0 0 2mm 0;">המועצה תמכור את הרכב ותגבה את הוצאותיה המלאות לצורך כך.</p>
+<p style="margin:0 0 2mm 0;">הודעה זו תודבק לרכבך ותצולם.</p>
+<p style="margin:0 0 2mm 0;">לקבלת פרטים נוספים ועזרה ניתן להתקשר למוקד - <strong>8669*</strong>.</p>
+<p style="margin:3mm 0 1mm 0;">בברכה,</p>
+<p style="margin:0;"><strong>גבי חותם</strong><br>מנהל מחלקת פיקוח<br>מועצה אזורית הגליל העליון</p>
+<div style="margin-top:5mm;padding-top:3mm;border-top:1px solid #eee;font-size:9pt;color:#888;">
+  <p style="margin:0 0 1mm 0;"><strong>העתק:</strong></p>
+  <p style="margin:0;">יערה קדוש – מנכ"לית מועצה אזורית הגליל העליון.</p>
+  <p style="margin:0;">מאיה גורדון – מנהל אגף מוניציפאלי מועצה אזורית הגליל העליון.</p>
+  <p style="margin:0;">עו"ד אריק שרמן – יועמ"ש מועצה אזורית הגליל העליון.</p>
 </div>`;
     }
   },
@@ -4970,13 +5082,37 @@ function openDocPreview(docId) {
   if (!doc) return;
   document.getElementById('doc-preview-title').textContent = doc.title;
   var body = document.getElementById('doc-preview-body');
-  body.innerHTML = doc.content();
+  // Build the inner letter HTML and wrap it with the full A4 page template
+  // (logo, fold marks, recipient block auto-filled from CASE, footer).
+  // This makes the in-modal preview look identical to the printed letter.
+  var letterContent = doc.content();
+  if (typeof wrapDocInPageTemplate === 'function' && _docNeedsTemplate(docId)) {
+    body.innerHTML = wrapDocInPageTemplate(letterContent);
+    body.classList.add('doc-preview-with-template');
+  } else {
+    body.innerHTML = letterContent;
+    body.classList.remove('doc-preview-with-template');
+  }
   body.contentEditable = 'false';
   body.classList.remove('editing');
   document.getElementById('doc-edit-toggle').classList.remove('active');
   document.getElementById('doc-edit-toggle').innerHTML = '✏️ עריכה';
   document.getElementById('doc-edit-hint').style.display = 'none';
   document.getElementById('doc-preview-overlay').classList.add('active');
+}
+
+// Decide which document templates should get the full A4 page wrapper
+// (logo + recipient block + footer). We skip the wrapper for diagrams
+// like "flowchart", stickers (nispach_b/e), and forms (vitor) which use
+// their own layout.
+function _docNeedsTemplate(docId) {
+  // Letters that go in an envelope and need the council letterhead
+  var lettersNeedingTemplate = [
+    'nispach_a',     // נספח א - מכתב ראשון
+    'nispach_d',     // נספח ד - מכתב שני
+    'pinuy_letter'   // בקשה לפינוי גרוטאה
+  ];
+  return lettersNeedingTemplate.indexOf(docId) !== -1;
 }
 
 function closeDocPreview(evt) {
@@ -4992,15 +5128,31 @@ function toggleDocEdit() {
   var btn = document.getElementById('doc-edit-toggle');
   var hint = document.getElementById('doc-edit-hint');
   if (docEditMode) {
-    body.contentEditable = 'true';
-    body.classList.add('editing');
+    // When editing a templated letter, only the gx-body (the letter text) is
+    // editable — the council header, recipient block, fold marks and footer
+    // remain fixed so the user can't accidentally break the layout.
+    var gxBody = body.querySelector('.gx-body');
+    if (gxBody) {
+      gxBody.contentEditable = 'true';
+      gxBody.classList.add('editing');
+      gxBody.focus();
+    } else {
+      body.contentEditable = 'true';
+      body.classList.add('editing');
+      body.focus();
+    }
     btn.classList.add('active');
     btn.innerHTML = '✅ סיים עריכה';
     hint.style.display = '';
-    body.focus();
   } else {
-    body.contentEditable = 'false';
-    body.classList.remove('editing');
+    var gxBody2 = body.querySelector('.gx-body');
+    if (gxBody2) {
+      gxBody2.contentEditable = 'false';
+      gxBody2.classList.remove('editing');
+    } else {
+      body.contentEditable = 'false';
+      body.classList.remove('editing');
+    }
     btn.classList.remove('active');
     btn.innerHTML = '✏️ עריכה';
     hint.style.display = 'none';
@@ -5008,24 +5160,147 @@ function toggleDocEdit() {
 }
 
 function getDocPrintStyles() {
+  // A4-sized page styling for council letters. The recipient address is
+  // absolutely positioned (top:50mm, left:20mm, width:90mm) so that when
+  // the page is Z-folded into thirds and inserted into a standard Israeli
+  // DL window envelope, the name + ID + street address land precisely
+  // inside the envelope's window. Two fold marks at 99mm and 198mm mark
+  // exactly where to crease.
   return `@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap');
-body{font-family:'Rubik',sans-serif;direction:rtl;padding:40px;font-size:13px;line-height:1.8;color:#333;margin:0;}
-h4{font-size:18px;margin:0 0 4px;color:#1b2a4a;}
-h5{font-size:14px;color:#1b2a4a;margin:16px 0 8px;}
-.letter-head{text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:2px solid #41c4a6;}
-.letter-head p{font-size:12px;color:#666;margin:0;}
-.field-blank{display:inline-block;min-width:100px;border-bottom:1.5px solid #999;margin:0 4px;}
-ol,ul{padding-right:24px;}
-li{margin-bottom:6px;}
-strong{color:#1b2a4a;}
-table{border-collapse:collapse;width:100%;}
-td,th{padding:6px 10px;border:1px solid #ddd;}
-@media print{body{padding:20px;}}`;
+@page { size: A4; margin: 0; }
+html, body { margin: 0; padding: 0; }
+body { font-family:'Rubik',sans-serif; direction:rtl; font-size:12.5px; line-height:1.85; color:#222; background:#f5f5f5; }
+.gx-page {
+  width: 210mm; height: 297mm; margin: 0 auto; background:#fff;
+  position: relative; box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  padding: 0; overflow: hidden;
+  page-break-after: avoid; page-break-inside: avoid;
+  break-after: avoid; break-inside: avoid;
+}
+@media print {
+  body { background: #fff; }
+  .gx-page { box-shadow: none; margin: 0; }
+}
+
+/* Header — logo + dept info */
+.gx-header { padding: 12mm 15mm 6mm; display:flex; align-items:flex-start; justify-content:space-between; }
+.gx-logo { height: 22mm; }
+.gx-hinfo { text-align:left; font-size:9pt; color:#41922e; line-height:1.6; font-family:'Rubik',Arial,sans-serif; }
+.gx-hinfo .dept { font-weight:700; font-size:13pt; margin-bottom:1mm; }
+
+/* Fold marks at the page edge — guide the user to fold correctly */
+.gx-fold { position: absolute; left: 0; width: 7mm; height: 0; border-top: 1px dashed #aaa; }
+.gx-fold::after { content: '— קו קיפול'; position: absolute; left: 8mm; top: -8px; font-size: 7pt; color: #999; white-space: nowrap; font-family: 'Rubik',Arial,sans-serif; }
+.gx-fold-1 { top: 99mm; }
+.gx-fold-2 { top: 198mm; }
+
+/* Recipient block — positioned to align with DL envelope window */
+.gx-to {
+  position: absolute; top: 50mm; left: 20mm; width: 90mm; min-height: 32mm;
+  padding: 5mm 6mm; background: #fff;
+  border: 1px dashed #ccc;
+  font-family: 'Rubik',Arial,sans-serif; z-index: 5;
+}
+.gx-to .gx-tolabel { font-size: 8pt; color:#888; font-weight: 600; letter-spacing: 1px; margin-bottom: 2mm; }
+.gx-to .gx-name { font-weight: 700; font-size: 13pt; line-height: 1.4; }
+.gx-to .gx-id { font-size: 10pt; color:#444; margin-top: 1mm; font-weight: 600; }
+.gx-to .gx-addr { font-size: 11pt; color:#222; margin-top: 2mm; line-height: 1.5; }
+@media print {
+  .gx-to { border: none; padding: 0; }
+  .gx-to .gx-tolabel { display: none; }
+  .gx-fold { border-top: 1px dashed #c8c8c8; }
+}
+
+/* Letter body — leaves room for the absolute-positioned address above
+   and the footer below. Padding sized so the typical Hebrew letter
+   (5–6 numbered items, signature) fits on one A4 page without overflow.
+   Tight margins on paragraphs/list items maximise vertical density. */
+.gx-body { padding: 84mm 18mm 46mm; font-size: 10pt; line-height: 1.5; }
+.gx-body p { margin: 0 0 2mm 0; }
+.gx-body ol, .gx-body ul { margin: 0 0 2mm 0; padding-right: 18px; }
+.gx-body li { margin-bottom: 1mm; }
+.gx-body h5 { margin: 0 0 2.5mm 0; font-size: 11pt; }
+
+/* Original letter content classes — kept intact for backward compat */
+h4 { font-size: 17pt; margin: 0 0 4px; color: #1b2a4a; font-weight: 700; }
+h5 { font-size: 14px; color: #1b2a4a; margin: 16px 0 8px; }
+.letter-head { text-align:center; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 2px solid #41922e; }
+.letter-head h4 { color: #41922e; }
+.letter-head p { font-size: 11px; color: #666; margin: 0; }
+.field-blank { display:inline-block; min-width: 100px; border-bottom: 1.5px solid #999; margin: 0 4px; }
+ol, ul { padding-right: 24px; }
+li { margin-bottom: 6px; }
+strong { color: #1b2a4a; }
+table { border-collapse: collapse; width: 100%; }
+td, th { padding: 6px 10px; border: 1px solid #ddd; }
+
+/* Footer — illustration + green contact bar */
+.gx-footer { position: absolute; bottom: 0; right: 0; left: 0; }
+.gx-footer-img { width: 100%; display: block; }
+.gx-contact-bar {
+  background: #41922e; padding: 3mm 15mm; color: #fff;
+  font-family: 'Rubik',Arial,sans-serif; font-size: 9pt;
+  display: flex; justify-content: space-around; align-items: center;
+  flex-wrap: wrap; gap: 8mm; direction: rtl;
+}`;
+}
+
+// Wrap a document's HTML content in a full-page A4 template with the
+// council logo, fold marks, recipient block (auto-filled from CASE), and
+// footer illustration. The `bodyHtml` is the existing letter content
+// from DOC_TEMPLATES (it already contains the title, "תאריך", "לכבוד",
+// etc., which is fine — we keep them visible because some letters are
+// hand-delivered and don't need the envelope).
+function wrapDocInPageTemplate(bodyHtml) {
+  var c = (typeof CASE !== 'undefined') ? CASE : {};
+  var name = c.ownerName || '';
+  var id   = c.ownerId || '';
+  var addr = c.ownerAddr || '';
+  return ''
+    + '<div class="gx-page">'
+    +   '<div class="gx-fold gx-fold-1"></div>'
+    +   '<div class="gx-fold gx-fold-2"></div>'
+    +   '<div class="gx-header">'
+    +     '<img class="gx-logo" src="' + (typeof IMG1 !== 'undefined' ? IMG1 : '') + '">'
+    +     '<div class="gx-hinfo">'
+    +       '<div class="dept">מחלקת פיקוח</div>'
+    +       '<div>מועצה אזורית הגליל העליון</div>'
+    +       '<div>ד.נ גליל עליון 1210000</div>'
+    +       '<div>טל׳: 04-6816363 | פקס: 04-6816358</div>'
+    +       '<div>pikuach@galil-elion.org.il</div>'
+    +     '</div>'
+    +   '</div>'
+    +   '<div class="gx-to">'
+    +     '<div class="gx-tolabel">אל:</div>'
+    +     '<div class="gx-name">' + (name || '&nbsp;') + '</div>'
+    +     (id ? '<div class="gx-id">ת"ז: ' + id + '</div>' : '')
+    +     '<div class="gx-addr">' + (addr || '&nbsp;') + '</div>'
+    +   '</div>'
+    +   '<div class="gx-body">' + bodyHtml + '</div>'
+    +   '<div class="gx-footer">'
+    +     '<img class="gx-footer-img" src="' + (typeof IMG2 !== 'undefined' ? IMG2 : '') + '">'
+    +     '<div class="gx-contact-bar">'
+    +       '<span style="font-weight:800">פיקוח · מועצה אזורית הגליל העליון</span>'
+    +       '<span>ד.נ גליל עליון 1210000</span>'
+    +       '<span>טל׳: 04-6816363</span>'
+    +       '<span>pikuach@galil-elion.org.il</span>'
+    +     '</div>'
+    +   '</div>'
+    + '</div>';
 }
 
 function previewDocBeforePrint() {
-  var content = document.getElementById('doc-preview-body').innerHTML;
-  var w = window.open('','_blank','width=900,height=700');
+  // Wrap the user-edited content in the full A4 template (logo, fold marks,
+  // recipient block aligned with the envelope window, and footer).
+  // IMPORTANT: if the in-modal preview already wrapped the content in a
+  // gx-page (when openDocPreview applied the template), we must extract
+  // just the inner letter body before re-wrapping — otherwise we get a
+  // nested gx-page which renders as TWO blank pages plus the real one.
+  var content = _extractEditableBody(document.getElementById('doc-preview-body').innerHTML);
+  var wrapped = (typeof wrapDocInPageTemplate === 'function')
+    ? wrapDocInPageTemplate(content)
+    : content;
+  var w = window.open('','_blank','width=900,height=1100');
   w.document.write('<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8"><title>תצוגה לפני הדפסה</title>');
   w.document.write('<style>' + getDocPrintStyles() + '</style>');
   w.document.write('<style>.no-print{position:fixed;top:0;left:0;right:0;background:#1b2a4a;color:#fff;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;z-index:999;font-family:"Rubik",sans-serif;box-shadow:0 2px 12px rgba(0,0,0,0.2);}');
@@ -5033,21 +5308,40 @@ function previewDocBeforePrint() {
   w.document.write('.no-print .btn-close{background:rgba(255,255,255,0.15);margin-right:8px;}@media print{.no-print{display:none!important;}body{padding-top:0!important;}}</style>');
   w.document.write('</head><body style="padding-top:60px;">');
   w.document.write('<div class="no-print"><span>👁️ תצוגה לפני הדפסה</span><div><button onclick="window.print()">🖨️ הדפס עכשיו</button><button class="btn-close" onclick="window.close()">✕ סגור</button></div></div>');
-  w.document.write(content);
-  w.document.write('<div id="print-target"></div>
-</body></html>');
+  w.document.write(wrapped);
+  w.document.write('</body></html>');
   w.document.close();
 }
 
 function printDocPreview() {
-  var content = document.getElementById('doc-preview-body').innerHTML;
-  var w = window.open('','','width=800,height=600');
+  // Same nesting fix as previewDocBeforePrint — extract just the editable
+  // body (or use the raw content if it wasn't templated in the modal).
+  var content = _extractEditableBody(document.getElementById('doc-preview-body').innerHTML);
+  var wrapped = (typeof wrapDocInPageTemplate === 'function')
+    ? wrapDocInPageTemplate(content)
+    : content;
+  var w = window.open('','','width=800,height=1100');
   w.document.write('<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8"><title>הדפסה</title>');
   w.document.write('<style>' + getDocPrintStyles() + '</style>');
-  w.document.write('</head><body>' + content + '<div id="print-target"></div>
-</body></html>');
+  w.document.write('</head><body>' + wrapped + '</body></html>');
   w.document.close();
   w.print();
+}
+
+// When the modal preview wraps the letter in a gx-page (full A4 template),
+// the user actually edits only the inner gx-body. Before printing or
+// previewing, we need to extract just that inner body — otherwise we'd
+// re-wrap an already-wrapped document and end up with nested gx-pages
+// which render as 2 blank pages + 1 real page.
+function _extractEditableBody(html) {
+  if (!html) return '';
+  if (html.indexOf('gx-page') === -1) return html; // not templated
+  try {
+    var tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    var body = tmp.querySelector('.gx-body');
+    return body ? body.innerHTML : html;
+  } catch (e) { return html; }
 }
 </script>
 
@@ -7614,24 +7908,18 @@ if (document.readyState === 'loading') {
       // Show "logged in as" badge in settings
       if (statusRow) statusRow.style.display = 'flex';
       if (emailEl) emailEl.textContent = user.email || '—';
-      // Restart listener after login so child_added re-fires for all
-      // existing cases (Firebase doesn't auto-replay events after auth).
-      if (listenerRef) { try { listenerRef.off(); } catch(e){} listenerRef = null; }
-      try { startListener(); } catch(e){}
+      if (listenerRef === null) {
+        try { startListener(); } catch(e){}
+      }
       console.log('[Auth] signed in as', user.email);
 
-      // Auto-refresh with retry — Firebase DB connection may not be ready
-      // immediately when auth fires, so retry until fbReady is true.
-      var _refreshAttempts = 0;
-      var _autoRefresh = function() {
-        if (fbReady && fbDb) {
-          try { refreshNow(); } catch(e) { console.warn('[Auth] auto-refresh failed:', e); }
-        } else if (_refreshAttempts < 8) {
-          _refreshAttempts++;
-          setTimeout(_autoRefresh, 800);
-        }
-      };
-      setTimeout(_autoRefresh, 600);
+      // Auto-refresh field cases on every login so the manager always sees
+      // up-to-date data without having to click the manual refresh button.
+      // Slight delay so Firebase has a chance to finish reconnecting and
+      // the listener is wired up first.
+      setTimeout(function() {
+        try { refreshNow(); } catch(e) { console.warn('[Auth] auto-refresh failed:', e); }
+      }, 800);
     } else {
       // Not logged in
       if (statusRow) statusRow.style.display = 'none';
@@ -7861,6 +8149,53 @@ if (document.readyState === 'loading') {
         if (typeof showToast === 'function') showToast('⚠️ שגיאה: ' + err.message);
       });
   }
+
+  // ═══ Insert a fully-populated demo case for the user to see what a
+  // real "from-the-field" case looks like in the management software.
+  // The case is saved to Firebase just like a real mobile case so it
+  // flows through the exact same code path. The user can later delete
+  // it from the cases table or from the Firebase Console. ═══
+  window.insertDemoCase = function() {
+    if (!fbReady || !fbDb) {
+      alert('Firebase עדיין לא מחובר. נסה שוב בעוד כמה שניות.');
+      return;
+    }
+    var demoId = 'demo-' + Date.now();
+    var demoCase = {
+      id: demoId,
+      source: 'mobile',
+      plate: '12-345-67',
+      owner: 'ישראל ישראלי',
+      ownerId: '023456789',
+      phone: '050-1234567',
+      address: 'רחוב הרצל 14, קריית שמונה',
+      location: 'קריית שמונה',
+      locAddress: 'שדרות צה"ל 25, קריית שמונה',
+      lat: '33.2074',
+      lon: '35.5703',
+      contact: 'משה כהן (שכן)',
+      contactPhone: '052-9876543',
+      vehicleType: 'טויוטה קורולה',
+      color: 'כסף',
+      status: 'yellow',
+      badge: '🟡 מדבקה צהובה',
+      notes: 'רכב נטוש מזה כחודשיים. אינו מוזז ממקומו, חלק מהצמיגים שטוחים.',
+      inspector: 'שימי רוזנברג',
+      inspectorPhone: '054-669-3634',
+      date: new Date().toISOString(),
+      photos: [],
+      syncedAt: new Date().toISOString(),
+      _demo: true  // marker so user knows this is a demo
+    };
+    fbDb.ref('cases/' + demoId).set(demoCase)
+      .then(function() {
+        if (typeof showToast === 'function') showToast('✅ נוסף תיק דוגמה: ישראל ישראלי, לוחית 12-345-67');
+        else alert('תיק דוגמה נוסף בהצלחה!');
+      })
+      .catch(function(err) {
+        alert('שגיאה בהוספת תיק דוגמה: ' + (err.message || err));
+      });
+  };
 
   function initFirebase() {
     var cfg = loadCfg();
@@ -8137,8 +8472,8 @@ if (document.readyState === 'loading') {
         '<button class="row-action" onclick="event.stopPropagation();window.GalilSync._showCase(\'' + safe(c.id) + '\')">📋 פרטים</button>' +
       '</td>';
 
-    // Click row to open details (setAttribute survives loadState innerHTML restore)
-    tr.setAttribute('onclick', 'window.GalilSync && window.GalilSync._showCase("' + safe(c.id) + '")');
+    // Click row to open details
+    tr.onclick = function() { showMobileCaseModal(c.id); };
 
     if (!existing) {
       tbody.insertBefore(tr, tbody.firstChild);
@@ -8503,5 +8838,4 @@ if (document.readyState === 'loading') {
 </script>
 
 
-<div id="print-target"></div>
 </body></html>
