@@ -476,10 +476,6 @@
       <p style="margin:4px 0 0;font-size:12px;color:#666;">גליל עליון</p>
     </div>
     <div id="auth-error" style="display:none;background:#fee;border:1px solid #fcc;color:#c00;padding:9px 11px;border-radius:8px;font-size:13px;margin-bottom:12px;"></div>
-    <label style="display:block;font-size:13px;color:#444;margin-bottom:5px;font-weight:500;">בחר את שמך</label>
-    <select id="auth-name-select" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:15px;margin-bottom:12px;box-sizing:border-box;background:#fff;cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;12&quot; height=&quot;8&quot; viewBox=&quot;0 0 12 8&quot;><path fill=&quot;%23666&quot; d=&quot;M6 8L0 0h12z&quot;/></svg>');background-repeat:no-repeat;background-position:left 12px center;padding-left:32px;">
-      <option value="">— בחר —</option>
-    </select>
     <label style="display:block;font-size:13px;color:#444;margin-bottom:5px;font-weight:500;">דוא"ל</label>
     <input id="auth-email" type="email" autocomplete="username" inputmode="email" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:15px;direction:ltr;text-align:left;margin-bottom:12px;box-sizing:border-box;-webkit-appearance:none;" placeholder="name@galil-elion.org.il">
     <label style="display:block;font-size:13px;color:#444;margin-bottom:5px;font-weight:500;">סיסמה</label>
@@ -810,39 +806,6 @@ function handleAuthStateChange(user) {
     if (overlay) overlay.style.display = 'none';
     authRequired = true;
     console.log('[Auth] signed in as', user.email);
-
-    // Auto-identify the inspector by email — skip the old "pick your name" screen
-    try {
-      var existing = loadInspector();
-      var emailLower = (user.email || '').toLowerCase();
-      var matched = null;
-      if (typeof STAFF_LIST !== 'undefined') {
-        for (var i = 0; i < STAFF_LIST.length; i++) {
-          if ((STAFF_LIST[i].email || '').toLowerCase() === emailLower) {
-            matched = STAFF_LIST[i];
-            break;
-          }
-        }
-      }
-      if (matched) {
-        // Save (or refresh) inspector profile from the auth identity
-        saveInspector({
-          name: matched.name,
-          email: matched.email || '',
-          phone: matched.phone || '',
-          role: matched.role || ''
-        });
-      }
-      // If we have an inspector (newly matched or already saved), jump straight to home
-      if (matched || existing) {
-        var loginScr = document.getElementById('scr-login');
-        var homeScr = document.getElementById('scr-home');
-        if (loginScr) loginScr.classList.remove('active');
-        if (homeScr)  homeScr.classList.add('active');
-        if (typeof refreshHomeUser === 'function') refreshHomeUser();
-        if (typeof renderHome === 'function') renderHome();
-      }
-    } catch(e) { console.warn('[Auth] auto-identify failed', e); }
   } else {
     if (authRequired && overlay) overlay.style.display = 'flex';
   }
@@ -873,30 +836,8 @@ function initLoginUI() {
   var btn = document.getElementById('auth-login-btn');
   var emailInput = document.getElementById('auth-email');
   var pwdInput = document.getElementById('auth-password');
-  var nameSelect = document.getElementById('auth-name-select');
   var errBox = document.getElementById('auth-error');
   if (!btn) return;
-
-  // Populate the name dropdown from STAFF_LIST (sorted by Hebrew name)
-  if (nameSelect && typeof STAFF_LIST !== 'undefined' && STAFF_LIST.length) {
-    var sorted = STAFF_LIST.slice().sort(function(a, b) {
-      return a.name.localeCompare(b.name, 'he');
-    });
-    sorted.forEach(function(s) {
-      var opt = document.createElement('option');
-      opt.value = s.email || '';
-      opt.textContent = s.name + (s.role ? ' · ' + s.role : '');
-      nameSelect.appendChild(opt);
-    });
-    nameSelect.addEventListener('change', function() {
-      if (nameSelect.value) {
-        emailInput.value = nameSelect.value;
-        // Move focus to password field for fast entry
-        if (pwdInput) pwdInput.focus();
-        clearError();
-      }
-    });
-  }
 
   function showError(msg) {
     if (!errBox) return;
@@ -990,11 +931,11 @@ function pushCaseToFirebase(c) {
 // Staff list - matches the staff in the management software.
 // To add/remove staff, update this list AND the management software's staffList.
 var STAFF_LIST = [
-  { name: 'שימי רוזנברג',  role: 'פקח',         phone: '054-669-3634', email: 'shimi@galil-elion.org.il' },
-  { name: 'פרנסיס ברוטמן', role: 'פקח',         phone: '054-452-7582', email: 'francis@galil-elion.org.il' },
-  { name: 'אייל ארצי',      role: 'פקח',         phone: '052-619-1985', email: 'eyal@galil-elion.org.il' },
-  { name: 'מורן לוז',        role: 'מזכירה',     phone: '052-379-1659', email: 'moranl@galil-elion.org.il' },
-  { name: 'גבי חותם',        role: 'מנהל פיקוח', phone: '050-757-4451', email: 'gabbyc@galil-elion.org.il' }
+  { name: 'שימי רוזנברג',  role: 'פקח',         phone: '054-669-3634', email: 'pikuach@galil-elion.org.il' },
+  { name: 'פרנסיס ברוטמן', role: 'פקח',         phone: '054-452-7582', email: 'pikuach@galil-elion.org.il' },
+  { name: 'אייל ארצי',      role: 'פקח',         phone: '052-619-1985', email: 'pikuach@galil-elion.org.il' },
+  { name: 'מורן לוז',        role: 'מזכירה',     phone: '052-379-1659', email: 'pikuach@galil-elion.org.il' },
+  { name: 'גבי חותם',        role: 'מנהל פיקוח', phone: '',              email: 'pikuach@galil-elion.org.il' }
 ];
 
 // Populate the dropdown when login screen opens
@@ -1368,18 +1309,7 @@ function renderView() {
   h += F('איש קשר', '<div class="field-value">' + (c.contact||'—') + '</div>');
   h += F('📱 נייד איש קשר', '<div class="phone-row"><div class="field-value" style="flex:1">' + (c.contactPhone||'—') + '</div>' + (c.contactPhone ? '<a href="tel:'+c.contactPhone+'" class="call-btn">📞</a>' : '') + '</div>');
   h += F('כתובת', '<div class="field-value" style="font-size:22px">' + (c.locAddress||'—') + '</div>');
-  if (c.lat && c.lon) {
-    var gmapsUrl = 'https://www.google.com/maps?q=' + encodeURIComponent(c.lat + ',' + c.lon);
-    h += F('📍 מיקום הרכב במפה',
-      '<a href="' + gmapsUrl + '" target="_blank" rel="noopener" '
-      + 'style="display:flex;align-items:center;justify-content:center;gap:8px;'
-      + 'padding:14px;background:linear-gradient(135deg,#1abc9c,#0e6655);'
-      + 'color:#fff;border-radius:10px;font-size:17px;font-weight:600;'
-      + 'text-decoration:none;box-shadow:0 2px 8px rgba(26,188,156,0.3);">'
-      + '🗺️ פתח במפת גוגל</a>'
-      + '<div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px;direction:ltr;">'
-      + c.lat + ', ' + c.lon + '</div>');
-  }
+  if (c.lat && c.lon) h += F('קורדינטות GPS', '<div class="coord-row"><div class="field-value">' + c.lat + '</div><div class="field-value">' + c.lon + '</div></div>');
   h += '</div>';
 
   h += '<div class="card"><div class="card-title">⚡ מה נעשה</div><div class="field-value" style="font-size:22px">' + (c.badge||'—') + '</div></div>';
@@ -1392,8 +1322,8 @@ function renderView() {
 function selectCaseType(type) {
   // Preserve any values already typed before re-rendering
   var v = function(id) { var el = document.getElementById(id); return el ? el.value : null; };
-  var fields = ['f-plate','f-owner','f-phone','f-address','f-location','f-contact','f-cphone','f-locaddr','f-lat','f-lon','f-status','f-notes'];
-  var keyMap = { 'f-plate':'plate','f-owner':'owner','f-phone':'phone','f-address':'address','f-location':'location','f-contact':'contact','f-cphone':'contactPhone','f-locaddr':'locAddress','f-lat':'lat','f-lon':'lon','f-status':'status','f-notes':'notes' };
+  var fields = ['f-plate','f-vehicleType','f-owner','f-phone','f-address','f-location','f-contact','f-cphone','f-locaddr','f-lat','f-lon','f-status','f-notes'];
+  var keyMap = { 'f-plate':'plate','f-vehicleType':'vehicleType','f-owner':'owner','f-phone':'phone','f-address':'address','f-location':'location','f-contact':'contact','f-cphone':'contactPhone','f-locaddr':'locAddress','f-lat':'lat','f-lon':'lon','f-status':'status','f-notes':'notes' };
   fields.forEach(function(id) {
     var val = v(id);
     if (val !== null) cur[keyMap[id]] = val;
@@ -1405,14 +1335,62 @@ function selectCaseType(type) {
 function newCase() {
   cur = {
     id: 'M' + Date.now(), date: new Date().toISOString().split('T')[0],
-    status: 'yellow', plate: '', owner: '', location: '',
-    badge: '🟡 מדבקה צהובה', phone: '', contact: '', contactPhone: '',
+    status: 'photographed', plate: '', vehicleType: '', owner: '', location: '',
+    badge: '📷 צולם וממתין להמשך טיפול', phone: '', contact: '', contactPhone: '',
     address: '', locAddress: '', notes: '', lat: '', lon: '', inspector: '', photos: [],
     caseType: 'abandoned'
   };
   photos = [];
   renderEdit();
   showScreen('edit');
+}
+
+// ═══ Navigation helpers ═══
+// Build a destination string for Waze/Google Maps. Prefers GPS coordinates
+// when available (most accurate); otherwise falls back to a free-text
+// search using "address, town" so the user still gets close to the car.
+function _navDestination() {
+  var v = function(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  var lat = v('f-lat'), lon = v('f-lon');
+  if (lat && lon) {
+    return { type: 'coords', lat: lat, lon: lon };
+  }
+  var locAddr = v('f-locaddr'), location = v('f-location');
+  var query = [locAddr, location].filter(Boolean).join(', ');
+  if (query) {
+    return { type: 'query', q: query };
+  }
+  return null;
+}
+
+function openWaze() {
+  var dest = _navDestination();
+  if (!dest) {
+    alert('לא הוזן מיקום עדיין.\nהזן GPS או כתובת תחילה.');
+    return;
+  }
+  var url;
+  if (dest.type === 'coords') {
+    url = 'https://waze.com/ul?ll=' + dest.lat + ',' + dest.lon + '&navigate=yes';
+  } else {
+    url = 'https://waze.com/ul?q=' + encodeURIComponent(dest.q) + '&navigate=yes';
+  }
+  window.open(url, '_blank');
+}
+
+function openGoogleMaps() {
+  var dest = _navDestination();
+  if (!dest) {
+    alert('לא הוזן מיקום עדיין.\nהזן GPS או כתובת תחילה.');
+    return;
+  }
+  var url;
+  if (dest.type === 'coords') {
+    url = 'https://www.google.com/maps/search/?api=1&query=' + dest.lat + ',' + dest.lon;
+  } else {
+    url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(dest.q);
+  }
+  window.open(url, '_blank');
 }
 
 function startEdit() {
@@ -1461,6 +1439,7 @@ function renderEdit() {
 
   h += '<div class="card"><div class="card-title">🚗 פרטי הרכב</div>';
   h += F('לוחית רישוי', '<input class="field-input plate" id="f-plate" value="' + (c.plate||'') + '">');
+  h += F('סוג / דגם רכב', '<input class="field-input" id="f-vehicleType" value="' + (c.vehicleType||'') + '" placeholder="לדוגמה: טויוטה קורולה">');
   h += F('בעל הרכב', '<input class="field-input" id="f-owner" value="' + (c.owner||'') + '">');
   h += F('📱 נייד בעל הרכב', '<div class="phone-row"><input class="field-input" id="f-phone" type="tel" value="' + (c.phone||'') + '"><div class="call-btn">📞</div></div>');
   h += F('🏠 כתובת בעל הרכב', '<input class="field-input" id="f-address" value="' + (c.address||'') + '">');
@@ -1472,11 +1451,17 @@ function renderEdit() {
   h += F('📱 נייד איש קשר', '<div class="phone-row"><input class="field-input" id="f-cphone" type="tel" value="' + (c.contactPhone||'') + '"><div class="call-btn">📞</div></div>');
   h += F('כתובת', '<input class="field-input" id="f-locaddr" value="' + (c.locAddress||'') + '">');
   h += F('קורדינטות GPS', '<div class="coord-row"><input class="field-input" id="f-lat" value="' + (c.lat||'') + '" placeholder="קו רוחב"><input class="field-input" id="f-lon" value="' + (c.lon||'') + '" placeholder="קו אורך"></div>');
+  // Navigation buttons - jump straight to Waze / Google Maps with the case coordinates
+  // (or address fallback). Lets the inspector reach the vehicle in one tap.
+  h += '<div style="display:flex;gap:8px;margin-top:8px;">';
+  h += '<button type="button" onclick="openWaze()" style="flex:1;padding:12px;background:#33ccff;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">🚗 נווט עם Waze</button>';
+  h += '<button type="button" onclick="openGoogleMaps()" style="flex:1;padding:12px;background:#34a853;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">🗺️ פתח במפת גוגל</button>';
+  h += '</div>';
   h += '</div>';
 
   h += '<div class="card"><div class="card-title">⚡ מה נעשה</div>';
   h += '<select class="field-input" id="f-status" style="background-color:#f8f9ff">';
-  h += '<option value="yellow"' + (c.status==='yellow'?' selected':'') + '>📷 צולם וממתין להמשך טיפול</option>';
+  h += '<option value="photographed"' + (c.status==='photographed'?' selected':'') + '>📷 צולם וממתין להמשך טיפול</option>';
   h += '<option value="yellow"' + (c.status==='yellow'?' selected':'') + '>🟡 הודבקה מדבקה צהובה</option>';
   h += '<option value="red"' + (c.status==='red'?' selected':'') + '>🔴 הודבקה מדבקה אדומה</option>';
   h += '</select></div>';
@@ -1492,6 +1477,7 @@ function renderEdit() {
 function saveCase() {
   var v = function(id) { var el = document.getElementById(id); return el ? el.value : ''; };
   cur.plate = v('f-plate') || cur.plate;
+  cur.vehicleType = v('f-vehicleType') || cur.vehicleType;
   cur.owner = v('f-owner') || cur.owner;
   cur.phone = v('f-phone') || cur.phone;
   cur.address = v('f-address') || cur.address;
@@ -1507,7 +1493,11 @@ function saveCase() {
   var st = v('f-status');
   if (st) {
     cur.status = st;
-    var badges = { yellow:'🟡 מדבקה צהובה', red:'🔴 מדבקה אדומה' };
+    var badges = {
+      photographed:'📷 צולם וממתין להמשך טיפול',
+      yellow:'🟡 מדבקה צהובה',
+      red:'🔴 מדבקה אדומה'
+    };
     cur.badge = badges[st] || cur.badge;
   }
 
@@ -1590,83 +1580,6 @@ function onPhoto(inp) {
   };
   reader.readAsDataURL(inp.files[0]);
   inp.value = '';
-
-  // Auto-capture GPS coordinates on first photo (don't overwrite manual entry)
-  captureGpsIfEmpty();
-}
-
-// Try to fill the lat/lon fields from device GPS — only if they're currently empty,
-// so manual edits aren't overwritten. Requires HTTPS and user permission.
-function captureGpsIfEmpty() {
-  var latInp = document.getElementById('f-lat');
-  var lonInp = document.getElementById('f-lon');
-  if (!latInp || !lonInp) return; // edit form not open
-  if ((latInp.value || '').trim() && (lonInp.value || '').trim()) return; // already filled
-  if (!navigator.geolocation) {
-    toast('המכשיר לא תומך באיתור מיקום');
-    return;
-  }
-  toast('📍 מאתר מיקום...');
-  navigator.geolocation.getCurrentPosition(
-    function(pos) {
-      var lat = pos.coords.latitude.toFixed(6);
-      var lon = pos.coords.longitude.toFixed(6);
-      // Re-check the inputs still exist and are empty (user may have typed in the meantime)
-      latInp = document.getElementById('f-lat');
-      lonInp = document.getElementById('f-lon');
-      if (latInp && !(latInp.value || '').trim()) latInp.value = lat;
-      if (lonInp && !(lonInp.value || '').trim()) lonInp.value = lon;
-      toast('📍 מיקום נקלט');
-      // Try to translate the GPS into a street address and fill the
-      // "כתובת" field (f-locaddr) — only if it's still empty so manual
-      // input is preserved.
-      reverseGeocodeFillStreet(lat, lon);
-    },
-    function(err) {
-      var msg = 'לא ניתן לקלוט מיקום';
-      if (err && err.code === 1) msg = 'הרשאת מיקום נדחתה';
-      else if (err && err.code === 2) msg = 'מיקום לא זמין';
-      else if (err && err.code === 3) msg = 'איתור מיקום נכשל (timeout)';
-      toast('⚠️ ' + msg);
-    },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-  );
-}
-
-// Reverse-geocode the given lat/lon via Nominatim (OpenStreetMap, free, no key)
-// and fill the "כתובת" field (f-locaddr) if it's currently empty. Used after
-// auto-capturing GPS so the inspector sees a real street name, not just numbers.
-function reverseGeocodeFillStreet(lat, lon) {
-  var addrEl = document.getElementById('f-locaddr');
-  if (!addrEl) return;
-  if ((addrEl.value || '').trim()) return; // don't overwrite manual entry
-
-  var url = 'https://nominatim.openstreetmap.org/reverse'
-          + '?format=jsonv2&accept-language=he'
-          + '&zoom=18&addressdetails=1'
-          + '&lat=' + encodeURIComponent(lat)
-          + '&lon=' + encodeURIComponent(lon);
-  fetch(url, { headers: { 'Accept': 'application/json' } })
-    .then(function(r) { return r.ok ? r.json() : null; })
-    .then(function(data) {
-      if (!data || !data.address) return;
-      var a = data.address;
-      var road = a.road || a.pedestrian || a.path || a.residential || a.neighbourhood || '';
-      var num  = a.house_number || '';
-      var streetText = (road && num) ? (road + ' ' + num)
-                     : road
-                     ? road
-                     : (a.suburb || a.neighbourhood || a.hamlet || '');
-      if (!streetText) return;
-      var el = document.getElementById('f-locaddr');
-      if (el && !(el.value || '').trim()) {
-        el.value = streetText;
-        toast('🏠 כתובת נקלטה: ' + streetText);
-      }
-    })
-    .catch(function(err) {
-      console.warn('[GeoCode] reverse geocoding failed:', err);
-    });
 }
 
 function toast(msg) {
@@ -1695,14 +1608,18 @@ function goBackFromView() {
   try { applyTheme(); } catch(e){}
 
   var insp = loadInspector();
-  if (insp) {
+  if (!insp) {
+    // First-time: show login
+    document.getElementById('scr-home').classList.remove('active');
+    document.getElementById('scr-login').classList.add('active');
+    // Populate inspector dropdown with staff list
+    if (typeof populateInspectorDropdown === 'function') {
+      populateInspectorDropdown();
+    }
+  } else {
     refreshHomeUser();
     renderHome();
   }
-  // If no inspector yet: do nothing here. The Firebase Auth overlay will
-  // appear (since rules require auth), and after a successful sign-in,
-  // handleAuthStateChange auto-identifies the user from STAFF_LIST by email
-  // and jumps straight to the home screen — no separate "pick name" step.
   // Init Firebase (waits for SDK to be loaded)
   if (typeof firebase !== 'undefined') {
     initFirebase();
