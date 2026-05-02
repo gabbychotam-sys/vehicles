@@ -1334,16 +1334,11 @@ select.edit-input { cursor:pointer; }
   overflow: hidden;
 }
 .doc-preview-content.doc-preview-with-template .gx-header {
-  padding: 12mm 15mm 6mm; display: flex;
-  align-items: flex-start; justify-content: space-between;
+  padding: 8mm 15mm 4mm; display: flex;
+  justify-content: flex-end; align-items: flex-start;
 }
-.doc-preview-content.doc-preview-with-template .gx-logo { height: 22mm; }
-.doc-preview-content.doc-preview-with-template .gx-hinfo {
-  text-align: left; font-size: 9pt; color: #41922e; line-height: 1.6;
-}
-.doc-preview-content.doc-preview-with-template .gx-hinfo .dept {
-  font-weight: 700; font-size: 13pt; margin-bottom: 1mm;
-}
+.doc-preview-content.doc-preview-with-template .gx-logo { height: 18mm; }
+.doc-preview-content.doc-preview-with-template .gx-hinfo { display: none; }
 .doc-preview-content.doc-preview-with-template .gx-fold {
   position: absolute; left: 0; width: 7mm; height: 0;
   border-top: 1px dashed #aaa;
@@ -1356,8 +1351,8 @@ select.edit-input { cursor:pointer; }
 .doc-preview-content.doc-preview-with-template .gx-fold-1 { top: 99mm; }
 .doc-preview-content.doc-preview-with-template .gx-fold-2 { top: 198mm; }
 .doc-preview-content.doc-preview-with-template .gx-to {
-  position: absolute; top: 50mm; left: 20mm; width: 90mm;
-  min-height: 32mm; padding: 5mm 6mm; background: #fff;
+  position: absolute; top: 25mm; left: 18mm; width: 95mm;
+  min-height: 36mm; padding: 4mm 6mm; background: #fff;
   border: 1px dashed #ccc; z-index: 5;
 }
 .doc-preview-content.doc-preview-with-template .gx-to .gx-tolabel {
@@ -1365,14 +1360,18 @@ select.edit-input { cursor:pointer; }
   letter-spacing: 1px; margin-bottom: 2mm;
 }
 .doc-preview-content.doc-preview-with-template .gx-to .gx-name {
-  font-weight: 700; font-size: 13pt; line-height: 1.4;
-}
-.doc-preview-content.doc-preview-with-template .gx-to .gx-id {
-  font-size: 10pt; color: #444; margin-top: 1mm; font-weight: 600;
+  font-weight: 700; font-size: 15pt; line-height: 1.3; color: #111;
 }
 .doc-preview-content.doc-preview-with-template .gx-to .gx-addr {
-  font-size: 11pt; color: #222; margin-top: 2mm; line-height: 1.5;
+  font-size: 13pt; color: #111; margin-top: 3mm; line-height: 1.5; font-weight: 500;
 }
+.doc-preview-content.doc-preview-with-template .gx-plate-ref {
+  position: absolute; top: 70mm; left: 18mm;
+  font-size: 10pt; color: #555;
+  background: #fff8e1; padding: 1.5mm 4mm; border-radius: 2mm;
+  border: 0.5pt solid #fdd835;
+}
+.doc-preview-content.doc-preview-with-template .gx-plate-ref strong { color: #1b2a4a; }
 .doc-preview-content.doc-preview-with-template .gx-body {
   padding: 84mm 18mm 46mm;
   font-size: 10pt; line-height: 1.5;
@@ -5182,11 +5181,14 @@ body { font-family:'Rubik',sans-serif; direction:rtl; font-size:12.5px; line-hei
   .gx-page { box-shadow: none; margin: 0; }
 }
 
-/* Header — logo + dept info */
-.gx-header { padding: 12mm 15mm 6mm; display:flex; align-items:flex-start; justify-content:space-between; }
-.gx-logo { height: 22mm; }
-.gx-hinfo { text-align:left; font-size:9pt; color:#41922e; line-height:1.6; font-family:'Rubik',Arial,sans-serif; }
-.gx-hinfo .dept { font-weight:700; font-size:13pt; margin-bottom:1mm; }
+/* Header — just the logo at the top-right.
+   The contact info that was previously on the left is removed because
+   it overlapped with the recipient block, which sits at top:25mm to be
+   visible through the DL envelope window. The full council contact info
+   is already shown in the green footer bar at the bottom of the page,
+   so removing it here doesn't lose any information. */
+.gx-header { padding: 8mm 15mm 4mm; display:flex; justify-content:flex-end; align-items:flex-start; }
+.gx-logo { height: 18mm; }
 
 /* Fold marks at the page edge — guide the user to fold correctly */
 .gx-fold { position: absolute; left: 0; width: 7mm; height: 0; border-top: 1px dashed #aaa; }
@@ -5194,21 +5196,41 @@ body { font-family:'Rubik',sans-serif; direction:rtl; font-size:12.5px; line-hei
 .gx-fold-1 { top: 99mm; }
 .gx-fold-2 { top: 198mm; }
 
-/* Recipient block — positioned to align with DL envelope window */
+/* Recipient block — positioned to align with the DL envelope window.
+   Standard Israeli DL window envelope (220×110mm) has a window at
+   approximately x=15mm, y=22mm, size 95×45mm from the envelope's top edge.
+   When the A4 letter is C-folded into thirds (with folds at 99mm and 198mm)
+   and the top edge of the folded letter aligns with the top of the envelope,
+   the window reveals the area between y=22mm and y=67mm of the original page.
+   We position the recipient block at top:25mm so name+address fit cleanly
+   inside that window with comfortable margins. */
 .gx-to {
-  position: absolute; top: 50mm; left: 20mm; width: 90mm; min-height: 32mm;
-  padding: 5mm 6mm; background: #fff;
+  position: absolute; top: 25mm; left: 18mm; width: 95mm; min-height: 36mm;
+  padding: 4mm 6mm; background: #fff;
   border: 1px dashed #ccc;
   font-family: 'Rubik',Arial,sans-serif; z-index: 5;
 }
 .gx-to .gx-tolabel { font-size: 8pt; color:#888; font-weight: 600; letter-spacing: 1px; margin-bottom: 2mm; }
-.gx-to .gx-name { font-weight: 700; font-size: 13pt; line-height: 1.4; }
-.gx-to .gx-id { font-size: 10pt; color:#444; margin-top: 1mm; font-weight: 600; }
-.gx-to .gx-addr { font-size: 11pt; color:#222; margin-top: 2mm; line-height: 1.5; }
+.gx-to .gx-name { font-weight: 700; font-size: 15pt; line-height: 1.3; color: #111; }
+.gx-to .gx-addr { font-size: 13pt; color:#111; margin-top: 3mm; line-height: 1.5; font-weight: 500; }
+
+/* License plate reference — small label below the recipient block,
+   OUTSIDE the envelope window area so it doesn't show through.
+   Positioned between the fold line and the body so it serves as a
+   quick reference in the body area. */
+.gx-plate-ref {
+  position: absolute; top: 70mm; left: 18mm;
+  font-size: 10pt; color: #555; font-family: 'Rubik',Arial,sans-serif;
+  background: #fff8e1; padding: 1.5mm 4mm; border-radius: 2mm;
+  border: 0.5pt solid #fdd835;
+}
+.gx-plate-ref strong { color: #1b2a4a; }
+
 @media print {
   .gx-to { border: none; padding: 0; }
   .gx-to .gx-tolabel { display: none; }
   .gx-fold { border-top: 1px dashed #c8c8c8; }
+  .gx-plate-ref { border: 0.5pt solid #fdd835; }
 }
 
 /* Letter body — leaves room for the absolute-positioned address above
@@ -5254,28 +5276,25 @@ td, th { padding: 6px 10px; border: 1px solid #ddd; }
 function wrapDocInPageTemplate(bodyHtml) {
   var c = (typeof CASE !== 'undefined') ? CASE : {};
   var name = c.ownerName || '';
-  var id   = c.ownerId || '';
   var addr = c.ownerAddr || '';
+  // The license plate is shown on the recipient block as a small reference
+  // line so that when the letter is folded and placed in a DL window envelope,
+  // the mail clerk (and recipient) can immediately match the letter to the
+  // correct vehicle. It's also embedded in the letter body for legal clarity.
+  var plate = c.plate || '';
   return ''
     + '<div class="gx-page">'
     +   '<div class="gx-fold gx-fold-1"></div>'
     +   '<div class="gx-fold gx-fold-2"></div>'
     +   '<div class="gx-header">'
     +     '<img class="gx-logo" src="' + (typeof IMG1 !== 'undefined' ? IMG1 : '') + '">'
-    +     '<div class="gx-hinfo">'
-    +       '<div class="dept">מחלקת פיקוח</div>'
-    +       '<div>מועצה אזורית הגליל העליון</div>'
-    +       '<div>ד.נ גליל עליון 1210000</div>'
-    +       '<div>טל׳: 04-6816363 | פקס: 04-6816358</div>'
-    +       '<div>pikuach@galil-elion.org.il</div>'
-    +     '</div>'
     +   '</div>'
     +   '<div class="gx-to">'
     +     '<div class="gx-tolabel">אל:</div>'
     +     '<div class="gx-name">' + (name || '&nbsp;') + '</div>'
-    +     (id ? '<div class="gx-id">ת"ז: ' + id + '</div>' : '')
     +     '<div class="gx-addr">' + (addr || '&nbsp;') + '</div>'
     +   '</div>'
+    +   (plate ? '<div class="gx-plate-ref">בנוגע לרכב מס׳: <strong>' + plate + '</strong></div>' : '')
     +   '<div class="gx-body">' + bodyHtml + '</div>'
     +   '<div class="gx-footer">'
     +     '<img class="gx-footer-img" src="' + (typeof IMG2 !== 'undefined' ? IMG2 : '') + '">'
