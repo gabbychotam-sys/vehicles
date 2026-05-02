@@ -476,8 +476,12 @@
       <p style="margin:4px 0 0;font-size:12px;color:#666;">גליל עליון</p>
     </div>
     <div id="auth-error" style="display:none;background:#fee;border:1px solid #fcc;color:#c00;padding:9px 11px;border-radius:8px;font-size:13px;margin-bottom:12px;"></div>
+    <label style="display:block;font-size:13px;color:#444;margin-bottom:5px;font-weight:500;">בחר את שמך</label>
+    <select id="auth-name-select" onchange="onAuthNameChange()" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:15px;direction:rtl;text-align:right;margin-bottom:12px;box-sizing:border-box;background:#fff;cursor:pointer;-webkit-appearance:none;">
+      <option value="">— בחר —</option>
+    </select>
     <label style="display:block;font-size:13px;color:#444;margin-bottom:5px;font-weight:500;">דוא"ל</label>
-    <input id="auth-email" type="email" autocomplete="username" inputmode="email" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:15px;direction:ltr;text-align:left;margin-bottom:12px;box-sizing:border-box;-webkit-appearance:none;" placeholder="name@galil-elion.org.il">
+    <input id="auth-email" type="email" autocomplete="username" inputmode="email" readonly style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:15px;direction:ltr;text-align:left;margin-bottom:12px;box-sizing:border-box;background:#f5f5f5;-webkit-appearance:none;" placeholder="ייקבע אוטומטית לאחר בחירת שם">
     <label style="display:block;font-size:13px;color:#444;margin-bottom:5px;font-weight:500;">סיסמה</label>
     <input id="auth-password" type="password" autocomplete="current-password" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:15px;direction:ltr;text-align:left;margin-bottom:16px;box-sizing:border-box;-webkit-appearance:none;" placeholder="••••••••">
     <button id="auth-login-btn" style="width:100%;padding:13px;background:#0f3460;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;-webkit-appearance:none;">כניסה</button>
@@ -827,6 +831,9 @@ function probeAuthRequired() {
         if (!currentAuthUser) {
           var overlay = document.getElementById('auth-overlay');
           if (overlay) overlay.style.display = 'flex';
+          // Build the staff name picker so user can pick their name
+          // and have their email auto-filled
+          if (typeof populateAuthNameDropdown === 'function') populateAuthNameDropdown();
         }
       }
     });
@@ -860,6 +867,23 @@ function initLoginUI() {
         btn.textContent = 'כניסה';
         btn.disabled = false;
         pwdInput.value = '';
+        // Save inspector identity from name picker so user doesn't have to
+        // pick the name again on the post-auth login screen.
+        var nameSel = document.getElementById('auth-name-select');
+        if (nameSel && nameSel.value !== '' && nameSel._sortedList) {
+          var picked = nameSel._sortedList[parseInt(nameSel.value, 10)];
+          if (picked) {
+            saveInspector({
+              name: picked.name,
+              email: picked.email || '',
+              phone: picked.phone || '',
+              role: picked.role || ''
+            });
+            if (typeof refreshHomeUser === 'function') refreshHomeUser();
+            // Skip the post-auth login screen and go straight to home
+            if (typeof showScreen === 'function') showScreen('home');
+          }
+        }
       })
       .catch(function(err) {
         btn.textContent = 'כניסה';
@@ -931,11 +955,11 @@ function pushCaseToFirebase(c) {
 // Staff list - matches the staff in the management software.
 // To add/remove staff, update this list AND the management software's staffList.
 var STAFF_LIST = [
-  { name: 'שימי רוזנברג',  role: 'פקח',         phone: '054-669-3634', email: 'pikuach@galil-elion.org.il' },
-  { name: 'פרנסיס ברוטמן', role: 'פקח',         phone: '054-452-7582', email: 'pikuach@galil-elion.org.il' },
-  { name: 'אייל ארצי',      role: 'פקח',         phone: '052-619-1985', email: 'pikuach@galil-elion.org.il' },
-  { name: 'מורן לוז',        role: 'מזכירה',     phone: '052-379-1659', email: 'pikuach@galil-elion.org.il' },
-  { name: 'גבי חותם',        role: 'מנהל פיקוח', phone: '',              email: 'pikuach@galil-elion.org.il' }
+  { name: 'שימי רוזנברג',  role: 'פקח',         phone: '054-669-3634', email: 'shimi@galil-elion.org.il' },
+  { name: 'פרנסיס ברוטמן', role: 'פקח',         phone: '054-452-7582', email: 'francis@galil-elion.org.il' },
+  { name: 'אייל ארצי',      role: 'פקח',         phone: '052-619-1985', email: 'eyal@galil-elion.org.il' },
+  { name: 'מורן לוז',        role: 'מזכירה',     phone: '052-379-1659', email: 'moranl@galil-elion.org.il' },
+  { name: 'גבי חותם',        role: 'מנהל פיקוח', phone: '050-757-4451', email: 'gabbyc@galil-elion.org.il' }
 ];
 
 // Populate the dropdown when login screen opens
@@ -953,6 +977,42 @@ function populateInspectorDropdown() {
   sel.innerHTML = html;
   // Store sorted list for lookup by index
   sel._sortedList = sorted;
+}
+
+// ═══ Auth screen: name picker ═══
+// Same staff list as the post-auth login screen, but here selecting the name
+// auto-fills the email so the user only needs to type their password.
+function populateAuthNameDropdown() {
+  var sel = document.getElementById('auth-name-select');
+  if (!sel) return;
+  var sorted = STAFF_LIST.slice().sort(function(a, b) {
+    return a.name.localeCompare(b.name, 'he');
+  });
+  var html = '<option value="">— בחר את שמך —</option>';
+  sorted.forEach(function(s, idx) {
+    html += '<option value="' + idx + '">' + s.name + ' · ' + s.role + '</option>';
+  });
+  sel.innerHTML = html;
+  sel._sortedList = sorted;
+}
+
+function onAuthNameChange() {
+  var sel = document.getElementById('auth-name-select');
+  var emailInput = document.getElementById('auth-email');
+  var pwdInput = document.getElementById('auth-password');
+  if (!sel || !emailInput) return;
+  var idx = sel.value;
+  if (idx === '' || !sel._sortedList) {
+    emailInput.value = '';
+    return;
+  }
+  var s = sel._sortedList[parseInt(idx, 10)];
+  if (!s) return;
+  emailInput.value = s.email || '';
+  // Move focus to password field so user can start typing immediately
+  if (pwdInput) {
+    setTimeout(function() { pwdInput.focus(); }, 50);
+  }
 }
 
 // Called when user picks a name from dropdown
