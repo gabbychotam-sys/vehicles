@@ -811,7 +811,12 @@ function handleAuthStateChange(user) {
     authRequired = true;
     console.log('[Auth] signed in as', user.email);
   } else {
-    if (authRequired && overlay) overlay.style.display = 'flex';
+    if (authRequired && overlay) {
+      overlay.style.display = 'flex';
+      // Build the staff name picker (with email auto-fill on selection)
+      // so the user can pick their name and only type the password.
+      if (typeof populateAuthNameDropdown === 'function') populateAuthNameDropdown();
+    }
   }
 }
 
@@ -1668,18 +1673,18 @@ function goBackFromView() {
   try { applyTheme(); } catch(e){}
 
   var insp = loadInspector();
-  if (!insp) {
-    // First-time: show login
-    document.getElementById('scr-home').classList.remove('active');
-    document.getElementById('scr-login').classList.add('active');
-    // Populate inspector dropdown with staff list
-    if (typeof populateInspectorDropdown === 'function') {
-      populateInspectorDropdown();
-    }
-  } else {
+  if (insp) {
+    // Already identified - go straight to home
     refreshHomeUser();
     renderHome();
   }
+  // Else: stay on the default home screen.
+  // The auth-overlay (with built-in name picker + email auto-fill) will
+  // appear on top if Firebase requires auth. After successful login the
+  // inspector identity is saved automatically and home refreshes with the
+  // user's name. We deliberately do NOT show scr-login here anymore — the
+  // auth-overlay handles both name selection AND password in one screen.
+  // (scr-login is kept as a manual change-user option from settings.)
   // Init Firebase (waits for SDK to be loaded)
   if (typeof firebase !== 'undefined') {
     initFirebase();
