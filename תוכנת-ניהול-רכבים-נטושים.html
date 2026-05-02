@@ -4606,6 +4606,16 @@ function openCaseFromRow(tr) {
   // Reset CASE then merge saved data
   Object.assign(CASE, CASE_EMPTY);
   Object.keys(saved).forEach(function(k) { CASE[k] = saved[k]; });
+
+  // ═══ Field-name compatibility ═══
+  // Older case records and mobile-app records use shorter field names
+  // (owner, address, phone) than the desktop format (ownerName, ownerAddr,
+  // ownerPhone). Normalise here so downstream code (letter templates,
+  // detail view, dropdowns) always finds the data under the desktop keys
+  // and letters never come out blank.
+  if (!CASE.ownerName  && CASE.owner)   CASE.ownerName  = CASE.owner;
+  if (!CASE.ownerAddr  && CASE.address) CASE.ownerAddr  = CASE.address;
+  if (!CASE.ownerPhone && CASE.phone)   CASE.ownerPhone = CASE.phone;
   // Reset SENT to a clean slate (per-case mailing data isn't persisted yet)
   Object.assign(SENT, SENT_EMPTY);
 
@@ -5206,12 +5216,15 @@ td, th { padding: 6px 10px; border: 1px solid #ddd; }
 // hand-delivered and don't need the envelope).
 function wrapDocInPageTemplate(bodyHtml) {
   var c = (typeof CASE !== 'undefined') ? CASE : {};
-  var name = c.ownerName || '';
-  var addr = c.ownerAddr || '';
-  // The license plate is shown on a small reference tag below the recipient
-  // block so when the letter is folded into the DL window envelope, the mail
-  // clerk and recipient can immediately match the letter to the correct vehicle.
-  var plate = c.plate || '';
+  // Support multiple field-name conventions:
+  //  - desktop format: ownerName, ownerAddr
+  //  - mobile-app format: owner, address
+  //  - older variants: name, addr
+  // This prevents empty letters when the case was created via mobile or
+  // an older version of the form.
+  var name = c.ownerName || c.owner || c.name || '';
+  var addr = c.ownerAddr || c.address || c.addr || '';
+  var plate = c.plate || c.licensePlate || '';
   return ''
     + '<div class="gx-page">'
     +   '<div class="gx-fold gx-fold-1"></div>'
