@@ -2003,7 +2003,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.5 — no seed</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.6 — photos fix</div>
     </div>
   </div>
 
@@ -2077,7 +2077,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <div class="tb-notif">🔔<div class="notif-dot"></div></div>
       <button onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.5 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.6 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2658,7 +2658,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.5 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.6 ✓</span>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
     </div>
@@ -5589,9 +5589,14 @@ function populateCaseView(c) {
   else pillHtml += '<span class="chip chip-yellow">🟡 מדבקה צהובה</span>';
   setHtml('cv-pills', pillHtml);
 
-  // Photos
+  // Photos — normalize to { dataUrl, name } objects
   if (Array.isArray(c.photos)) {
-    casePhotos = c.photos.slice();
+    casePhotos = c.photos.map(function(p) {
+      if (!p) return null;
+      if (typeof p === 'string') return { dataUrl: p, name: 'photo.jpg' };
+      if (p.dataUrl) return { dataUrl: p.dataUrl, name: p.name || 'photo.jpg' };
+      return null;
+    }).filter(function(p) { return p !== null; });
   } else {
     casePhotos = [];
   }
@@ -10328,8 +10333,15 @@ if (document.readyState === 'loading') {
 
       // Transfer photos from mobile to new case form
       if (c.photos && c.photos.length && typeof newCasePhotos !== 'undefined') {
-        c.photos.forEach(function(photoUrl) {
-          newCasePhotos.push({ dataUrl: photoUrl });
+        c.photos.forEach(function(p) {
+          // Photos may arrive as raw data-URL strings (legacy mobile app) or
+          // as { dataUrl, name } objects. Normalize to the object shape.
+          if (!p) return;
+          if (typeof p === 'string') {
+            newCasePhotos.push({ dataUrl: p, name: 'photo.jpg' });
+          } else if (p.dataUrl) {
+            newCasePhotos.push({ dataUrl: p.dataUrl, name: p.name || 'photo.jpg' });
+          }
         });
         if (typeof renderNewCasePhotoThumbs === 'function') {
           renderNewCasePhotoThumbs();
@@ -10461,8 +10473,14 @@ if (document.readyState === 'loading') {
 
         // Transfer photos from mobile to new case form
         if (c.photos && c.photos.length && typeof newCasePhotos !== 'undefined') {
-          c.photos.forEach(function(photoUrl) {
-            newCasePhotos.push({ dataUrl: photoUrl });
+          c.photos.forEach(function(p) {
+            // Normalize to { dataUrl, name } shape (handles both legacy and new format)
+            if (!p) return;
+            if (typeof p === 'string') {
+              newCasePhotos.push({ dataUrl: p, name: 'photo.jpg' });
+            } else if (p.dataUrl) {
+              newCasePhotos.push({ dataUrl: p.dataUrl, name: p.name || 'photo.jpg' });
+            }
           });
           if (typeof renderNewCasePhotoThumbs === 'function') {
             renderNewCasePhotoThumbs();
