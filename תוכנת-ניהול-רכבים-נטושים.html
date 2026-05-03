@@ -2085,7 +2085,7 @@ try {
       <div class="tb-date" id="live-date">יום שבת, 2 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <div class="tb-notif">🔔<div class="notif-dot"></div></div>
-      <button onclick="window.insertDemoCase&amp;&amp;window.insertDemoCase()" style="background:#9c27b0;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px;" title="מוסיף תיק דוגמה דרך Firebase כדי שתוכל לראות איך תיק מהשטח נראה">🧪 הוסף תיק דוגמה</button>
+      <button onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2495,14 +2495,21 @@ try {
     <div class="card">
       <div style="padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
         <div>
-          <div class="card-title">📋 תהליך טיפול בתיק</div>
-          <div class="card-sub">שליחת מכתבים ועדכון סטטוסים</div>
+          <div class="card-title">📜 היסטוריית פעולות בתיק</div>
+          <div class="card-sub">תיעוד כרונולוגי של כל הפעולות והשינויים בתיק</div>
         </div>
       </div>
 
-            <div class="timeline" id="cv-timeline">
+      <!-- Live history of actions taken on this case -->
+      <div id="cv-case-history" style="padding:16px 20px;">
+        <div id="cv-case-history-list" style="display:flex;flex-direction:column;gap:8px;">
+          <div style="font-size:12px;color:var(--muted);font-style:italic;">אין פעולות מתועדות עדיין בתיק זה</div>
+        </div>
+      </div>
 
-        <!-- STEP 1: מכתב ראשון -->
+      <!-- Hidden timeline DOM (kept so legacy renderTimeline() doesn't error,
+           but invisible — user prefers chronological history above) -->
+      <div class="timeline" id="cv-timeline" style="display:none;">
         <div class="tl-row" id="tl-step1">
           <div class="tl-step">
             <div class="tl-circle step-pending" id="tl-circle1">1</div>
@@ -2510,30 +2517,16 @@ try {
           </div>
           <div class="tl-content">
             <div class="tl-header">
-              <div>
-                <div class="tl-title">שלב 1 — נספח א׳: מכתב ראשון בדואר רשום</div>
-                <div class="tl-days">30 יום לפינוי מתאריך קבלת המכתב</div>
-              </div>
-              <button class="btn-print-letter" id="tl-btn-send1" onclick="openModal('letter1')">
-                📄 הפק מכתב ראשון
-              </button>
+              <div><div class="tl-title">שלב 1</div></div>
+              <button class="btn-print-letter" id="tl-btn-send1" onclick="openModal('letter1')" style="display:none;">📄</button>
             </div>
             <div class="sent-record" id="tl-sent1" style="display:none;">
               <span class="sr-icon">✅</span>
-              <div class="sr-info">
-                <div class="sr-label">נשלח בדואר רשום</div>
-                <div class="sr-value" id="tl-sent1-info"></div>
-              </div>
-              <div class="sr-deadline">
-                <div class="sr-dl-label">תאריך יעד</div>
-                <div class="sr-dl-value" id="tl-sent1-deadline"></div>
-              </div>
-              <button class="btn-print-letter sent-btn" onclick="openModal('letter1')">📄 צפה/הדפס</button>
+              <div class="sr-info"><div class="sr-label"></div><div class="sr-value" id="tl-sent1-info"></div></div>
+              <div class="sr-deadline"><div class="sr-dl-label"></div><div class="sr-dl-value" id="tl-sent1-deadline"></div></div>
             </div>
           </div>
         </div>
-
-        <!-- STEP 2: מכתב שני -->
         <div class="tl-row" id="tl-step2">
           <div class="tl-step">
             <div class="tl-circle step-pending" id="tl-circle2">2</div>
@@ -2541,54 +2534,30 @@ try {
           </div>
           <div class="tl-content">
             <div class="tl-header">
-              <div>
-                <div class="tl-title">שלב 2 — נספח ד׳: מכתב שני בדואר רשום</div>
-                <div class="tl-days">14 יום לפינוי מתאריך קבלת המכתב</div>
-              </div>
-              <button class="btn-print-letter" id="tl-btn-send2" onclick="openModal('letter2')">
-                📄 הפק מכתב שני
-              </button>
+              <div><div class="tl-title">שלב 2</div></div>
+              <button class="btn-print-letter" id="tl-btn-send2" onclick="openModal('letter2')" style="display:none;">📄</button>
             </div>
             <div class="sent-record" id="tl-sent2" style="display:none;">
               <span class="sr-icon">✅</span>
-              <div class="sr-info">
-                <div class="sr-label">נשלח בדואר רשום</div>
-                <div class="sr-value" id="tl-sent2-info"></div>
-              </div>
-              <div class="sr-deadline">
-                <div class="sr-dl-label">תאריך יעד</div>
-                <div class="sr-dl-value" id="tl-sent2-deadline"></div>
-              </div>
-              <button class="btn-print-letter sent-btn" onclick="openModal('letter2')">📄 צפה/הדפס</button>
+              <div class="sr-info"><div class="sr-label"></div><div class="sr-value" id="tl-sent2-info"></div></div>
+              <div class="sr-deadline"><div class="sr-dl-label"></div><div class="sr-dl-value" id="tl-sent2-deadline"></div></div>
             </div>
             <div class="countdown-bar" id="tl-countdown2" style="display:none;">
-              <div class="cb-labels"><span id="tl-cd2-sent"></span><span id="tl-cd2-remain" style="color:var(--red);font-weight:700;"></span></div>
+              <div class="cb-labels"><span id="tl-cd2-sent"></span><span id="tl-cd2-remain"></span></div>
               <div class="cb-track"><div class="cb-fill red" id="tl-cd2-fill" style="width:0%"></div></div>
             </div>
           </div>
         </div>
-
-        <!-- STEP 3: גרירה -->
         <div class="tl-row" id="tl-step3">
-          <div class="tl-step">
-            <div class="tl-circle step-pending" id="tl-circle3">3</div>
-          </div>
+          <div class="tl-step"><div class="tl-circle step-pending" id="tl-circle3">3</div></div>
           <div class="tl-content">
             <div class="tl-header">
-              <div>
-                <div class="tl-title" id="tl-title3">שלב 3 — גרירה למגרש</div>
-                <div class="tl-days">לאחר גרירה: 60 יום לאיסוף (50 ₪/יום אחסנה)</div>
-              </div>
-              <button class="btn-print-letter" id="tl-btn-send3" onclick="openModal('letter4')" style="background:var(--red);">
-                🚛 תעד גרירה + הדפס הודעה
-              </button>
+              <div><div class="tl-title" id="tl-title3">שלב 3</div></div>
+              <button class="btn-print-letter" id="tl-btn-send3" onclick="openModal('letter4')" style="display:none;">🚛</button>
             </div>
-            <div id="tl-step3-notice" style="background:#fff5f5;border:1px solid #ffcdd2;border-radius:10px;padding:10px 14px;font-size:12px;color:#c62828;">
-              ⚠️ הרכב לא פונה — ניתן להורות על גרירה. לאחר גרירה ישלח מכתב אוטומטי לבעל הרכב.
-            </div>
+            <div id="tl-step3-notice" style="display:none;"></div>
           </div>
         </div>
-
       </div>
     </div>
 
@@ -2697,6 +2666,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
+      <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -3356,6 +3326,31 @@ try {
         </div>
       </div>
 
+      <!-- ═══ NEW: Section: מספרי דואר רשום ═══ -->
+      <div class="edit-section">
+        <div class="edit-section-title">📮 מספרי דואר רשום</div>
+        <div class="edit-grid">
+          <div class="edit-group">
+            <div class="edit-label">מספר דואר רשום — מכתב ראשון</div>
+            <input class="edit-input" id="e-regnum-1" type="text" placeholder="למשל RR123456789IL" style="font-family:monospace;direction:ltr;text-align:right;">
+            <div style="font-size:10px;color:var(--muted);margin-top:4px;">מספר זה יופיע אוטומטית במכתב הראשון</div>
+          </div>
+          <div class="edit-group">
+            <div class="edit-label">מספר דואר רשום — מכתב שני</div>
+            <input class="edit-input" id="e-regnum-2" type="text" placeholder="למשל RR987654321IL" style="font-family:monospace;direction:ltr;text-align:right;">
+            <div style="font-size:10px;color:var(--muted);margin-top:4px;">מספר זה יופיע אוטומטית במכתב השני</div>
+          </div>
+          <div class="edit-group">
+            <div class="edit-label">תאריך שליחת מכתב ראשון</div>
+            <input class="edit-input" id="e-letter1-date" type="date">
+          </div>
+          <div class="edit-group">
+            <div class="edit-label">תאריך שליחת מכתב שני</div>
+            <input class="edit-input" id="e-letter2-date" type="date">
+          </div>
+        </div>
+      </div>
+
       <!-- Section: הערות -->
       <div class="edit-section">
         <div class="edit-section-title">📝 הערות</div>
@@ -3595,15 +3590,20 @@ function openModal(lid) {
   document.getElementById('modal-deadline-label').textContent = `📅 תאריך יעד (${meta.days} יום)`;
   document.getElementById('modal-note').textContent = meta.note;
 
+  // ═══ NEW: Pre-fill regnum from saved CASE.regnum1/regnum2 if no SENT record yet ═══
+  var savedRegnum = '';
+  if (lid === 'letter1' && CASE.regnum1) savedRegnum = CASE.regnum1;
+  else if (lid === 'letter2' && CASE.regnum2) savedRegnum = CASE.regnum2;
+
   if (sent) {
     document.getElementById('modal-date').value     = sent.date;
-    document.getElementById('modal-regnum').value   = sent.regnum;
+    document.getElementById('modal-regnum').value   = sent.regnum || savedRegnum;
     document.getElementById('modal-deadline').value = sent.deadline;
     document.getElementById('modal-confirm-btn').textContent = '📮 עדכן שליחה';
     document.getElementById('modal-confirm-btn').style.background = '#2e7d32';
   } else {
     document.getElementById('modal-date').value     = '';
-    document.getElementById('modal-regnum').value   = '';
+    document.getElementById('modal-regnum').value   = savedRegnum;
     document.getElementById('modal-deadline').value = '';
     document.getElementById('modal-confirm-btn').textContent = '📮 אישור שליחה + עדכון סטטוס';
     document.getElementById('modal-confirm-btn').style.background = '';
@@ -3789,6 +3789,12 @@ function confirmSent() {
   const deadline = addDays(d, meta.days);
 
   SENT[lid] = { date:d, regnum:n, deadline };
+
+  // ═══ NEW: Also persist regnum to CASE so it pre-fills next time ═══
+  if (n) {
+    if (lid === 'letter1') CASE.regnum1 = n;
+    else if (lid === 'letter2') CASE.regnum2 = n;
+  }
 
   // ═══ NEW: Auto-update case status when letter is sent ═══
   // letter1 → status = letter1_sent, letter2 → letter2_sent, letter4 → towed
@@ -4293,10 +4299,11 @@ function renderArchive(plate, items) {
         (d.regnum ? '<div style="font-size:11px;color:var(--muted);font-family:monospace;direction:ltr;text-align:right;">דואר רשום: ' + d.regnum + '</div>' : '') +
         inspectorLine +
         '<div style="font-size:10px;color:#999;">נשמר: ' + savedDate + '</div>' +
-        '<div style="display:flex;gap:6px;margin-top:6px;">' +
-          '<button class="row-action" style="flex:1;background:#e3f2fd;color:#1565c0;font-size:11px;padding:6px;border:none;border-radius:6px;cursor:pointer;" onclick="viewArchivedDoc(\'' + safe + '\',\'' + it.key + '\')">👁️ צפה</button>' +
-          '<button class="row-action" style="flex:1;background:#e8f5e9;color:#2e7d32;font-size:11px;padding:6px;border:none;border-radius:6px;cursor:pointer;" onclick="printArchivedDoc(\'' + safe + '\',\'' + it.key + '\')">🖨️ הדפס</button>' +
-          '<button class="row-action" style="flex:1;background:#fff3e0;color:#e65100;font-size:11px;padding:6px;border:none;border-radius:6px;cursor:pointer;" onclick="downloadArchivedDoc(\'' + safe + '\',\'' + it.key + '\')">⬇️ הורד</button>' +
+        '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">' +
+          '<button class="row-action" style="flex:1;min-width:60px;background:#e3f2fd;color:#1565c0;font-size:11px;padding:6px;border:none;border-radius:6px;cursor:pointer;" onclick="viewArchivedDoc(\'' + safe + '\',\'' + it.key + '\')">👁️ צפה</button>' +
+          '<button class="row-action" style="flex:1;min-width:60px;background:#e8f5e9;color:#2e7d32;font-size:11px;padding:6px;border:none;border-radius:6px;cursor:pointer;" onclick="printArchivedDoc(\'' + safe + '\',\'' + it.key + '\')">🖨️ הדפס</button>' +
+          '<button class="row-action" style="flex:1;min-width:60px;background:#fff3e0;color:#e65100;font-size:11px;padding:6px;border:none;border-radius:6px;cursor:pointer;" onclick="downloadArchivedDoc(\'' + safe + '\',\'' + it.key + '\')">⬇️ הורד</button>' +
+          '<button class="row-action" style="flex:1;min-width:60px;background:#ffebee;color:#c62828;font-size:11px;padding:6px;border:1px solid #ffcdd2;border-radius:6px;cursor:pointer;" onclick="deleteArchivedDoc(\'' + safe + '\',\'' + it.key + '\')">🗑️ מחק</button>' +
         '</div>' +
       '</div>';
   });
@@ -4369,6 +4376,70 @@ function downloadArchivedDoc(safePlate, key) {
   a.click();
   document.body.removeChild(a);
   setTimeout(function() { URL.revokeObjectURL(url); }, 100);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   🗑️ deleteArchivedDoc — Removes a single document from the archive
+   (both from Firebase and localStorage fallback). Asks for confirmation.
+   ═══════════════════════════════════════════════════════════════════ */
+function deleteArchivedDoc(safePlate, key) {
+  var doc = _getArchivedDoc(safePlate, key);
+  if (!doc) { alert('לא נמצא המסמך'); return; }
+
+  var typeLabelMap = {
+    letter1: 'מכתב ראשון', letter2: 'מכתב שני', letter4: 'הודעת גרירה',
+    nispach_a: 'נספח א׳ — מכתב ראשון', nispach_b: 'מדבקה צהובה',
+    nispach_d: 'נספח ד׳ — מכתב שני', nispach_e: 'מדבקה אדומה',
+    pinuy_letter: 'מכתב פינוי גרוטאה', vitor: 'הצהרת ויתור',
+    flowchart: 'תרשים זרימה', case_snapshot: 'תיעוד פרטי תיק'
+  };
+  var typeLbl = typeLabelMap[doc.type] || doc.title || 'מסמך';
+  var dateStr = doc.savedAt ? new Date(doc.savedAt).toLocaleDateString('he-IL') : '';
+
+  if (!confirm('האם למחוק את המסמך מהארכיון?\n\n' + typeLbl + (dateStr ? ' (' + dateStr + ')' : '') + '\n\n⚠️ פעולה זו לא ניתנת לביטול')) return;
+
+  // ═══ Delete from Firebase ═══
+  var deletedFromFirebase = false;
+  var db = (typeof fbDb !== 'undefined' && fbDb) || window.fbDb;
+  var fbPromise = Promise.resolve();
+  if (db) {
+    fbPromise = db.ref('archives/' + safePlate + '/' + key).remove()
+      .then(function() {
+        console.log('[archive] ✓ deleted from Firebase:', safePlate, key);
+        deletedFromFirebase = true;
+      })
+      .catch(function(err) {
+        console.warn('[archive] ✗ Firebase delete failed:', err);
+      });
+  }
+
+  // ═══ Delete from localStorage fallback ═══
+  try {
+    var lsKey = 'galilArchive_' + safePlate;
+    var existing = JSON.parse(localStorage.getItem(lsKey) || '{}');
+    if (existing[key]) {
+      delete existing[key];
+      localStorage.setItem(lsKey, JSON.stringify(existing));
+      console.log('[archive] ✓ deleted from localStorage:', key);
+    }
+  } catch(e) { console.warn('[archive] localStorage delete failed:', e); }
+
+  // ═══ Remove from in-memory cache ═══
+  if (window._archiveCache && window._archiveCache[safePlate]) {
+    window._archiveCache[safePlate] = window._archiveCache[safePlate].filter(function(it) {
+      return it.key !== key;
+    });
+  }
+
+  if (typeof showToast === 'function') showToast('⏳ מוחק מסמך...');
+
+  fbPromise.finally(function() {
+    if (typeof showToast === 'function') showToast('🗑️ המסמך נמחק מהארכיון');
+    // Reload archive panel to reflect deletion
+    if (typeof loadCaseDocuments === 'function' && CASE && CASE.plate) {
+      setTimeout(function() { loadCaseDocuments(CASE.plate); }, 200);
+    }
+  });
 }
 
 function addToTowedPanel(caseData, deadline) {
@@ -4477,12 +4548,16 @@ function msDeleteSelected(tbodyId, barId, countId, allCbId) {
       // If row has a mobile-id, delete that record directly
       if (mobileId && window.GalilSync._deleteCase) {
         console.log('[msDeleteSelected] deleting from Firebase by id:', mobileId);
+        // ═══ TOMBSTONE: mark deleted so it never comes back ═══
+        if (window.GalilSync._markDeleted) window.GalilSync._markDeleted(mobileId);
         fbDeletePromises.push(window.GalilSync._deleteCase(mobileId));
       } else if (plateText && window.GalilSync._findIdByPlate && window.GalilSync._deleteCase) {
         // Otherwise, look up by plate in the mobile cache
         var idByPlate = window.GalilSync._findIdByPlate(plateText);
         if (idByPlate) {
           console.log('[msDeleteSelected] deleting from Firebase by plate:', plateText, '→', idByPlate);
+          // ═══ TOMBSTONE: mark deleted so it never comes back ═══
+          if (window.GalilSync._markDeleted) window.GalilSync._markDeleted(idByPlate);
           fbDeletePromises.push(window.GalilSync._deleteCase(idByPlate));
         } else {
           console.log('[msDeleteSelected] no Firebase id found for plate:', plateText, '— local-only delete');
@@ -4781,6 +4856,29 @@ function openEditModal() {
   currentStatus = CASE.status || 'red';
   document.querySelectorAll('.status-chip').forEach(c =>
     c.classList.toggle('active', c.dataset.status === currentStatus));
+
+  // ═══ NEW: Populate registered-mail fields from SENT data ═══
+  var regnum1El = document.getElementById('e-regnum-1');
+  var regnum2El = document.getElementById('e-regnum-2');
+  var letter1DateEl = document.getElementById('e-letter1-date');
+  var letter2DateEl = document.getElementById('e-letter2-date');
+  if (regnum1El)     regnum1El.value     = (SENT && SENT.letter1 && SENT.letter1.regnum) || CASE.regnum1 || '';
+  if (regnum2El)     regnum2El.value     = (SENT && SENT.letter2 && SENT.letter2.regnum) || CASE.regnum2 || '';
+  if (letter1DateEl) letter1DateEl.value = (SENT && SENT.letter1 && SENT.letter1.date)   || '';
+  if (letter2DateEl) letter2DateEl.value = (SENT && SENT.letter2 && SENT.letter2.date)   || '';
+
+  // ═══ NEW: Auto-fill location from GPS coordinates if available ═══
+  // Uses Nominatim (OpenStreetMap) reverse geocoding — free, no key.
+  // Only fills empty fields so we don't clobber user edits.
+  try {
+    var hasGps = CASE.lat != null && CASE.lon != null && CASE.lat !== '' && CASE.lon !== '';
+    var cityEmpty = !citySel.value || citySel.value === citySel.options[0].value;
+    var streetEmpty = !document.getElementById('e-location-street').value;
+    if (hasGps && (cityEmpty || streetEmpty) && typeof window._gx_reverseGeocodeForEdit === 'function') {
+      window._gx_reverseGeocodeForEdit(CASE.lat, CASE.lon);
+    }
+  } catch(e) { console.warn('[edit] geocode failed:', e); }
+
   updateTowSection();
   renderPhotoThumbs();
   document.getElementById('edit-modal-overlay').classList.add('open');
@@ -4833,6 +4931,36 @@ function saveCase() {
   CASE.towDate     = document.getElementById('e-tow-date').value || null;
   CASE.notes       = document.getElementById('e-notes').value.trim();
   CASE.status      = currentStatus;
+
+  // ═══ NEW: Save registered-mail numbers and dates ═══
+  var newRegnum1     = (document.getElementById('e-regnum-1')     || {}).value || '';
+  var newRegnum2     = (document.getElementById('e-regnum-2')     || {}).value || '';
+  var newLetter1Date = (document.getElementById('e-letter1-date') || {}).value || '';
+  var newLetter2Date = (document.getElementById('e-letter2-date') || {}).value || '';
+  CASE.regnum1 = newRegnum1.trim();
+  CASE.regnum2 = newRegnum2.trim();
+  // Update SENT records if a date is provided
+  if (newLetter1Date || (CASE.regnum1 && SENT.letter1)) {
+    SENT.letter1 = SENT.letter1 || {};
+    if (newLetter1Date) SENT.letter1.date = newLetter1Date;
+    if (CASE.regnum1)   SENT.letter1.regnum = CASE.regnum1;
+    if (SENT.letter1.date && typeof addDays === 'function') {
+      SENT.letter1.deadline = addDays(SENT.letter1.date, 30);
+    }
+  } else if (!newLetter1Date && !CASE.regnum1) {
+    // If user cleared both, clear SENT.letter1
+    if (SENT.letter1 && !SENT.letter1.date) SENT.letter1 = null;
+  }
+  if (newLetter2Date || (CASE.regnum2 && SENT.letter2)) {
+    SENT.letter2 = SENT.letter2 || {};
+    if (newLetter2Date) SENT.letter2.date = newLetter2Date;
+    if (CASE.regnum2)   SENT.letter2.regnum = CASE.regnum2;
+    if (SENT.letter2.date && typeof addDays === 'function') {
+      SENT.letter2.deadline = addDays(SENT.letter2.date, 14);
+    }
+  } else if (!newLetter2Date && !CASE.regnum2) {
+    if (SENT.letter2 && !SENT.letter2.date) SENT.letter2 = null;
+  }
 
   setTimeout(() => {
     // Live update header via IDs
@@ -6193,7 +6321,168 @@ document.querySelectorAll('.tb-bc-link').forEach(link => {
 // ═══════════════ CASE MANAGEMENT ═══════════════
 
 // ═══════════════ TIMELINE RENDERING ═══════════════
+/* ═══════════════════════════════════════════════════════════════════
+   📜 renderCaseHistory — Builds the live "history of actions" panel
+   shown at the top of the תהליך טיפול בתיק card. Reflects the actual
+   state of the case: stickers applied, letters sent, towed, scrapped,
+   waiver signed, closed.
+   Sources of truth (in order):
+     1. CASE.history[] (if present — actual audit trail)
+     2. SENT.letter1/letter2/letter4 (mailing data)
+     3. CASE.status (current sticker/state)
+     4. CASE.foundDate (when the case was opened)
+   ═══════════════════════════════════════════════════════════════════ */
+function renderCaseHistory() {
+  var listEl = document.getElementById('cv-case-history-list');
+  if (!listEl) return;
+
+  var events = [];
+
+  // 1) Case opened
+  if (CASE && (CASE.foundDate || CASE.date)) {
+    events.push({
+      icon: '🆕',
+      color: '#1565c0',
+      title: 'תיק נפתח',
+      detail: CASE.inspector ? ('פקח: ' + CASE.inspector) : '',
+      date: CASE.foundDate || CASE.date,
+      ts: new Date(CASE.foundDate || CASE.date).getTime() || 0
+    });
+  }
+
+  // 2) Initial sticker (status when case was created — yellow/red)
+  // We can't know exactly when it was applied without history, so we
+  // approximate: if status is yellow/red, show "sticker applied" at case open.
+  if (CASE) {
+    if (CASE.status === 'yellow') {
+      events.push({
+        icon: '🟡',
+        color: '#f9a825',
+        title: 'הודבקה מדבקה צהובה',
+        detail: 'נספח ב׳ — התראה ראשונה (30 יום לפינוי)',
+        date: CASE.foundDate || CASE.date || '',
+        ts: (new Date(CASE.foundDate || CASE.date).getTime() || 0) + 1
+      });
+    } else if (CASE.status === 'red') {
+      events.push({
+        icon: '🔴',
+        color: '#c62828',
+        title: 'הודבקה מדבקה אדומה',
+        detail: 'נספח ה׳ — התראה שנייה (14 יום לפינוי)',
+        date: CASE.foundDate || CASE.date || '',
+        ts: (new Date(CASE.foundDate || CASE.date).getTime() || 0) + 1
+      });
+    }
+  }
+
+  // 3) Letters sent (from SENT)
+  if (typeof SENT !== 'undefined' && SENT) {
+    if (SENT.letter1) {
+      events.push({
+        icon: '📮',
+        color: '#1565c0',
+        title: 'נשלח מכתב ראשון בדואר רשום',
+        detail: 'נספח א׳ — 30 יום לפינוי' + (SENT.letter1.regnum ? ' | מס׳ רשום: ' + SENT.letter1.regnum : ''),
+        date: SENT.letter1.date || '',
+        ts: new Date(SENT.letter1.date).getTime() || 0,
+        deadline: SENT.letter1.deadline
+      });
+    }
+    if (SENT.letter2) {
+      events.push({
+        icon: '📮',
+        color: '#ad1457',
+        title: 'נשלח מכתב שני בדואר רשום',
+        detail: 'נספח ד׳ — 14 יום לפינוי' + (SENT.letter2.regnum ? ' | מס׳ רשום: ' + SENT.letter2.regnum : ''),
+        date: SENT.letter2.date || '',
+        ts: new Date(SENT.letter2.date).getTime() || 0,
+        deadline: SENT.letter2.deadline
+      });
+    }
+    if (SENT.letter4) {
+      events.push({
+        icon: '🚛',
+        color: '#e65100',
+        title: 'הרכב נגרר למגרש',
+        detail: '60 יום לאיסוף (50 ₪/יום אחסנה)',
+        date: SENT.letter4.date || '',
+        ts: new Date(SENT.letter4.date).getTime() || 0,
+        deadline: SENT.letter4.deadline
+      });
+    }
+  }
+
+  // 4) Status changes that aren't covered above
+  if (CASE) {
+    if (CASE.status === 'scrapped') {
+      events.push({
+        icon: '♻️',
+        color: '#5d4037',
+        title: 'הרכב פונה כגרוטאה',
+        detail: 'הוצא מהמגרש לפינוי לפי חוק',
+        date: CASE.scrappedDate || '',
+        ts: Date.now()
+      });
+    }
+    if (CASE.status === 'waiver') {
+      events.push({
+        icon: '✍️',
+        color: '#6a1b9a',
+        title: 'נחתמה הצהרת ויתור',
+        detail: 'בעל הרכב ויתר על כלי הרכב',
+        date: CASE.waiverDate || '',
+        ts: Date.now()
+      });
+    }
+    if (CASE.status === 'closed' || CASE.status === 'green') {
+      events.push({
+        icon: '✅',
+        color: '#2e7d32',
+        title: 'התיק נסגר',
+        detail: 'הטיפול בתיק הסתיים',
+        date: CASE.closedDate || '',
+        ts: Date.now()
+      });
+    }
+  }
+
+  // Sort events chronologically (oldest first)
+  events.sort(function(a, b) { return (a.ts || 0) - (b.ts || 0); });
+
+  // Render
+  if (!events.length) {
+    listEl.innerHTML = '<div style="font-size:12px;color:var(--muted);font-style:italic;">אין פעולות מתועדות עדיין בתיק זה</div>';
+    return;
+  }
+
+  var html = '';
+  events.forEach(function(ev) {
+    var dateStr = '';
+    if (ev.date) {
+      try { dateStr = new Date(ev.date).toLocaleDateString('he-IL'); } catch(e) { dateStr = ev.date; }
+    }
+    var deadlineStr = '';
+    if (ev.deadline) {
+      try { deadlineStr = ' (יעד פינוי: ' + new Date(ev.deadline).toLocaleDateString('he-IL') + ')'; } catch(e){}
+    }
+    html +=
+      '<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 10px;background:var(--card);border:1px solid var(--border);border-right:3px solid ' + ev.color + ';border-radius:8px;">' +
+        '<div style="font-size:20px;flex-shrink:0;">' + ev.icon + '</div>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:13px;font-weight:700;color:' + ev.color + ';">' + ev.title + (dateStr ? ' <span style="color:var(--muted);font-weight:600;">— ' + dateStr + '</span>' : '') + '</div>' +
+          (ev.detail ? '<div style="font-size:11px;color:var(--muted);margin-top:2px;">' + ev.detail + deadlineStr + '</div>' : '') +
+        '</div>' +
+      '</div>';
+  });
+  listEl.innerHTML = html;
+}
+
 function renderTimeline() {
+  // ═══ NEW: Render the live "history of actions" panel above timeline ═══
+  if (typeof renderCaseHistory === 'function') {
+    try { renderCaseHistory(); } catch(e) { console.warn('[history] render failed:', e); }
+  }
+
   // Step 1
   var c1 = document.getElementById('tl-circle1');
   var l1 = document.getElementById('tl-line1');
@@ -6454,6 +6743,107 @@ function renderNewCasePhotoThumbs() {
   });
   var addLabel = document.getElementById('nf-photo-add-label');
   if (addLabel) addLabel.style.display = newCasePhotos.length >= 10 ? 'none' : '';
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   🗑️ nukeAllVisibleCases — Emergency clear button.
+   Marks every Firebase ID currently in the cases table as "deleted"
+   (tombstone) so it never reappears, removes the rows from the DOM,
+   and attempts a Firebase delete on each. This is more reliable than
+   the global "remove cases/" because it works even if Firebase rules
+   only allow per-record writes.
+   ═══════════════════════════════════════════════════════════════════ */
+function nukeAllVisibleCases() {
+  if (!confirm('⚠️ למחוק את כל התיקים מהמערכת?\n\nהפעולה תמחק:\n• כל התיקים שמופיעים בכל המסכים\n• כל התיקים שיש ב-Firebase\n• רישום ברשימה שחורה כך שלא יחזרו לעולם\n\n⚠️ פעולה זו לא ניתנת לביטול')) return;
+
+  var db = (typeof fbDb !== 'undefined' && fbDb) || window.fbDb;
+  var idsToDelete = {};
+
+  // ═══ Collect IDs from all DOM tables ═══
+  ['cases-tbody', 'dash-urgent-tbody', 'tw-towed-tbody', 'towed-tbody', 'mobile-cases-tbody'].forEach(function(tbId) {
+    var tb = document.getElementById(tbId);
+    if (!tb) return;
+    tb.querySelectorAll('tr').forEach(function(row) {
+      var mid = row.getAttribute('data-mobile-id');
+      if (mid) idsToDelete[mid] = true;
+      else {
+        var pb = row.querySelector('.plate-badge');
+        if (pb && window.GalilSync && window.GalilSync._findIdByPlate) {
+          var id = window.GalilSync._findIdByPlate(pb.textContent.trim());
+          if (id) idsToDelete[id] = true;
+        }
+      }
+    });
+  });
+
+  // ═══ Also collect IDs from Firebase mobileCasesCache ═══
+  try {
+    if (window.GalilSync && window.GalilSync._listAllIds) {
+      window.GalilSync._listAllIds().forEach(function(id) { idsToDelete[id] = true; });
+    }
+  } catch(e){}
+
+  if (typeof showToast === 'function') showToast('⏳ מוחק את כל התיקים...');
+
+  // ═══ Helper: tombstone + delete + remove from DOM ═══
+  function _processIds(ids) {
+    ids.forEach(function(id) {
+      if (window.GalilSync && window.GalilSync._markDeleted) {
+        window.GalilSync._markDeleted(id);
+      }
+      if (db) {
+        db.ref('cases/' + id).remove()
+          .then(function() { console.log('[nukeAll] ✓ deleted:', id); })
+          .catch(function(err) { console.warn('[nukeAll] FB delete failed for ' + id + ':', err); });
+      }
+    });
+    // Remove all rows from all tables
+    ['cases-tbody', 'dash-urgent-tbody', 'tw-towed-tbody', 'towed-tbody', 'mobile-cases-tbody', 'tw-history-tbody', 'towns-cases-tbody'].forEach(function(tbId) {
+      var tb = document.getElementById(tbId);
+      if (tb) tb.innerHTML = '';
+    });
+    // Clear caches
+    try {
+      if (typeof mobileCasesCache !== 'undefined') {
+        Object.keys(mobileCasesCache).forEach(function(k) { delete mobileCasesCache[k]; });
+      }
+      if (typeof MAP_CASES !== 'undefined' && Array.isArray(MAP_CASES)) MAP_CASES.length = 0;
+    } catch(e){}
+    // Refresh counters
+    try {
+      if (typeof updateAllCounters === 'function') updateAllCounters();
+      if (typeof syncDashboardWithCases === 'function') syncDashboardWithCases();
+      if (typeof refreshDashboardPanels === 'function') refreshDashboardPanels();
+    } catch(e){}
+  }
+
+  // ═══ ALSO query Firebase directly to catch any IDs not in our caches ═══
+  if (db) {
+    db.ref('cases').once('value')
+      .then(function(snap) {
+        snap.forEach(function(child) { idsToDelete[child.key] = true; });
+        var allIds = Object.keys(idsToDelete);
+        console.log('[nukeAll] processing ' + allIds.length + ' IDs');
+        _processIds(allIds);
+        if (typeof showToast === 'function') {
+          showToast('🗑️ נמחקו ' + allIds.length + ' תיקים — לא יחזרו לעולם');
+        }
+      })
+      .catch(function(err) {
+        // Firebase read failed — process what we already have
+        var allIds = Object.keys(idsToDelete);
+        _processIds(allIds);
+        if (typeof showToast === 'function') {
+          showToast('🗑️ נמחקו ' + allIds.length + ' תיקים מהמסך');
+        }
+      });
+  } else {
+    var allIds = Object.keys(idsToDelete);
+    _processIds(allIds);
+    if (typeof showToast === 'function') {
+      showToast('🗑️ נמחקו ' + allIds.length + ' תיקים מהמסך');
+    }
+  }
 }
 
 function openNewCase() {
@@ -7239,11 +7629,17 @@ function executeDeleteCase() {
     if (window.GalilSync && window.GalilSync.isReady && window.GalilSync.isReady()) {
       // If we have a mobile-id from the row, use it directly
       if (mobileIdToDelete && window.GalilSync._deleteCase) {
+        // ═══ TOMBSTONE: mark deleted so it never comes back ═══
+        if (window.GalilSync._markDeleted) window.GalilSync._markDeleted(mobileIdToDelete);
         window.GalilSync._deleteCase(mobileIdToDelete);
       } else if (window.GalilSync._findIdByPlate && window.GalilSync._deleteCase) {
         // Otherwise try to find by plate
         var idByPlate = window.GalilSync._findIdByPlate(deletingPlate);
-        if (idByPlate) window.GalilSync._deleteCase(idByPlate);
+        if (idByPlate) {
+          // ═══ TOMBSTONE: mark deleted so it never comes back ═══
+          if (window.GalilSync._markDeleted) window.GalilSync._markDeleted(idByPlate);
+          window.GalilSync._deleteCase(idByPlate);
+        }
       }
     }
 
@@ -8306,20 +8702,35 @@ function resetSavedData() {
 
   showToast('🔄 מוחק את כל הנתונים...');
 
-  // ═══ Step 1: Clear local storage ═══
+  // ═══ Step 1: Mark reset timestamp — used by Firebase listener to ignore ═══
+  // ═══ stale cases that survived (e.g. due to permission errors).         ═══
+  var resetAt = Date.now();
+  try {
+    localStorage.setItem('galilElyon_resetAt', String(resetAt));
+    window._galilResetAt = resetAt;
+    console.log('[reset] resetAt timestamp set to', resetAt);
+  } catch(e) {}
+
+  // ═══ Step 2: Clear local storage ═══
   try {
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem('galilElyon_activityFeed');
+    // Clear all archive localStorage entries
+    for (var i = localStorage.length - 1; i >= 0; i--) {
+      var k = localStorage.key(i);
+      if (k && k.indexOf('galilArchive_') === 0) {
+        localStorage.removeItem(k);
+      }
+    }
   } catch (e) { console.warn('localStorage clear failed:', e); }
 
-  // ═══ Step 2: Clear ALL rows from every table in the DOM ═══
-  // (otherwise demo rows baked into the HTML would still appear after reload)
-  ['cases-tbody', 'tw-tow-pending-tbody', 'tw-towed-tbody', 'tw-returned-tbody', 'towed-tbody', 'mobile-cases-tbody'].forEach(function(id) {
+  // ═══ Step 3: Clear ALL rows from every table in the DOM ═══
+  ['cases-tbody', 'tw-tow-pending-tbody', 'tw-towed-tbody', 'tw-returned-tbody', 'towed-tbody', 'mobile-cases-tbody', 'dash-urgent-tbody', 'tw-history-tbody', 'towns-cases-tbody'].forEach(function(id) {
     var tb = document.getElementById(id);
     if (tb) tb.innerHTML = '';
   });
 
-  // ═══ Step 3: Clear in-memory caches ═══
+  // ═══ Step 4: Clear in-memory caches ═══
   try {
     if (typeof mobileCasesCache !== 'undefined') {
       Object.keys(mobileCasesCache).forEach(function(k) { delete mobileCasesCache[k]; });
@@ -8329,29 +8740,52 @@ function resetSavedData() {
     if (typeof activityFeed !== 'undefined' && Array.isArray(activityFeed)) activityFeed.length = 0;
   } catch(e){}
 
-  // ═══ Step 4: Refresh dashboard counters ═══
+  // ═══ Step 5: Refresh dashboard counters ═══
   try {
     if (typeof updateAllCounters === 'function') updateAllCounters();
     if (typeof refreshDashboardPanels === 'function') refreshDashboardPanels();
     if (typeof renderActivityFeed === 'function') renderActivityFeed();
   } catch(e){}
 
-  // ═══ Step 5: Clear Firebase data (cases + archives) ═══
-  try {
-    var db = (typeof fbDb !== 'undefined' && fbDb) || window.fbDb;
-    if (db) {
-      db.ref('cases').remove()
-        .then(function() { console.log('[reset] ✓ Firebase cases cleared'); })
-        .catch(function(err) { console.warn('[reset] cases clear failed:', err); });
+  // ═══ Step 6: Clear Firebase data (cases + archives) — best effort ═══
+  var db = (typeof fbDb !== 'undefined' && fbDb) || window.fbDb;
+  var fbDeletePromises = [];
+  if (db) {
+    // ═══ NEW: First, snapshot all existing case IDs and add them to the ═══
+    // ═══ tombstone list so they never come back even if remove() fails. ═══
+    fbDeletePromises.push(
+      db.ref('cases').once('value')
+        .then(function(snap) {
+          var ids = [];
+          snap.forEach(function(child) { ids.push(child.key); });
+          if (ids.length && window.GalilSync && window.GalilSync._markDeleted) {
+            ids.forEach(function(id) { window.GalilSync._markDeleted(id); });
+            console.log('[reset] tombstoned ' + ids.length + ' Firebase case IDs');
+          }
+          // Now actually delete
+          return db.ref('cases').remove();
+        })
+        .then(function() { console.log('[reset] ✓ Firebase cases cleared'); return true; })
+        .catch(function(err) { console.warn('[reset] cases clear failed:', err); return false; })
+    );
+    fbDeletePromises.push(
       db.ref('archives').remove()
-        .then(function() { console.log('[reset] ✓ Firebase archives cleared'); })
-        .catch(function(err) { console.warn('[reset] archives clear failed:', err); });
-    }
-  } catch (e) { console.warn('[reset] Firebase setup failed:', e); }
+        .then(function() { console.log('[reset] ✓ Firebase archives cleared'); return true; })
+        .catch(function(err) { console.warn('[reset] archives clear failed:', err); return false; })
+    );
+  }
 
-  setTimeout(function() {
-    showToast('✅ הכל נמחק בהצלחה');
-  }, 800);
+  // After Firebase delete attempt, show appropriate message
+  Promise.all(fbDeletePromises).then(function(results) {
+    var allOk = results.every(function(r) { return r === true; });
+    if (allOk) {
+      showToast('✅ הכל נמחק בהצלחה — כולל מהאייפון של כולם');
+    } else {
+      // Even if Firebase delete failed, the resetAt timestamp will hide
+      // those cases on next load.
+      showToast('✅ הנתונים נמחקו במחשב (תיקים ישנים מ-Firebase יוסתרו)');
+    }
+  });
 }
 
 // Ctrl+S / Cmd+S → manual save
@@ -8521,6 +8955,57 @@ if (document.readyState === 'loading') {
   // Expose for use by the case-promotion code further down in this IIFE
   window._gx_reverseGeocodeIntoStreet = reverseGeocodeIntoStreet;
 
+  // ═══ NEW: Variant that fills the EDIT modal fields (e-location-*) ═══
+  // Used when opening an existing case for editing if it has GPS but no city.
+  window._gx_reverseGeocodeForEdit = function(lat, lon) {
+    if (lat == null || lon == null) return;
+    var streetEl = document.getElementById('e-location-street');
+    var citySel  = document.getElementById('e-location-city');
+    if (!streetEl && !citySel) return;
+
+    var key = (+lat).toFixed(5) + ',' + (+lon).toFixed(5);
+    if (geocodeCache.hasOwnProperty(key)) {
+      applyGeocodeResult(geocodeCache[key], streetEl, citySel);
+      return;
+    }
+
+    var url = 'https://nominatim.openstreetmap.org/reverse'
+            + '?format=jsonv2&accept-language=he'
+            + '&zoom=18&addressdetails=1'
+            + '&lat=' + encodeURIComponent(lat)
+            + '&lon=' + encodeURIComponent(lon);
+
+    fetch(url, { headers: { 'Accept': 'application/json' } })
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(data) {
+        if (!data) return;
+        var a = data.address || {};
+        var road = a.road || a.pedestrian || a.path || a.footway
+                || a.cycleway || a.residential || a.living_street
+                || a.tourism || a.amenity || a.shop || '';
+        var num  = a.house_number || '';
+        var streetText = '';
+        if (road && num) streetText = road + ' ' + num;
+        else if (road) streetText = road;
+        else if (a.neighbourhood) streetText = a.neighbourhood;
+        else if (a.suburb) streetText = a.suburb;
+        else if (a.hamlet) streetText = a.hamlet;
+        else if (a.quarter) streetText = a.quarter;
+        else if (data.name) streetText = data.name;
+        else if (data.display_name) streetText = data.display_name.split(',')[0];
+
+        var cityText = a.city || a.town || a.village || a.municipality
+                     || a.suburb || a.county || '';
+        var result = { street: streetText, city: cityText };
+        geocodeCache[key] = result;
+        applyGeocodeResult(result, streetEl, citySel);
+        console.log('[GeoCode/Edit] filled:', result);
+      })
+      .catch(function(err) {
+        console.warn('[GeoCode/Edit] reverse geocoding failed:', err);
+      });
+  };
+
   // Show / hide the navigation buttons (Waze + Google Maps) below the
   // city dropdown, so the manager can navigate straight to where the
   // photo was taken. Both links share the same lat/lon.
@@ -8552,6 +9037,22 @@ if (document.readyState === 'loading') {
     isReady: function() { return fbReady; },
     _showCase: showMobileCaseModal,
     openInCaseList: openInCaseList,
+    // ═══ NEW: Tombstone — mark id as deleted forever (survives in localStorage) ═══
+    _markDeleted: function(id) {
+      if (!id) return;
+      try {
+        var raw = localStorage.getItem('galilElyon_deletedIds') || '[]';
+        var arr = JSON.parse(raw);
+        if (!Array.isArray(arr)) arr = [];
+        if (arr.indexOf(id) === -1) {
+          arr.push(id);
+          // Cap at 5000 to avoid unbounded growth
+          if (arr.length > 5000) arr = arr.slice(-5000);
+          localStorage.setItem('galilElyon_deletedIds', JSON.stringify(arr));
+          console.log('[GalilSync] marked deleted:', id);
+        }
+      } catch(e) { console.warn('[GalilSync] markDeleted failed:', e); }
+    },
     // Delete a case from Firebase (used when user deletes locally)
     _deleteCase: function(id) {
       if (!fbReady || !fbDb || !id) {
@@ -9082,25 +9583,67 @@ if (document.readyState === 'loading') {
     if (!fbReady || !fbDb || listenerRef) return;
     listenerRef = fbDb.ref('cases');
 
+    // ═══ NEW: Read reset timestamp — any case older than this is hidden ═══
+    function _getResetAt() {
+      try {
+        var v = parseInt(localStorage.getItem('galilElyon_resetAt') || '0', 10);
+        return isNaN(v) ? 0 : v;
+      } catch(e) { return 0; }
+    }
+
+    // ═══ NEW: Tombstone — list of Firebase IDs that the user has deleted, ═══
+    // ═══ even if Firebase itself didn't accept the delete (perm error).  ═══
+    function _getDeletedIds() {
+      try {
+        var raw = localStorage.getItem('galilElyon_deletedIds') || '[]';
+        var arr = JSON.parse(raw);
+        return Array.isArray(arr) ? arr : [];
+      } catch(e) { return []; }
+    }
+
+    function _isStaleCase(c, fbKey) {
+      // Tombstone wins: if this id is in the deleted list, hide it
+      if (fbKey) {
+        var deleted = _getDeletedIds();
+        if (deleted.indexOf(fbKey) !== -1) return true;
+      }
+      var resetAt = _getResetAt();
+      if (!resetAt) return false;
+      // A case is "stale" if it existed BEFORE the reset event.
+      var updatedAt = +(c && c.updatedAt) || 0;
+      if (updatedAt) return updatedAt < resetAt;
+      // Fall back to date for cases without updatedAt (e.g. older mobile cases)
+      var dateMs = 0;
+      try { if (c && c.date) dateMs = new Date(c.date).getTime() || 0; } catch(e){}
+      if (dateMs) return dateMs < resetAt;
+      // No timestamp at all → treat as stale
+      return true;
+    }
+
     listenerRef.on('child_added', function(snap) {
       var c = snap.val();
       if (!c) return;
+      // ═══ Skip cases that were deleted or are from before reset ═══
+      if (_isStaleCase(c, snap.key)) {
+        console.log('[Firebase] skipping stale/deleted case', snap.key, c.plate || '');
+        try { fbDb.ref('cases/' + snap.key).remove().catch(function(){}); } catch(e){}
+        return;
+      }
       if (c.source === 'mobile') {
         mobileCasesCache[c.id] = c;
         addOrUpdateMobileRow(c, true);
       } else if (c.source === 'manual') {
-        // ═══ NEW: manual case from another manager → render row ═══
         addOrUpdateManualRow(c, true);
       }
     });
     listenerRef.on('child_changed', function(snap) {
       var c = snap.val();
       if (!c) return;
+      if (_isStaleCase(c, snap.key)) return;
       if (c.source === 'mobile') {
         mobileCasesCache[c.id] = c;
         addOrUpdateMobileRow(c, false);
       } else if (c.source === 'manual') {
-        // ═══ NEW: manual case edited elsewhere → update row ═══
         addOrUpdateManualRow(c, false);
       }
     });
