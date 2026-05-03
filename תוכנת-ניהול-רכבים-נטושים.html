@@ -2003,7 +2003,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.6 — photos fix</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.7 — full edit form</div>
     </div>
   </div>
 
@@ -2077,7 +2077,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <div class="tb-notif">🔔<div class="notif-dot"></div></div>
       <button onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.6 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.7 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2658,7 +2658,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.6 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.7 ✓</span>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
     </div>
@@ -5379,7 +5379,7 @@ function upsertCaseRow(oldPlate, c, fullData) {
       try { existing.setAttribute('data-case', JSON.stringify(fullData)); } catch(e){}
     }
     existing.style.cursor = 'pointer';
-    existing.onclick = function() { openCaseFromRow(this); };
+    existing.onclick = function() { openEditFullForm(this); };
     tr = existing;
     // Brief flash to indicate update
     tr.style.background = 'rgba(46,125,50,0.18)';
@@ -5395,7 +5395,7 @@ function upsertCaseRow(oldPlate, c, fullData) {
       try { tr.setAttribute('data-case', JSON.stringify(fullData)); } catch(e){}
     }
     tr.style.cursor = 'pointer';
-    tr.onclick = function() { openCaseFromRow(this); };
+    tr.onclick = function() { openEditFullForm(this); };
     tbody.insertBefore(tr, tbody.firstChild);
     // Brief highlight on insert
     tr.style.background = 'rgba(46,125,50,0.18)';
@@ -5529,6 +5529,125 @@ function openCaseFromRow(tr) {
   // Scroll to top
   var ps = document.querySelector('.view-case .page-scroll');
   if (ps) ps.scrollTop = 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   openEditFullForm — Opens the FULL "new case" form pre-filled with an
+   existing case's data, with title "✏️ עריכת תיק" instead of "תיק חדש".
+   When the user clicks save, the existing case row is updated instead of
+   a new one being created.
+   ═══════════════════════════════════════════════════════════════════════ */
+function openEditFullForm(tr) {
+  if (!tr) return;
+
+  var caseDataStr = tr.getAttribute('data-case');
+  if (!caseDataStr) {
+    // No inline data — fall back to the legacy behavior (which can fetch from FB)
+    return openCaseFromRow(tr);
+  }
+
+  var saved;
+  try { saved = JSON.parse(caseDataStr); } catch(e) {
+    console.error('[openEditFullForm] failed to parse:', e);
+    return;
+  }
+
+  // Field-name compatibility (mobile vs desktop) — normalize on `saved`
+  if (!saved.ownerName  && saved.owner)   saved.ownerName  = saved.owner;
+  if (!saved.ownerAddr  && saved.address) saved.ownerAddr  = saved.address;
+  if (!saved.ownerPhone && saved.phone)   saved.ownerPhone = saved.phone;
+
+  // ═══ Mark that we're editing an existing case ═══
+  // saveNewCase will check this flag to decide whether to add a new row
+  // or update the existing one.
+  window._editingExistingRow = tr;
+  window._editingExistingId  = tr.getAttribute('data-mobile-id') || tr.getAttribute('data-id') || '';
+
+  // Open the standard "new case" form FIRST (this resets CASE and clears fields)
+  openNewCase();
+
+  // ═══ Now restore CASE with the existing data, AFTER the reset ═══
+  Object.assign(CASE, CASE_EMPTY);
+  Object.keys(saved).forEach(function(k) { CASE[k] = saved[k]; });
+  Object.assign(SENT, SENT_EMPTY);
+
+  // ═══ Fill the form with the existing case data ═══
+  var setVal = function(id, val) {
+    var el = document.getElementById(id);
+    if (el) el.value = (val == null) ? '' : val;
+  };
+  setVal('nf-plate',          CASE.plate);
+  setVal('nf-vehicle-type',   CASE.vehicleType);
+  setVal('nf-color',          CASE.color || 'כסף');
+  setVal('nf-owner-name',     CASE.ownerName);
+  setVal('nf-owner-id',       CASE.ownerId);
+  setVal('nf-owner-addr',     CASE.ownerAddr);
+  setVal('nf-owner-phone',    CASE.ownerPhone);
+  setVal('nf-notes',          CASE.notes);
+  // Date — accept either yyyy-mm-dd or full ISO
+  if (CASE.date) {
+    var d = String(CASE.date).split('T')[0];
+    setVal('nf-found-date', d);
+  }
+  // Location — split into city + street if possible
+  if (CASE.location) {
+    var parts = String(CASE.location).split(',').map(function(s){return s.trim();});
+    var citySel = document.getElementById('nf-location-city');
+    if (citySel && parts[0]) {
+      var found = false;
+      for (var i = 0; i < citySel.options.length; i++) {
+        if (citySel.options[i].text === parts[0] || citySel.options[i].value === parts[0]) {
+          citySel.selectedIndex = i;
+          found = true; break;
+        }
+      }
+      if (!found && citySel.querySelector('option[value="אחר"]')) {
+        citySel.value = 'אחר';
+      }
+    }
+    var streetEl = document.getElementById('nf-location-street');
+    if (streetEl) streetEl.value = parts.slice(1).join(', ') || '';
+  }
+  // Inspector dropdown
+  if (CASE.inspector) {
+    var insp = document.getElementById('nf-inspector');
+    if (insp) {
+      for (var j = 0; j < insp.options.length; j++) {
+        if (insp.options[j].text === CASE.inspector || insp.options[j].value === CASE.inspector) {
+          insp.selectedIndex = j; break;
+        }
+      }
+    }
+  }
+
+  // Photos — normalize and load
+  if (Array.isArray(CASE.photos)) {
+    newCasePhotos = CASE.photos.map(function(p) {
+      if (!p) return null;
+      if (typeof p === 'string') return { dataUrl: p, name: 'photo.jpg' };
+      if (p.dataUrl) return { dataUrl: p.dataUrl, name: p.name || 'photo.jpg' };
+      return null;
+    }).filter(function(p) { return p !== null; });
+    if (typeof renderNewCasePhotoThumbs === 'function') renderNewCasePhotoThumbs();
+  }
+
+  // ═══ Change the title from "תיק חדש" → "✏️ עריכת תיק 12-345-67" ═══
+  var titleEl = document.getElementById('cv-bc-title');
+  if (titleEl) titleEl.textContent = '✏️ עריכת תיק ' + (CASE.plate || '');
+  var ownerEl = document.getElementById('cv-owner');
+  if (ownerEl) ownerEl.textContent = CASE.ownerName || 'עריכת תיק';
+  var pillsEl = document.getElementById('cv-pills');
+  if (pillsEl) pillsEl.innerHTML = '<span class="chip chip-blue">🚗 רכב נטוש</span><span class="chip chip-yellow">✏️ במצב עריכה</span>';
+
+  // Show the case header so plate/owner are visible
+  var hdr = document.querySelector('.case-header');
+  if (hdr) hdr.style.display = '';
+
+  // ═══ Change the save button text ═══
+  var saveBtn = document.getElementById('nf-save-btn');
+  if (saveBtn) saveBtn.textContent = '💾 שמור שינויים';
+  var saveOnlyBtn = document.getElementById('nf-save-only-btn');
+  if (saveOnlyBtn) saveOnlyBtn.style.display = 'none';  // hide "save only"
 }
 
 /* Show / hide the "Open in Google Maps" button on the case detail card,
@@ -7045,6 +7164,11 @@ function saveNewCase() {
   btn.textContent = '⏳ שומר...';
   btn.disabled = true;
 
+  // ═══ Detect edit mode (set by openEditFullForm) ═══
+  var isEditing = !!window._editingExistingRow;
+  var existingRow = window._editingExistingRow;
+  var existingId = window._editingExistingId;
+
   // Read all fields into CASE
   _newCaseReadFields();
 
@@ -7100,13 +7224,58 @@ function saveNewCase() {
     btn.textContent = '💾 שמור ופתח תיק';
     btn.disabled = false;
 
-    // ═══ NEW: Add row to cases-tbody + persist ═══
-    _newCasePersistRow();
+    // Restore the "save only" button visibility (in case it was hidden by edit mode)
+    var saveOnlyBtn = document.getElementById('nf-save-only-btn');
+    if (saveOnlyBtn) saveOnlyBtn.style.display = '';
 
-    // ═══ NEW: Remove the original mobile-source row (it's now an active case)
-    _removeMobilePromotedRow();
+    if (isEditing && existingRow) {
+      // ═══ EDIT MODE: Update the existing row's data + push update to Firebase ═══
+      try {
+        var fullSnap = Object.assign({}, CASE);
+        fullSnap.photos = casePhotos.slice();
+        existingRow.setAttribute('data-case', JSON.stringify(fullSnap));
 
-    showToast('✅ תיק חדש נפתח בהצלחה!');
+        // Update visible cells in the row
+        var plateBadge = existingRow.querySelector('.plate-badge');
+        if (plateBadge) plateBadge.textContent = CASE.plate;
+        var ownerNameEl = existingRow.querySelector('.owner-name');
+        if (ownerNameEl) ownerNameEl.textContent = CASE.ownerName || '—';
+        var ownerLocEl = existingRow.querySelector('.owner-loc');
+        if (ownerLocEl) ownerLocEl.textContent = '📍 ' + (CASE.location || '');
+
+        // Push to Firebase if we have an id
+        var dbForUpdate = (typeof fbDb !== 'undefined' && fbDb) || window.fbDb;
+        if (dbForUpdate && existingId) {
+          var payload = {
+            plate: CASE.plate || '',
+            owner: CASE.ownerName || '',
+            location: CASE.location || '',
+            inspector: document.getElementById('nf-inspector')?.value || CASE.inspector || '',
+            updatedAt: Date.now(),
+            fullData: fullSnap
+          };
+          dbForUpdate.ref('cases/' + existingId).update(payload)
+            .then(function(){ console.log('[saveNewCase EDIT] ✓ pushed update to Firebase:', existingId); })
+            .catch(function(err){ console.warn('[saveNewCase EDIT] FB update failed:', err); });
+        }
+
+        // Save state to localStorage so changes persist
+        if (typeof saveState === 'function') saveState();
+
+        showToast('✅ השינויים נשמרו!');
+      } catch (e) {
+        console.error('[saveNewCase EDIT] failed to update row:', e);
+        showToast('⚠️ השמירה נכשלה: ' + e.message);
+      }
+      // Clear the edit-mode flag
+      window._editingExistingRow = null;
+      window._editingExistingId = null;
+    } else {
+      // ═══ NEW CASE MODE: original behavior ═══
+      _newCasePersistRow();
+      _removeMobilePromotedRow();
+      showToast('✅ תיק חדש נפתח בהצלחה!');
+    }
   }, 500);
 }
 
@@ -10156,7 +10325,8 @@ if (document.readyState === 'loading') {
     });
     try { tr.setAttribute('data-case', JSON.stringify(fullCaseData)); } catch(e){}
     tr.onclick = function() {
-      if (typeof openCaseFromRow === 'function') openCaseFromRow(this);
+      if (typeof openEditFullForm === 'function') openEditFullForm(this);
+      else if (typeof openCaseFromRow === 'function') openCaseFromRow(this);
       else showMobileCaseModal(c.id); // Fallback to old behavior
     };
 
