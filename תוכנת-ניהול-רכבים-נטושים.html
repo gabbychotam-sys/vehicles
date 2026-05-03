@@ -45,6 +45,7 @@ body.dark-mode .status-badge.sb-blue { color: #1565c0 !important; }
 body.dark-mode .status-badge.sb-pink { color: #ad1457 !important; }
 body.dark-mode .status-badge.sb-brown { color: #5d4037 !important; }
 body.dark-mode .status-badge.sb-purple { color: #6a1b9a !important; }
+body.dark-mode .status-badge.sb-gray   { color: #546e7a !important; }
 body.dark-mode .town-stat.ts-red { color: #ef5350 !important; }
 body.dark-mode .town-stat.ts-green { color: #66bb6a !important; }
 body.dark-mode .town-stat.ts-yellow { color: #ffee58 !important; }
@@ -550,6 +551,8 @@ body {
 .sb-purple  { background: rgba(106,27,154,0.12);  color: #6a1b9a;  border: 1px solid rgba(106,27,154,0.3); }
 .sb-teal   { background: rgba(0,180,216,0.12);   color: var(--teal); border: 1px solid rgba(0,180,216,0.25); }
 .sb-green  { background: rgba(46,204,113,0.12);  color: #2ecc71;  border: 1px solid rgba(46,204,113,0.25); }
+/* ═══ v2.9.11: "photographed / awaiting details" status from mobile app ═══ */
+.sb-gray   { background: rgba(120,144,156,0.15); color: #78909c;  border: 1px solid rgba(120,144,156,0.3); }
 
 /* Countdown cell */
 .countdown-cell { min-width: 120px; }
@@ -2003,7 +2006,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.10 — auto-geocode</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.11 — photographed status</div>
     </div>
   </div>
 
@@ -2077,7 +2080,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <div class="tb-notif">🔔<div class="notif-dot"></div></div>
       <button onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.10 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.11 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2658,7 +2661,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.10 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.11 ✓</span>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
     </div>
@@ -5319,7 +5322,10 @@ function upsertCaseRow(oldPlate, c, fullData) {
     letter1_sent:  { cls: 'sb-blue',   label: '📮 נשלח מכתב ראשון', days: 30, cd: 'warn' },
     letter2_sent:  { cls: 'sb-pink',   label: '📮 נשלח מכתב שני',   days: 14, cd: 'urgent' },
     scrapped:      { cls: 'sb-brown',  label: '♻️ פינוי גרוטאה',    days: 0,  cd: 'ok' },
-    waiver:        { cls: 'sb-purple', label: '✍️ הצהרת ויתור',     days: 0,  cd: 'ok' }
+    waiver:        { cls: 'sb-purple', label: '✍️ הצהרת ויתור',     days: 0,  cd: 'ok' },
+    /* ═══ v2.9.11: status from mobile app — vehicle photographed but ═══ */
+    /* ═══ no sticker yet, manager still needs to fill in details.    ═══ */
+    photographed:  { cls: 'sb-gray',   label: '📷 ממתין להשלמת פרטים', days: 0, cd: 'ok' }
   };
   var s = statusInfo[c.status] || statusInfo.yellow;
   var elapsed = 0;
@@ -7400,7 +7406,14 @@ function _newCaseReadFields() {
   CASE.ownerPhone = document.getElementById('nf-owner-phone').value.trim();
   CASE.location = street ? city + ', ' + street : city;
   CASE.notes = document.getElementById('nf-notes').value.trim();
-  CASE.status = 'yellow';
+  // ═══ v2.9.11: only set status='yellow' for genuinely NEW cases.        ═══
+  // ═══ When editing an existing case (e.g. status='photographed' from   ═══
+  // ═══ the mobile app), do NOT overwrite the status — preserve whatever  ═══
+  // ═══ the manager (or mobile app) already set.                          ═══
+  if (!window._editingExistingRow) {
+    CASE.status = 'yellow';
+  }
+  // else: keep existing CASE.status as it was loaded from data-case
   CASE.caseType = newCaseType;
 
   // Transfer photos
@@ -10452,7 +10465,9 @@ if (document.readyState === 'loading') {
       letter1_sent:  { cls: 'sb-blue',   label: '📮 נשלח מכתב ראשון', days: 30, cd: 'warn' },
       letter2_sent:  { cls: 'sb-pink',   label: '📮 נשלח מכתב שני',   days: 14, cd: 'urgent' },
       scrapped:      { cls: 'sb-brown',  label: '♻️ פינוי גרוטאה',    days: 0,  cd: 'ok' },
-      waiver:        { cls: 'sb-purple', label: '✍️ הצהרת ויתור',     days: 0,  cd: 'ok' }
+      waiver:        { cls: 'sb-purple', label: '✍️ הצהרת ויתור',     days: 0,  cd: 'ok' },
+      /* ═══ v2.9.11: status from mobile app — photographed only ═══ */
+      photographed:  { cls: 'sb-gray',   label: '📷 ממתין להשלמת פרטים', days: 0, cd: 'ok' }
     };
     var s = statusInfo[c.status] || statusInfo.yellow;
     var elapsed = 0;
