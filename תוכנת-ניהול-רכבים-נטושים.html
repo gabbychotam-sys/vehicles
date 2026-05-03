@@ -2013,7 +2013,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.0 — refreshNow fixed</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.1 — Firebase tombstone</div>
     </div>
   </div>
 
@@ -2087,7 +2087,7 @@ try {
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <div class="tb-notif">🔔<div class="notif-dot"></div></div>
       <button onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.0 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.1 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2668,7 +2668,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.0 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.1 ✓</span>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
     </div>
@@ -6803,24 +6803,30 @@ function nukeAllVisibleCases() {
         window.GalilSync._markDeleted(id);
       }
       if (db) {
-        // ═══ Try remove() first; if it fails (e.g. Firebase rules), fall back to set(null) ═══
-        db.ref('cases/' + id).remove()
-          .then(function() { console.log('[nukeAll] ✓ removed:', id); })
+        // ═══ NEW STRATEGY (v2.9.1): Write _deleted: true FIRST as the primary  ═══
+        // ═══ delete mechanism. This is more reliable than remove() because:    ═══
+        // ═══   1. Firebase rules usually allow update() even if remove() fails ═══
+        // ═══   2. The marker survives in Firebase and syncs to ALL devices    ═══
+        // ═══   3. Even if Chrome wipes localStorage, the deletion persists     ═══
+        // ═══      because the listener checks c._deleted on every load        ═══
+        db.ref('cases/' + id).update({
+          _deleted: true,
+          _deletedAt: Date.now(),
+          _deletedBy: (window.currentUser && window.currentUser.email) || 'admin'
+        })
+          .then(function() {
+            console.log('[nukeAll] ✓ marked _deleted:', id);
+            // Now ALSO try to remove() as a cleanup. Best effort.
+            db.ref('cases/' + id).remove()
+              .then(function() { console.log('[nukeAll] ✓ also fully removed:', id); })
+              .catch(function() { /* fine — the _deleted marker handles it */ });
+          })
           .catch(function(err) {
-            console.warn('[nukeAll] remove() failed for ' + id + ':', err);
-            // Fallback: set(null) — sometimes works even when remove() doesn't
-            db.ref('cases/' + id).set(null)
-              .then(function() { console.log('[nukeAll] ✓ set null worked for:', id); })
-              .catch(function(err2) {
-                console.warn('[nukeAll] set(null) also failed:', err2);
-                // Last resort: write a "deleted" marker so other clients can filter it
-                db.ref('cases/' + id).update({
-                  _deleted: true,
-                  _deletedAt: Date.now(),
-                  _deletedBy: (window.currentUser && window.currentUser.email) || 'admin'
-                }).catch(function(err3) {
-                  console.error('[nukeAll] could not even mark deleted:', err3);
-                });
+            console.warn('[nukeAll] could not mark _deleted for ' + id + ':', err);
+            // If even update failed, try remove and set(null) as last resorts
+            db.ref('cases/' + id).remove()
+              .catch(function() {
+                db.ref('cases/' + id).set(null).catch(function(){});
               });
           });
       }
@@ -6843,7 +6849,7 @@ function nukeAllVisibleCases() {
       if (typeof syncDashboardWithCases === 'function') syncDashboardWithCases();
       if (typeof refreshDashboardPanels === 'function') refreshDashboardPanels();
     } catch(e){}
-    // ═══ NEW: Auto-save to localStorage so the empty state persists across reloads ═══
+    // ═══ Auto-save to localStorage (best-effort; doesn't matter if it gets cleared) ═══
     try {
       if (typeof saveState === 'function') {
         saveState();
