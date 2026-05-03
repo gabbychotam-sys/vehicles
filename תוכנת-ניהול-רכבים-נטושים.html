@@ -3382,6 +3382,7 @@ try {
 
     <div class="edit-actions">
       <button class="btn-cancel" onclick="closeEditModal()">ביטול</button>
+      <button class="btn-cancel" onclick="saveCaseSnapshotToArchive()" style="background:#f3e5f5;color:#6a1b9a;border-color:#ce93d8;">💾 שמור בארכיון</button>
       <button class="btn-save" id="edit-save-btn" onclick="saveCase()">💾 שמור שינויים</button>
     </div>
   </div>
@@ -3897,9 +3898,11 @@ function archivePrintedDocument(docType, title, html, extraMeta) {
   // or REJECTS with an Error so callers can show proper feedback.
   return new Promise(function(resolve, reject) {
     try {
-      if (typeof fbDb === 'undefined' || !fbDb) {
+      // ═══ FIX: fbDb lives inside an IIFE, so access via window.fbDb ═══
+      var db = (typeof fbDb !== 'undefined' && fbDb) || window.fbDb;
+      if (!db) {
         console.warn('[archive] Firebase not ready');
-        reject(new Error('Firebase לא מחובר — בדוק את החיבור לאינטרנט'));
+        reject(new Error('Firebase לא מחובר — בדוק את החיבור לאינטרנט וודא שהתחברת'));
         return;
       }
       if (!CASE || !CASE.plate) {
@@ -3911,8 +3914,9 @@ function archivePrintedDocument(docType, title, html, extraMeta) {
       var docKey = (docType || 'doc') + '_' + Date.now();
       var savedByEmail = '';
       try {
-        if (typeof currentUser !== 'undefined' && currentUser && currentUser.email) {
-          savedByEmail = currentUser.email;
+        var u = (typeof currentUser !== 'undefined' && currentUser) || window.currentUser;
+        if (u && u.email) {
+          savedByEmail = u.email;
         } else {
           savedByEmail = (document.getElementById('auth-status-email') || {}).textContent || '';
         }
@@ -3930,7 +3934,7 @@ function archivePrintedDocument(docType, title, html, extraMeta) {
 
       console.log('[archive] saving to archives/' + safePlate + '/' + docKey, payload.action, payload.type);
 
-      fbDb.ref('archives/' + safePlate + '/' + docKey).set(payload)
+      db.ref('archives/' + safePlate + '/' + docKey).set(payload)
         .then(function() {
           console.log('[archive] ✓ saved ' + payload.action + ':', safePlate, docKey);
           // Refresh archive panel
@@ -4002,6 +4006,105 @@ function saveDocToArchive() {
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   📋 saveCaseSnapshotToArchive — saves a snapshot of the CURRENT case
+   details (as edited in the modal) to the archive. Used from the
+   "✏️ עריכת תיק" modal so the user has a documented record of every
+   change to a case (status changes, inspector reassignments etc.).
+   ═══════════════════════════════════════════════════════════════════ */
+function saveCaseSnapshotToArchive() {
+  console.log('[saveCaseSnapshot] button clicked');
+  try {
+    if (!CASE || !CASE.plate) {
+      // Try reading the plate from the edit modal if CASE is empty
+      var plateInput = document.getElementById('e-plate');
+      if (plateInput && plateInput.value && plateInput.value.trim()) {
+        // Use the typed plate as fallback
+        if (!CASE) CASE = {};
+        CASE.plate = plateInput.value.trim();
+      } else {
+        if (typeof showToast === 'function') showToast('⚠️ אין תיק פעיל לשמירה');
+        return;
+      }
+    }
+
+    // Read the CURRENT values from the modal (might be unsaved edits)
+    var snap = {
+      plate:      (document.getElementById('e-plate')        || {}).value || CASE.plate || '',
+      vehicleType:(document.getElementById('e-vehicle-type') || {}).value || CASE.vehicleType || '',
+      color:      (document.getElementById('e-color')        || {}).value || CASE.color || '',
+      ownerName:  (document.getElementById('e-owner-name')   || {}).value || CASE.ownerName || '',
+      ownerId:    (document.getElementById('e-owner-id')     || {}).value || CASE.ownerId || '',
+      ownerAddr:  (document.getElementById('e-owner-addr')   || {}).value || CASE.ownerAddr || '',
+      ownerPhone: (document.getElementById('e-owner-phone')  || {}).value || CASE.ownerPhone || '',
+      city:       (document.getElementById('e-location-city')|| {}).value || '',
+      street:     (document.getElementById('e-location-street')|| {}).value || '',
+      inspector:  (document.getElementById('e-inspector')    || {}).value || CASE.inspector || '',
+      foundDate:  (document.getElementById('e-found-date')   || {}).value || '',
+      towDate:    (document.getElementById('e-tow-date')     || {}).value || CASE.towDate || '',
+      notes:      (document.getElementById('e-notes')        || {}).value || CASE.notes || '',
+      status:     (typeof currentStatus !== 'undefined' && currentStatus) || CASE.status || 'yellow'
+    };
+
+    var statusLabels = {
+      yellow: '🟡 מדבקה צהובה', red: '🔴 מדבקה אדומה',
+      letter1_sent: '📮 נשלח מכתב ראשון', letter2_sent: '📮 נשלח מכתב שני',
+      towed: '🚛 נגרר', scrapped: '♻️ פינוי גרוטאה',
+      waiver: '✍️ הצהרת ויתור', closed: '✅ סגור', green: '✅ סגור'
+    };
+    var statusLabel = statusLabels[snap.status] || snap.status;
+    var nowStr = new Date().toLocaleDateString('he-IL') + ' ' + new Date().toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
+
+    // Build a nice HTML snapshot
+    var html =
+      '<div style="font-family:Heebo,Arial,sans-serif;direction:rtl;padding:24px;max-width:780px;margin:0 auto;">' +
+        '<h2 style="border-bottom:2px solid #1a237e;padding-bottom:8px;color:#1a237e;">📋 תיעוד פרטי תיק</h2>' +
+        '<div style="font-size:11pt;color:#555;margin-bottom:16px;">תאריך תיעוד: <strong>' + nowStr + '</strong></div>' +
+        '<table style="width:100%;border-collapse:collapse;font-size:11pt;">' +
+          '<tr><td style="padding:6px;background:#f5f5f5;width:35%;font-weight:700;">לוחית רישוי</td><td style="padding:6px;border-bottom:1px solid #eee;">' + snap.plate + '</td></tr>' +
+          '<tr><td style="padding:6px;background:#f5f5f5;font-weight:700;">סוג רכב</td><td style="padding:6px;border-bottom:1px solid #eee;">' + (snap.vehicleType || '—') + '</td></tr>' +
+          '<tr><td style="padding:6px;background:#f5f5f5;font-weight:700;">צבע</td><td style="padding:6px;border-bottom:1px solid #eee;">' + (snap.color || '—') + '</td></tr>' +
+          '<tr><td colspan="2" style="padding:8px 6px;background:#1a237e;color:#fff;font-weight:700;">פרטי בעל הרכב</td></tr>' +
+          '<tr><td style="padding:6px;background:#f5f5f5;font-weight:700;">שם מלא</td><td style="padding:6px;border-bottom:1px solid #eee;">' + (snap.ownerName || '—') + '</td></tr>' +
+          '<tr><td style="padding:6px;background:#f5f5f5;font-weight:700;">תעודת זהות</td><td style="padding:6px;border-bottom:1px solid #eee;">' + (snap.ownerId || '—') + '</td></tr>' +
+          '<tr><td style="padding:6px;background:#f5f5f5;font-weight:700;">כתובת מגורים</td><td style="padding:6px;border-bottom:1px solid #eee;">' + (snap.ownerAddr || '—') + '</td></tr>' +
+          '<tr><td style="padding:6px;background:#f5f5f5;font-weight:700;">טלפון</td><td style="padding:6px;border-bottom:1px solid #eee;">' + (snap.ownerPhone || '—') + '</td></tr>' +
+          '<tr><td colspan="2" style="padding:8px 6px;background:#1a237e;color:#fff;font-weight:700;">מיקום הרכב</td></tr>' +
+          '<tr><td style="padding:6px;background:#f5f5f5;font-weight:700;">יישוב</td><td style="padding:6px;border-bottom:1px solid #eee;">' + (snap.city || '—') + '</td></tr>' +
+          '<tr><td style="padding:6px;background:#f5f5f5;font-weight:700;">כתובת מדויקת</td><td style="padding:6px;border-bottom:1px solid #eee;">' + (snap.street || '—') + '</td></tr>' +
+          '<tr><td style="padding:6px;background:#f5f5f5;font-weight:700;">פקח מטפל</td><td style="padding:6px;border-bottom:1px solid #eee;">' + (snap.inspector || '—') + '</td></tr>' +
+          '<tr><td style="padding:6px;background:#f5f5f5;font-weight:700;">תאריך גילוי</td><td style="padding:6px;border-bottom:1px solid #eee;">' + (snap.foundDate || '—') + '</td></tr>' +
+          (snap.towDate ? '<tr><td style="padding:6px;background:#f5f5f5;font-weight:700;">תאריך גרירה</td><td style="padding:6px;border-bottom:1px solid #eee;">' + snap.towDate + '</td></tr>' : '') +
+          '<tr><td colspan="2" style="padding:8px 6px;background:#1a237e;color:#fff;font-weight:700;">סטטוס</td></tr>' +
+          '<tr><td style="padding:6px;background:#f5f5f5;font-weight:700;">שלב נוכחי</td><td style="padding:10px 6px;border-bottom:1px solid #eee;font-size:14pt;font-weight:700;">' + statusLabel + '</td></tr>' +
+          (snap.notes ? '<tr><td colspan="2" style="padding:8px 6px;background:#1a237e;color:#fff;font-weight:700;">הערות</td></tr><tr><td colspan="2" style="padding:10px 6px;background:#fffbe6;font-size:11pt;line-height:1.6;white-space:pre-wrap;">' + snap.notes + '</td></tr>' : '') +
+        '</table>' +
+        '<div style="margin-top:24px;padding-top:8px;border-top:1px solid #ccc;font-size:9pt;color:#888;text-align:center;">' +
+          'מערכת ניהול רכבים נטושים — מועצה אזורית הגליל העליון' +
+        '</div>' +
+      '</div>';
+
+    if (typeof showToast === 'function') showToast('⏳ שומר בארכיון...');
+
+    archivePrintedDocument('case_snapshot', 'תיעוד פרטי תיק — ' + snap.plate, html, {
+      action: 'saved',
+      snapshot: snap,
+      sentDate: nowStr
+    })
+      .then(function(docKey) {
+        console.log('[saveCaseSnapshot] ✓ saved:', docKey);
+        if (typeof showToast === 'function') showToast('✅ פרטי התיק נשמרו בארכיון (' + snap.plate + ')');
+      })
+      .catch(function(err) {
+        console.error('[saveCaseSnapshot] ✗ failed:', err);
+        if (typeof showToast === 'function') showToast('❌ ' + (err.message || 'שמירה נכשלה'));
+      });
+  } catch(e) {
+    console.error('[saveCaseSnapshot] exception:', e);
+    if (typeof showToast === 'function') showToast('⚠️ שגיאה: ' + (e.message || e));
+  }
+}
+
 function saveLetterToArchive() {
   // Saves the currently-open letter modal to archive (without printing or sending)
   try {
@@ -4062,8 +4165,9 @@ function loadCaseDocuments(plate) {
     } catch(e) { return []; }
   }
 
-  // If Firebase isn't ready, show what we have locally
-  if (typeof fbDb === 'undefined' || !fbDb) {
+  // ═══ FIX: fbDb is in IIFE scope, use window.fbDb ═══
+  var db = (typeof fbDb !== 'undefined' && fbDb) || window.fbDb;
+  if (!db) {
     var localItems = _getLocalItems();
     if (localItems.length) {
       localItems.sort(function(a,b){ return (b.doc.savedAt||0)-(a.doc.savedAt||0); });
@@ -4084,7 +4188,7 @@ function loadCaseDocuments(plate) {
   // Show loading state
   listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">⏳ טוען מסמכים...</div>';
 
-  fbDb.ref('archives/' + safe).once('value')
+  db.ref('archives/' + safe).once('value')
     .then(function(snap) {
       var data = snap.val() || {};
       var items = [];
@@ -4137,7 +4241,8 @@ function renderArchive(plate, items) {
     letter1: '📮', letter2: '📮', letter4: '🚛',
     nispach_a: '📬', nispach_b: '🟡', nispach_d: '📭',
     nispach_e: '🔴', pinuy_letter: '♻️', vitor: '✍️',
-    flowchart: '🗺️'
+    flowchart: '🗺️',
+    case_snapshot: '📋'
   };
   var typeLabelMap = {
     letter1: 'מכתב ראשון בדואר רשום',
@@ -4149,7 +4254,8 @@ function renderArchive(plate, items) {
     nispach_e: 'נספח ה׳ — מדבקה אדומה',
     pinuy_letter: 'מכתב פינוי גרוטאה',
     vitor: 'הצהרת ויתור',
-    flowchart: 'תרשים זרימה'
+    flowchart: 'תרשים זרימה',
+    case_snapshot: 'תיעוד פרטי תיק'
   };
   var safe = safePlateKey(plate);
 
@@ -4784,7 +4890,8 @@ function saveCase() {
             if (pb && pb.textContent.trim() === CASE.plate) editedRow = tr;
           });
         }
-        if (editedRow && typeof fbDb !== 'undefined' && fbDb) {
+        var dbForEdit = (typeof fbDb !== 'undefined' && fbDb) || window.fbDb;
+        if (editedRow && dbForEdit) {
           var fbId = editedRow.getAttribute('data-mobile-id');
           var rowData = {
             plate: CASE.plate,
@@ -4798,7 +4905,7 @@ function saveCase() {
           };
           if (fbId) {
             // Existing Firebase record — update it
-            fbDb.ref('cases/' + fbId).update(rowData)
+            dbForEdit.ref('cases/' + fbId).update(rowData)
               .then(function() { console.log('[saveCase] ✓ synced edit to Firebase:', fbId); })
               .catch(function(err) { console.warn('[saveCase] Firebase sync failed:', err); });
           } else if (window.GalilSync && window.GalilSync.isReady && window.GalilSync.isReady() && window.GalilSync._pushManualCase) {
@@ -5186,9 +5293,10 @@ function openCaseFromRow(tr) {
     var plate = plateBadge ? plateBadge.textContent.trim() : '';
 
     // Try via Firebase + mobileId first (mobile-created cases)
-    if (mobileId && typeof fbDb !== 'undefined' && fbDb) {
+    var dbForOpen = (typeof fbDb !== 'undefined' && fbDb) || window.fbDb;
+    if (mobileId && dbForOpen) {
       if (typeof showToast === 'function') showToast('⏳ טוען תיק מ-Firebase...');
-      fbDb.ref('cases/' + mobileId).once('value')
+      dbForOpen.ref('cases/' + mobileId).once('value')
         .then(function(snap) {
           var data = snap.val();
           if (!data) {
@@ -8230,11 +8338,12 @@ function resetSavedData() {
 
   // ═══ Step 5: Clear Firebase data (cases + archives) ═══
   try {
-    if (typeof fbDb !== 'undefined' && fbDb) {
-      fbDb.ref('cases').remove()
+    var db = (typeof fbDb !== 'undefined' && fbDb) || window.fbDb;
+    if (db) {
+      db.ref('cases').remove()
         .then(function() { console.log('[reset] ✓ Firebase cases cleared'); })
         .catch(function(err) { console.warn('[reset] cases clear failed:', err); });
-      fbDb.ref('archives').remove()
+      db.ref('archives').remove()
         .then(function() { console.log('[reset] ✓ Firebase archives cleared'); })
         .catch(function(err) { console.warn('[reset] archives clear failed:', err); });
     }
@@ -8919,6 +9028,10 @@ if (document.readyState === 'loading') {
         projectId: cfg.projectId || ''
       }, appName);
       fbDb = fbApp.database();
+      // ═══ NEW: Expose fbDb to global scope so external functions ═══
+      // ═══ (archivePrintedDocument, saveCase, etc.) can use it.    ═══
+      window.fbDb = fbDb;
+      window.fbReady = function() { return fbReady; };
       // ═══ NEW: initialize Auth (no-op if Firebase Authentication isn't enabled). ═══
       try {
         if (typeof fbApp.auth === 'function') {
@@ -8933,6 +9046,8 @@ if (document.readyState === 'loading') {
       if (fbAuth) {
         fbAuth.onAuthStateChanged(function(user) {
           handleAuthStateChange(user);
+          // Expose currentUser globally too
+          window.currentUser = user || null;
         });
       }
 
