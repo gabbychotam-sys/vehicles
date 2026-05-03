@@ -2003,7 +2003,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.8 — fields persist</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.9 — GPS fix</div>
     </div>
   </div>
 
@@ -2077,7 +2077,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <div class="tb-notif">🔔<div class="notif-dot"></div></div>
       <button onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.8 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.9 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2658,7 +2658,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.8 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.9 ✓</span>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
     </div>
@@ -5568,6 +5568,10 @@ function openEditFullForm(tr) {
 
   // ═══ Now restore CASE with the existing data, AFTER the reset ═══
   Object.assign(CASE, CASE_EMPTY);
+  // ═══ v2.9.9: explicitly clear lat/lon — CASE_EMPTY doesn't include them, ═══
+  // ═══ so without this, GPS coords from a previously-opened case would     ═══
+  // ═══ leak into the next case opened.                                     ═══
+  CASE.lat = ''; CASE.lon = '';
   Object.keys(saved).forEach(function(k) { CASE[k] = saved[k]; });
   Object.assign(SENT, SENT_EMPTY);
 
@@ -5629,6 +5633,36 @@ function openEditFullForm(tr) {
       return null;
     }).filter(function(p) { return p !== null; });
     if (typeof renderNewCasePhotoThumbs === 'function') renderNewCasePhotoThumbs();
+  }
+
+  // ═══ v2.9.9: SHOW GPS NAVIGATION BUTTONS IF COORDINATES EXIST ═══
+  // The mobile app captures lat/lon via navigator.geolocation when the
+  // inspector photographs a vehicle in the field. Display Waze + Google
+  // Maps buttons so the office can navigate straight to the vehicle.
+  // Coordinates can come from CASE.lat/CASE.lon (top-level) OR be nested
+  // under various keys depending on how the case was saved.
+  var lat = CASE.lat || CASE.latitude || (CASE.gps && CASE.gps.lat) || '';
+  var lon = CASE.lon || CASE.lng || CASE.longitude || (CASE.gps && CASE.gps.lon) || '';
+  var navBox = document.getElementById('nf-nav-buttons');
+  var emptyBox = document.getElementById('nf-nav-empty');
+  if (lat && lon && !isNaN(parseFloat(lat)) && !isNaN(parseFloat(lon))) {
+    // ═══ Real GPS — show the nav buttons with the case's actual coords ═══
+    if (navBox) {
+      navBox.style.display = 'flex';
+      var wazeLink = document.getElementById('nf-waze-link');
+      var mapLink  = document.getElementById('nf-map-link');
+      if (wazeLink) wazeLink.href = 'https://waze.com/ul?ll=' + encodeURIComponent(lat) + '%2C' + encodeURIComponent(lon) + '&navigate=yes';
+      if (mapLink)  mapLink.href  = 'https://www.google.com/maps?q=' + encodeURIComponent(lat) + ',' + encodeURIComponent(lon);
+    }
+    if (emptyBox) emptyBox.style.display = 'none';
+    // Sync to CASE so saveNewCase preserves them
+    CASE.lat = lat;
+    CASE.lon = lon;
+    console.log('[openEditFullForm] ✓ GPS shown:', lat, lon);
+  } else {
+    if (navBox) navBox.style.display = 'none';
+    if (emptyBox) emptyBox.style.display = 'block';
+    console.log('[openEditFullForm] no GPS for this case');
   }
 
   // ═══ Change the title from "תיק חדש" → "✏️ עריכת תיק 12-345-67" ═══
@@ -7266,6 +7300,10 @@ function saveNewCase() {
             status:      CASE.status || 'yellow',
             inspector:   inspectorVal,
             date:        CASE.date || (new Date()).toISOString().split('T')[0],
+            // ═══ v2.9.9: GPS coordinates — preserve them in top-level so the   ═══
+            // ═══ mobile app and other listeners pick them up immediately       ═══
+            lat:         CASE.lat || '',
+            lon:         CASE.lon || '',
             updatedAt:   Date.now(),
             fullData:    fullSnap     // entire CASE object as a single field
           };
@@ -10259,9 +10297,13 @@ if (document.readyState === 'loading') {
     tr.setAttribute('data-source', 'mobile');
     // Carry GPS coords on the row so the Leaflet map can plot the case
     // exactly where the photo was taken, not just the town centroid.
-    if (c.lat != null && c.lon != null && c.lat !== '' && c.lon !== '') {
-      tr.setAttribute('data-lat', c.lat);
-      tr.setAttribute('data-lon', c.lon);
+    // ═══ v2.9.9: also check c.fullData (saved by edit-mode) so coords ═══
+    // ═══ from a manager-edited record are preserved.                  ═══
+    var rowLat = c.lat || (c.fullData && c.fullData.lat) || '';
+    var rowLon = c.lon || (c.fullData && c.fullData.lon) || '';
+    if (rowLat != null && rowLon != null && rowLat !== '' && rowLon !== '') {
+      tr.setAttribute('data-lat', rowLat);
+      tr.setAttribute('data-lon', rowLon);
     } else {
       tr.removeAttribute('data-lat');
       tr.removeAttribute('data-lon');
@@ -10346,6 +10388,9 @@ if (document.readyState === 'loading') {
       location:   src.location || c.location || '',
       notes:      src.notes || c.notes || '',
       inspector:  src.inspector || c.inspector || '',
+      // ═══ v2.9.9: GPS coords — also carry in fullCaseData so openEditFullForm reads them ═══
+      lat:        src.lat || c.lat || '',
+      lon:        src.lon || c.lon || '',
       photos:     Array.isArray(src.photos) ? src.photos : (Array.isArray(c.photos) ? c.photos : [])
     });
     try { tr.setAttribute('data-case', JSON.stringify(fullCaseData)); } catch(e){}
