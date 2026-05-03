@@ -3759,6 +3759,20 @@ function printLetter() {
       </div>
     </div>`;
 
+  // ═══ NEW: Auto-archive every print, regardless of confirm-send ═══
+  try {
+    if (typeof archivePrintedDocument === 'function') {
+      var printedHtml = document.getElementById('print-target').innerHTML;
+      var meta = LETTER_META[lid] || {};
+      archivePrintedDocument(lid, meta.title || ('מכתב ' + lid), printedHtml, {
+        action: 'printed',
+        sentDate: date,
+        regnum: regnum && regnum !== '___________' ? regnum : '',
+        deadline: deadline || ''
+      });
+    }
+  } catch(e) { console.warn('[printLetter archive] error:', e); }
+
   window.print();
 }
 
@@ -3803,32 +3817,18 @@ function confirmSent() {
     } catch(e) { console.warn('[confirmSent] status update failed:', e); }
   }
 
-  // ═══ NEW: Save letter copy to Firebase archive (cases/{plate}/documents/) ═══
+  // ═══ NEW: Save SENT letter copy via the generic archive helper ═══
   try {
-    if (typeof fbDb !== 'undefined' && fbDb && CASE.plate) {
+    if (typeof archivePrintedDocument === 'function') {
       var letterHtml = (document.getElementById('modal-preview') || {}).innerHTML || '';
-      var docKey = lid + '_' + Date.now();
-      var safePlate = String(CASE.plate).replace(/[^0-9A-Za-z\u0590-\u05FF\-]/g, '_');
-      var docPayload = {
-        type: lid,
-        title: meta.title,
+      archivePrintedDocument(lid, meta.title, letterHtml, {
+        action: 'sent',
         sentDate: d,
-        deadline: deadline,
         regnum: n || '',
-        html: letterHtml,
-        savedAt: Date.now(),
-        savedBy: (typeof currentUserEmail === 'string' && currentUserEmail) ||
-                 (document.getElementById('auth-status-email') || {}).textContent || ''
-      };
-      fbDb.ref('archives/' + safePlate + '/' + docKey).set(docPayload)
-        .then(function() {
-          console.log('[archive] ✓ saved letter to Firebase:', safePlate, docKey);
-        })
-        .catch(function(err) {
-          console.warn('[archive] ✗ Firebase save failed:', err);
-        });
+        deadline: deadline || ''
+      });
     }
-  } catch(e) { console.warn('[archive] error:', e); }
+  } catch(e) { console.warn('[confirmSent archive] error:', e); }
 
   // If this is letter4 (tow notification), add to towed panel
   if (lid === 'letter4') {
@@ -3879,6 +3879,65 @@ window._archiveCache = window._archiveCache || {};
 
 function safePlateKey(plate) {
   return String(plate || '').replace(/[^0-9A-Za-z\u0590-\u05FF\-]/g, '_');
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   archivePrintedDocument — generic archive function
+   Called from any "print" or "send" action to save a copy to Firebase.
+   - docType: short id (letter1, letter2, letter4, nispach_a, nispach_b...)
+   - title:   display title
+   - html:    the document HTML body
+   - extraMeta: { action: 'printed'|'sent', sentDate, regnum, deadline... }
+   Returns a Promise.
+   ═══════════════════════════════════════════════════════════════════ */
+function archivePrintedDocument(docType, title, html, extraMeta) {
+  try {
+    if (typeof fbDb === 'undefined' || !fbDb) {
+      console.warn('[archive] Firebase not ready, skipping archive');
+      return Promise.resolve(null);
+    }
+    if (!CASE || !CASE.plate) {
+      console.warn('[archive] No CASE.plate, skipping archive');
+      return Promise.resolve(null);
+    }
+    var safePlate = safePlateKey(CASE.plate);
+    var docKey = (docType || 'doc') + '_' + Date.now();
+    var savedByEmail = '';
+    try {
+      if (typeof currentUser !== 'undefined' && currentUser && currentUser.email) {
+        savedByEmail = currentUser.email;
+      } else {
+        savedByEmail = (document.getElementById('auth-status-email') || {}).textContent || '';
+      }
+    } catch(e) {}
+
+    var payload = Object.assign({
+      type: docType || 'doc',
+      title: title || '',
+      html: html || '',
+      action: 'printed',
+      savedAt: Date.now(),
+      savedBy: savedByEmail,
+      inspector: (typeof getCurrentInspectorName === 'function' ? getCurrentInspectorName() : '') || ''
+    }, extraMeta || {});
+
+    return fbDb.ref('archives/' + safePlate + '/' + docKey).set(payload)
+      .then(function() {
+        console.log('[archive] ✓ saved ' + payload.action + ':', safePlate, docKey, docType);
+        // Refresh archive panel if currently viewing this case
+        if (typeof loadCaseDocuments === 'function') {
+          setTimeout(function() { loadCaseDocuments(CASE.plate); }, 300);
+        }
+        return docKey;
+      })
+      .catch(function(err) {
+        console.warn('[archive] ✗ Firebase save failed:', err);
+        return null;
+      });
+  } catch(e) {
+    console.warn('[archive] error:', e);
+    return Promise.resolve(null);
+  }
 }
 
 function loadCaseDocuments(plate) {
@@ -3939,16 +3998,29 @@ function renderArchive(plate, items) {
       '<div style="text-align:center;padding:30px 20px;color:var(--muted);font-size:13px;">' +
       '<div style="font-size:36px;margin-bottom:8px;">📭</div>' +
       '<div style="font-weight:600;margin-bottom:4px;">אין מסמכים שמורים בארכיון</div>' +
-      '<div style="font-size:11px;">בעת אישור שליחה של מכתב, עותק יישמר כאן אוטומטית</div>' +
+      '<div style="font-size:11px;">בעת הדפסה או אישור שליחה של מסמך — עותק יישמר כאן אוטומטית</div>' +
       '</div>';
     return;
   }
 
+  // ═══ Maps for icon and label per document type ═══
   var iconMap = {
-    letter1: '📮', letter2: '📮', letter4: '🚛'
+    letter1: '📮', letter2: '📮', letter4: '🚛',
+    nispach_a: '📬', nispach_b: '🟡', nispach_d: '📭',
+    nispach_e: '🔴', pinuy_letter: '♻️', vitor: '✍️',
+    flowchart: '🗺️'
   };
   var typeLabelMap = {
-    letter1: 'מכתב ראשון', letter2: 'מכתב שני', letter4: 'הודעת גרירה'
+    letter1: 'מכתב ראשון בדואר רשום',
+    letter2: 'מכתב שני בדואר רשום',
+    letter4: 'הודעת גרירה',
+    nispach_a: 'נספח א׳ — מכתב ראשון',
+    nispach_b: 'נספח ב׳ — מדבקה צהובה',
+    nispach_d: 'נספח ד׳ — מכתב שני',
+    nispach_e: 'נספח ה׳ — מדבקה אדומה',
+    pinuy_letter: 'מכתב פינוי גרוטאה',
+    vitor: 'הצהרת ויתור',
+    flowchart: 'תרשים זרימה'
   };
   var safe = safePlateKey(plate);
 
@@ -3959,16 +4031,30 @@ function renderArchive(plate, items) {
     var typeLbl = typeLabelMap[d.type] || (d.title || 'מסמך');
     var savedDate = d.savedAt ? new Date(d.savedAt).toLocaleDateString('he-IL') + ' ' + new Date(d.savedAt).toLocaleTimeString('he-IL', {hour:'2-digit',minute:'2-digit'}) : '';
     var sentDate = d.sentDate ? new Date(d.sentDate).toLocaleDateString('he-IL') : '';
+
+    // Action badge (printed vs sent)
+    var actionBadge = '';
+    if (d.action === 'sent') {
+      actionBadge = '<span style="background:#e8f5e9;color:#2e7d32;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;">📮 נשלח</span>';
+    } else {
+      actionBadge = '<span style="background:#e3f2fd;color:#1565c0;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;">🖨️ הודפס</span>';
+    }
+    // Inspector who saved
+    var inspectorLine = d.inspector ? '<div style="font-size:10px;color:var(--muted);">👮 ' + d.inspector + '</div>' : '';
+
     html +=
       '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px;">' +
         '<div style="display:flex;align-items:center;gap:10px;">' +
           '<div style="width:38px;height:38px;border-radius:10px;background:rgba(102,51,153,0.1);display:flex;align-items:center;justify-content:center;font-size:20px;">' + icon + '</div>' +
           '<div style="flex:1;min-width:0;">' +
             '<div style="font-size:13px;font-weight:700;color:var(--navy);">' + typeLbl + '</div>' +
-            '<div style="font-size:11px;color:var(--muted);">נשלח: ' + sentDate + '</div>' +
+            '<div style="display:flex;align-items:center;gap:6px;margin-top:2px;">' + actionBadge +
+              (sentDate ? '<span style="font-size:11px;color:var(--muted);">' + sentDate + '</span>' : '') +
+            '</div>' +
           '</div>' +
         '</div>' +
         (d.regnum ? '<div style="font-size:11px;color:var(--muted);font-family:monospace;direction:ltr;text-align:right;">דואר רשום: ' + d.regnum + '</div>' : '') +
+        inspectorLine +
         '<div style="font-size:10px;color:#999;">נשמר: ' + savedDate + '</div>' +
         '<div style="display:flex;gap:6px;margin-top:6px;">' +
           '<button class="row-action" style="flex:1;background:#e3f2fd;color:#1565c0;font-size:11px;padding:6px;border:none;border-radius:6px;cursor:pointer;" onclick="viewArchivedDoc(\'' + safe + '\',\'' + it.key + '\')">👁️ צפה</button>' +
@@ -5616,6 +5702,20 @@ function printDocPreview() {
   var wrapped = (typeof wrapDocInPageTemplate === 'function')
     ? wrapDocInPageTemplate(content)
     : content;
+
+  // ═══ NEW: Auto-archive print ═══
+  try {
+    if (typeof archivePrintedDocument === 'function' && currentDocPreview) {
+      var docMeta = (typeof DOC_TEMPLATES !== 'undefined' && DOC_TEMPLATES[currentDocPreview]) || {};
+      archivePrintedDocument(
+        currentDocPreview,
+        docMeta.title || (document.getElementById('doc-preview-title') || {}).textContent || 'מסמך',
+        wrapped,
+        { action: 'printed' }
+      );
+    }
+  } catch(e) { console.warn('[printDocPreview archive] error:', e); }
+
   var w = window.open('','','width=800,height=1100');
   w.document.write('<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8"><title>הדפסה</title>');
   w.document.write('<style>' + getDocPrintStyles() + '</style>');
