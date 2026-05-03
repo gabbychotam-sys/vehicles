@@ -1954,12 +1954,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
 </style>
 
 <script>
-/* Auto-restore on open */
-try {
-  var __b = "eyJ2ZXJzaW9uIjoxLCJzYXZlZEF0IjoiMjAyNi0wNC0yN1QwOTowNDoxNy40NTZaIiwidGFibGVzIjp7ImNhc2VzLXRib2R5IjoiXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICIsImRhc2gtdXJnZW50LXRib2R5IjoiXG4gICAgICAgICAgICBcbiAgICAgICAgICAgIFxuICAgICAgICAgICAgXG4gICAgICAgICAgICBcbiAgICAgICAgICAgIFxuICAgICAgICAgICIsInRvd2VkLXRib2R5IjoiXG4gICAgICAgICAgICBcbiAgICAgICAgICAiLCJ0dy10b3dlZC10Ym9keSI6IlxuICAgICAgICAgIFxuICAgICAgICAiLCJ0dy1oaXN0b3J5LXRib2R5IjoiXG4gICAgICAgICAgXG4gICAgICAgICAgXG4gICAgICAgICJ9LCJtYXBDYXNlcyI6W10sImN1c3RvbURvY3MiOltdLCJzdGFmZkxpc3QiOlt7ImlkIjoxLCJuYW1lIjoi16nXmdee15kg16jXldeW16DXkdeo15IiLCJyb2xlIjoi16TXp9eXIiwicGhvbmUiOiIwNTQtNjY5LTM2MzQiLCJlbWFpbCI6InNoaW1vbnJAZ2FsaWwtZWxpb24ub3JnLmlsIiwiY2FzZXMiOjgsImNvbG9yIjoiIzM0OThkYiwjMWE0MjY4In0seyJpZCI6MiwibmFtZSI6Itek16jXoNeh15nXoSDXkdeo15XXmNee158iLCJyb2xlIjoi16TXp9eXIiwicGhvbmUiOiIwNTQtNDUyLTc1ODIiLCJlbWFpbCI6IkZyYW5zaXNCQGdhbGlsLWVsaW9uLm9yZy5pbCIsImNhc2VzIjo5LCJjb2xvciI6IiNlNzRjM2MsIzdiMjQxYyJ9LHsiaWQiOjMsIm5hbWUiOiLXkNeZ15nXnCDXkNeo16bXmSIsInJvbGUiOiLXpNen15ciLCJwaG9uZSI6IjA1Mi02MTktMTk4NSIsImVtYWlsIjoiRXlhbEFAZ2FsaWwtZWxpb24ub3JnLmlsIiwiY2FzZXMiOjcsImNvbG9yIjoiIzliNTliNiwjNGEyMzVhIn0seyJpZCI6NCwibmFtZSI6Itee15XXqNefINec15XXliIsInJvbGUiOiLXnteW15vXmdeo15QiLCJwaG9uZSI6IjA1Mi0zNzktMTY1OSIsImVtYWlsIjoibW9yYW5sQGdhbGlsLWVsaW9uLm9yZy5pbCIsImNhc2VzIjowLCJjb2xvciI6IiNmMzljMTIsI2Q2ODkxMCJ9XSwidGhlbWUiOnsiZGFya01vZGUiOmZhbHNlLCJjc3NWYXJzIjp7fX19";
-  var __s = decodeURIComponent(escape(atob(__b)));
-  localStorage.setItem("galilElyon_appState_v1", __s);
-} catch(e) { console.warn("seed failed", e); }
+/* Auto-restore on open — REMOVED in v2.9.5 (was forcing old cases into localStorage on every load) */
 </script>
 
 <!-- Leaflet (interactive map library, free, no API key) -->
@@ -1967,12 +1962,7 @@ try {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-/* Auto-restore on open */
-try {
-  var __b = "eyJ2ZXJzaW9uIjoxLCJzYXZlZEF0IjoiMjAyNi0wNS0wMlQwOTo0MDowNy44ODBaIiwidGFibGVzIjp7ImNhc2VzLXRib2R5IjoiPHRyIGRhdGEtbW9iaWxlLWlkPVwiTTE3Nzc3MTMyMTc4MjRcIiBkYXRhLXN0YXR1cz1cInllbGxvd1wiIGRhdGEtc291cmNlPVwibW9iaWxlXCIgZGF0YS1sYXQ9XCIzMy4yMjYxNTFcIiBkYXRhLWxvbj1cIjM1LjU4MzY2MFwiIHN0eWxlPVwiY3Vyc29yOiBwb2ludGVyOyB0cmFuc2l0aW9uOiBiYWNrZ3JvdW5kIDEuOHM7XCI+PHRkIHN0eWxlPVwidGV4dC1hbGlnbjpjZW50ZXI7XCIgb25jbGljaz1cImV2ZW50LnN0b3BQcm9wYWdhdGlvbigpXCI+PGlucHV0IHR5cGU9XCJjaGVja2JveFwiIGNsYXNzPVwibXMtY2JcIiBvbmNoYW5nZT1cIm1zVXBkYXRlQ291bnQoJ2Nhc2VzLXRib2R5JywnbXMtYmFyLWNhc2VzJywnbXMtY291bnQtY2FzZXMnLCdtcy1hbGwtY2FzZXMnKVwiPjwvdGQ+PHRkIHN0eWxlPVwiY29sb3I6dmFyKC0tbXV0ZWQpO2ZvbnQtc2l6ZToxM3B4O1wiPjI8L3RkPjx0ZCBzdHlsZT1cImZvbnQtc2l6ZToxMnB4O1wiPjAyLjA1LjIwMjY8L3RkPjx0ZD48c3BhbiBjbGFzcz1cInBsYXRlLWJhZGdlXCI+MTQwOTE5Njwvc3Bhbj48L3RkPjx0ZD48ZGl2IGNsYXNzPVwib3duZXItbmFtZVwiPuKAlDwvZGl2PjxkaXYgY2xhc3M9XCJvd25lci1sb2NcIj7wn5OxINee15TXqdeY15c8L2Rpdj48L3RkPjx0ZCBzdHlsZT1cImZvbnQtc2l6ZToxMnB4O1wiPvCfk40g4oCUPC90ZD48dGQ+PHNwYW4gY2xhc3M9XCJzdGF0dXMtYmFkZ2Ugc2IteWVsbG93XCI+8J+foSDXnteT15HXp9eUINem15TXldeR15Q8L3NwYW4+PC90ZD48dGQ+PGRpdiBjbGFzcz1cImNvdW50ZG93bi1jZWxsXCI+PGRpdiBjbGFzcz1cImNkLWRheXMgb2tcIj4zMCDXmdee15nXnTwvZGl2PjxkaXYgY2xhc3M9XCJjZC10cmFja1wiPjxkaXYgY2xhc3M9XCJjZC1maWxsIG9rXCIgc3R5bGU9XCJ3aWR0aDowJVwiPjwvZGl2PjwvZGl2PjwvZGl2PjwvdGQ+PHRkIHN0eWxlPVwiZm9udC1zaXplOjEycHg7XCI+15LXkdeZINeX15XXqtedPC90ZD48dGQgc3R5bGU9XCJ3aGl0ZS1zcGFjZTpub3dyYXA7XCI+PGJ1dHRvbiBjbGFzcz1cInJvdy1hY3Rpb25cIiBvbmNsaWNrPVwiZXZlbnQuc3RvcFByb3BhZ2F0aW9uKCk7d2luZG93LkdhbGlsU3luYy5fc2hvd0Nhc2UoJ00xNzc3NzEzMjE3ODI0JylcIj7wn5OLINek16jXmNeZ1508L2J1dHRvbj48L3RkPjwvdHI+PHRyIGRhdGEtbW9iaWxlLWlkPVwiTTE3Nzc2NTQwMDY1MzJcIiBkYXRhLXN0YXR1cz1cInllbGxvd1wiIGRhdGEtc291cmNlPVwibW9iaWxlXCIgZGF0YS1sYXQ9XCIzMy4xOTQxMjdcIiBkYXRhLWxvbj1cIjM1LjU2NzM5M1wiIHN0eWxlPVwiY3Vyc29yOiBwb2ludGVyOyB0cmFuc2l0aW9uOiBiYWNrZ3JvdW5kIDEuOHM7XCI+PHRkIHN0eWxlPVwidGV4dC1hbGlnbjpjZW50ZXI7XCIgb25jbGljaz1cImV2ZW50LnN0b3BQcm9wYWdhdGlvbigpXCI+PGlucHV0IHR5cGU9XCJjaGVja2JveFwiIGNsYXNzPVwibXMtY2JcIiBvbmNoYW5nZT1cIm1zVXBkYXRlQ291bnQoJ2Nhc2VzLXRib2R5JywnbXMtYmFyLWNhc2VzJywnbXMtY291bnQtY2FzZXMnLCdtcy1hbGwtY2FzZXMnKVwiPjwvdGQ+PHRkIHN0eWxlPVwiY29sb3I6dmFyKC0tbXV0ZWQpO2ZvbnQtc2l6ZToxM3B4O1wiPjE8L3RkPjx0ZCBzdHlsZT1cImZvbnQtc2l6ZToxMnB4O1wiPjAxLjA1LjIwMjY8L3RkPjx0ZD48c3BhbiBjbGFzcz1cInBsYXRlLWJhZGdlXCI+MTIzNDU2PC9zcGFuPjwvdGQ+PHRkPjxkaXYgY2xhc3M9XCJvd25lci1uYW1lXCI+15LXkdeZPC9kaXY+PGRpdiBjbGFzcz1cIm93bmVyLWxvY1wiPvCfk7Eg157XlNep15jXlzwvZGl2PjwvdGQ+PHRkIHN0eWxlPVwiZm9udC1zaXplOjEycHg7XCI+8J+TjSDigJQ8L3RkPjx0ZD48c3BhbiBjbGFzcz1cInN0YXR1cy1iYWRnZSBzYi15ZWxsb3dcIj7wn5+hINee15PXkden15Qg16bXlNeV15HXlDwvc3Bhbj48L3RkPjx0ZD48ZGl2IGNsYXNzPVwiY291bnRkb3duLWNlbGxcIj48ZGl2IGNsYXNzPVwiY2QtZGF5cyBva1wiPjI5INeZ157XmdedPC9kaXY+PGRpdiBjbGFzcz1cImNkLXRyYWNrXCI+PGRpdiBjbGFzcz1cImNkLWZpbGwgb2tcIiBzdHlsZT1cIndpZHRoOjMlXCI+PC9kaXY+PC9kaXY+PC9kaXY+PC90ZD48dGQgc3R5bGU9XCJmb250LXNpemU6MTJweDtcIj7XkteR15kg15fXldeq1508L3RkPjx0ZCBzdHlsZT1cIndoaXRlLXNwYWNlOm5vd3JhcDtcIj48YnV0dG9uIGNsYXNzPVwicm93LWFjdGlvblwiIG9uY2xpY2s9XCJldmVudC5zdG9wUHJvcGFnYXRpb24oKTt3aW5kb3cuR2FsaWxTeW5jLl9zaG93Q2FzZSgnTTE3Nzc2NTQwMDY1MzInKVwiPvCfk4sg16TXqNeY15nXnTwvYnV0dG9uPjwvdGQ+PC90cj5cbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgIiwiZGFzaC11cmdlbnQtdGJvZHkiOiJcbiAgICAgICAgICAgIFxuICAgICAgICAgICAgXG4gICAgICAgICAgICBcbiAgICAgICAgICAgIFxuICAgICAgICAgICAgXG4gICAgICAgICAgIiwidG93ZWQtdGJvZHkiOiJcbiAgICAgICAgICAgIFxuICAgICAgICAgICIsInR3LXRvd2VkLXRib2R5IjoiXG4gICAgICAgICAgXG4gICAgICAgICIsInR3LWhpc3RvcnktdGJvZHkiOiJcbiAgICAgICAgICBcbiAgICAgICAgICBcbiAgICAgICAgIn0sIm1hcENhc2VzIjpbXSwiY3VzdG9tRG9jcyI6W10sInN0YWZmTGlzdCI6W3siaWQiOjEsIm5hbWUiOiLXqdeZ157XmSDXqNeV15bXoNeR16jXkiIsInJvbGUiOiLXpNen15ciLCJwaG9uZSI6IjA1NC02NjktMzYzNCIsImVtYWlsIjoic2hpbW9uckBnYWxpbC1lbGlvbi5vcmcuaWwiLCJjYXNlcyI6MCwiY29sb3IiOiIjMzQ5OGRiLCMxYTQyNjgifSx7ImlkIjoyLCJuYW1lIjoi16TXqNeg16HXmdehINeR16jXldeY157XnyIsInJvbGUiOiLXpNen15ciLCJwaG9uZSI6IjA1NC00NTItNzU4MiIsImVtYWlsIjoiRnJhbnNpc0JAZ2FsaWwtZWxpb24ub3JnLmlsIiwiY2FzZXMiOjAsImNvbG9yIjoiI2U3NGMzYywjN2IyNDFjIn0seyJpZCI6MywibmFtZSI6IteQ15nXmdecINeQ16jXpteZIiwicm9sZSI6Itek16fXlyIsInBob25lIjoiMDUyLTYxOS0xOTg1IiwiZW1haWwiOiJFeWFsQUBnYWxpbC1lbGlvbi5vcmcuaWwiLCJjYXNlcyI6MCwiY29sb3IiOiIjOWI1OWI2LCM0YTIzNWEifSx7ImlkIjo0LCJuYW1lIjoi157Xldeo158g15zXldeWIiwicm9sZSI6Itee15bXm9eZ16jXlCIsInBob25lIjoiMDUyLTM3OS0xNjU5IiwiZW1haWwiOiJtb3JhbmxAZ2FsaWwtZWxpb24ub3JnLmlsIiwiY2FzZXMiOjAsImNvbG9yIjoiI2YzOWMxMiwjZDY4OTEwIn0seyJpZCI6NSwibmFtZSI6IteS15HXmSDXl9eV16rXnSIsInJvbGUiOiLXnteg15TXnCDXpNeZ16fXldeXIiwicGhvbmUiOiIwNTAtNzU3LTQ0NTEiLCJlbWFpbCI6ImdhYmJ5Y0BnYWxpbC1lbGlvbi5vcmcuaWwiLCJjYXNlcyI6MCwiY29sb3IiOiIjMWFiYzljLCMwZTY2NTUifV0sInRoZW1lIjp7ImRhcmtNb2RlIjpmYWxzZSwiY3NzVmFycyI6e319fQ==";
-  var __s = decodeURIComponent(escape(atob(__b)));
-  localStorage.setItem("galilElyon_appState_v1", __s);
-} catch(e) { console.warn("seed failed", e); }
+/* Auto-restore on open — REMOVED in v2.9.5 (was forcing old cases into localStorage on every load) */
 </script>
 </head>
 <body class="">
@@ -2013,7 +2003,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.3 — fresh start</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.5 — no seed</div>
     </div>
   </div>
 
@@ -2087,7 +2077,7 @@ try {
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <div class="tb-notif">🔔<div class="notif-dot"></div></div>
       <button onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.3 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.5 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2668,7 +2658,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.3 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.5 ✓</span>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
     </div>
@@ -8663,8 +8653,13 @@ function buildSelfContainedHtml() {
   var globalMenu = document.getElementById('global-save-menu');
   if (globalMenu) globalMenu.remove();
 
-  // Snapshot of all JS-only state (customDocs, staffList, MAP_CASES, theme, ...)
+  // Snapshot of all JS-only state — but WITHOUT tables (cases). Including
+  // tables would bake current cases into the HTML file, causing them to
+  // re-appear on every load even after deletion. Cases live in Firebase.
   var snap = buildStateSnapshot();
+  if (snap && snap.tables) {
+    snap.tables = {};  // ← strip cases from the saved file
+  }
 
   // ───── BULLETPROOF APPROACH ─────
   // Encode the snapshot as base64. This way, the embedded data has NO chance
@@ -8957,9 +8952,9 @@ function _bootSequence() {
   // ═══ slate. Marker is stored in localStorage so it only runs once.        ═══
   // ═══════════════════════════════════════════════════════════════════════════
   try {
-    var FRESH_FLAG = 'galilElyon_firebaseFreshStartV293';
+    var FRESH_FLAG = 'galilElyon_firebaseFreshStartV294';
     if (!localStorage.getItem(FRESH_FLAG)) {
-      console.log('[FreshStart] First run of v2.9.3 — will clean Firebase shortly');
+      console.log('[FreshStart] First run of v2.9.4 — will clean Firebase shortly');
       _scheduleFreshStartCleanup(FRESH_FLAG);
     }
   } catch(e) { console.warn('[FreshStart] check failed:', e); }
@@ -9744,52 +9739,8 @@ if (document.readyState === 'loading') {
       });
   }
 
-  // ═══ Insert a fully-populated demo case for the user to see what a
-  // real "from-the-field" case looks like in the management software.
-  // The case is saved to Firebase just like a real mobile case so it
-  // flows through the exact same code path. The user can later delete
-  // it from the cases table or from the Firebase Console. ═══
-  window.insertDemoCase = function() {
-    if (!fbReady || !fbDb) {
-      alert('Firebase עדיין לא מחובר. נסה שוב בעוד כמה שניות.');
-      return;
-    }
-    var demoId = 'demo-' + Date.now();
-    var demoCase = {
-      id: demoId,
-      source: 'mobile',
-      plate: '12-345-67',
-      owner: 'ישראל ישראלי',
-      ownerId: '023456789',
-      phone: '050-1234567',
-      address: 'רחוב הרצל 14, קריית שמונה',
-      location: 'קריית שמונה',
-      locAddress: 'שדרות צה"ל 25, קריית שמונה',
-      lat: '33.2074',
-      lon: '35.5703',
-      contact: 'משה כהן (שכן)',
-      contactPhone: '052-9876543',
-      vehicleType: 'טויוטה קורולה',
-      color: 'כסף',
-      status: 'yellow',
-      badge: '🟡 מדבקה צהובה',
-      notes: 'רכב נטוש מזה כחודשיים. אינו מוזז ממקומו, חלק מהצמיגים שטוחים.',
-      inspector: 'שימי רוזנברג',
-      inspectorPhone: '054-669-3634',
-      date: new Date().toISOString(),
-      photos: [],
-      syncedAt: new Date().toISOString(),
-      _demo: true  // marker so user knows this is a demo
-    };
-    fbDb.ref('cases/' + demoId).set(demoCase)
-      .then(function() {
-        if (typeof showToast === 'function') showToast('✅ נוסף תיק דוגמה: ישראל ישראלי, לוחית 12-345-67');
-        else alert('תיק דוגמה נוסף בהצלחה!');
-      })
-      .catch(function(err) {
-        alert('שגיאה בהוספת תיק דוגמה: ' + (err.message || err));
-      });
-  };
+  // ═══ insertDemoCase REMOVED in v2.9.4 by user request — was creating  ═══
+  // ═══ stray demo cases that kept reappearing. Function deleted entirely. ═══
 
   function initFirebase() {
     var cfg = loadCfg();
