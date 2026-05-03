@@ -41,6 +41,10 @@ body.dark-mode .status-badge.sb-red { color: #c62828 !important; }
 body.dark-mode .status-badge.sb-green { color: #2e7d32 !important; }
 body.dark-mode .status-badge.sb-yellow { color: #f9a825 !important; }
 body.dark-mode .status-badge.sb-orange { color: #e65100 !important; }
+body.dark-mode .status-badge.sb-blue { color: #1565c0 !important; }
+body.dark-mode .status-badge.sb-pink { color: #ad1457 !important; }
+body.dark-mode .status-badge.sb-brown { color: #5d4037 !important; }
+body.dark-mode .status-badge.sb-purple { color: #6a1b9a !important; }
 body.dark-mode .town-stat.ts-red { color: #ef5350 !important; }
 body.dark-mode .town-stat.ts-green { color: #66bb6a !important; }
 body.dark-mode .town-stat.ts-yellow { color: #ffee58 !important; }
@@ -539,6 +543,11 @@ body {
 .sb-yellow { background: rgba(241,196,15,0.15);  color: #f1c40f;  border: 1px solid rgba(241,196,15,0.3); }
 .sb-red    { background: rgba(231,76,60,0.15);   color: #e74c3c;  border: 1px solid rgba(231,76,60,0.3); }
 .sb-orange { background: rgba(243,156,18,0.15);  color: #f39c12;  border: 1px solid rgba(243,156,18,0.3); }
+/* ═══ NEW STATUS BADGES ═══ */
+.sb-blue    { background: rgba(21,101,192,0.12);  color: #1565c0;  border: 1px solid rgba(21,101,192,0.3); }
+.sb-pink    { background: rgba(173,20,87,0.12);   color: #ad1457;  border: 1px solid rgba(173,20,87,0.3); }
+.sb-brown   { background: rgba(93,64,55,0.12);    color: #5d4037;  border: 1px solid rgba(93,64,55,0.3); }
+.sb-purple  { background: rgba(106,27,154,0.12);  color: #6a1b9a;  border: 1px solid rgba(106,27,154,0.3); }
 .sb-teal   { background: rgba(0,180,216,0.12);   color: var(--teal); border: 1px solid rgba(0,180,216,0.25); }
 .sb-green  { background: rgba(46,204,113,0.12);  color: #2ecc71;  border: 1px solid rgba(46,204,113,0.25); }
 
@@ -1009,6 +1018,15 @@ select.edit-input { cursor:pointer; }
 .sc-towed.active  { border-color:#3949ab; }
 .sc-closed { background:#e8f5e9; color:#2e7d32; }
 .sc-closed.active { border-color:#2e7d32; }
+/* ═══ NEW STATUS CHIPS — letters/scrap/waiver ═══ */
+.sc-letter1 { background:#e3f2fd; color:#1565c0; }
+.sc-letter1.active { border-color:#1565c0; }
+.sc-letter2 { background:#fce4ec; color:#ad1457; }
+.sc-letter2.active { border-color:#ad1457; }
+.sc-scrapped { background:#efebe9; color:#5d4037; }
+.sc-scrapped.active { border-color:#5d4037; }
+.sc-waiver { background:#f3e5f5; color:#6a1b9a; }
+.sc-waiver.active { border-color:#6a1b9a; }
 .edit-actions {
   display:flex; gap:10px; justify-content:flex-end;
   padding:16px 22px; border-top:1px solid var(--border); flex-shrink:0;
@@ -1351,8 +1369,8 @@ select.edit-input { cursor:pointer; }
 .doc-preview-content.doc-preview-with-template .gx-fold-1 { top: 99mm; }
 .doc-preview-content.doc-preview-with-template .gx-fold-2 { top: 198mm; }
 .doc-preview-content.doc-preview-with-template .gx-to {
-  position: absolute; top: 25mm; left: 18mm; width: 95mm;
-  min-height: 36mm; padding: 4mm 6mm; background: #fff;
+  position: absolute; top: 50mm; right: 20mm; width: 90mm;
+  min-height: 30mm; padding: 4mm 6mm; background: #fff;
   border: 1px dashed #ccc; z-index: 5;
 }
 .doc-preview-content.doc-preview-with-template .gx-to .gx-tolabel {
@@ -1367,7 +1385,7 @@ select.edit-input { cursor:pointer; }
   font-size: 13pt; color: #111; margin-top: 3mm; line-height: 1.5; font-weight: 500;
 }
 .doc-preview-content.doc-preview-with-template .gx-plate-ref {
-  position: absolute; top: 70mm; left: 18mm;
+  position: absolute; top: 90mm; right: 20mm;
   font-size: 10pt; color: #555;
   background: #fff8e1; padding: 1.5mm 4mm; border-radius: 2mm;
   border: 0.5pt solid #fdd835;
@@ -2633,6 +2651,24 @@ try {
       </div>
     </div>
 
+    <!-- ═══════════════ NEW: Case Documents Archive ═══════════════ -->
+    <div class="card" id="cv-archive-card" style="padding:0;border:1.5px solid rgba(102,51,153,0.25);box-shadow:0 2px 12px rgba(102,51,153,0.06);">
+      <div style="padding:16px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,rgba(102,51,153,0.06),rgba(102,51,153,0.02));">
+        <div>
+          <div class="card-title" style="font-size:16px;">📁 ארכיון מסמכים שנשלחו בתיק</div>
+          <div class="card-sub">העתקים של כל המכתבים שנשלחו — נשמרים אוטומטית בעת אישור שליחה</div>
+        </div>
+        <span id="cv-archive-count" style="background:#6633cc;color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;">0 מסמכים</span>
+      </div>
+      <div id="cv-archive-list" style="padding:16px 20px;">
+        <div style="text-align:center;padding:30px 20px;color:var(--muted);font-size:13px;">
+          <div style="font-size:36px;margin-bottom:8px;">📭</div>
+          <div style="font-weight:600;margin-bottom:4px;">אין מסמכים שמורים בארכיון</div>
+          <div style="font-size:11px;">בעת אישור שליחה של מכתב, עותק יישמר כאן אוטומטית</div>
+        </div>
+      </div>
+    </div>
+
   </div><!-- end page-scroll -->
 </div><!-- end case-main -->
 </div>
@@ -2711,13 +2747,7 @@ try {
     </div>
   </div>
   <div class="content" style="padding:0;position:relative;overflow:hidden;">
-    <div id="leaflet-map" style="width: 100%; height: 100%; background: rgb(232, 240, 227); position: relative;" class="leaflet-container leaflet-touch leaflet-retina leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom" tabindex="0"></div></div></div><div class="leaflet-pane leaflet-overlay-pane"></div><div class="leaflet-pane leaflet-shadow-pane"></div><div class="leaflet-pane leaflet-marker-pane"><div class="leaflet-marker-icon leaflet-case-marker leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -16px; margin-top: -16px; width: 32px; height: 32px; transform: translate3d(49px, -219px, 0px); z-index: -219;"><div style="background:#fdd835;color:#fff;border:3px solid #fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,0.4);">96</div></div><div class="leaflet-marker-icon leaflet-case-marker leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -16px; margin-top: -16px; width: 32px; height: 32px; transform: translate3d(26px, -163px, 0px); z-index: -163;"><div style="background:#fdd835;color:#fff;border:3px solid #fff;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,0.4);">56</div></div></div><div class="leaflet-pane leaflet-tooltip-pane"></div><div class="leaflet-pane leaflet-popup-pane"></div><div class="leaflet-proxy leaflet-zoom-animated" style="transform: translate3d(313917px, 211009px, 0px) scale(1024);"></div></div><div class="leaflet-control-container"><div class="leaflet-top leaflet-left"><div class="leaflet-control-zoom leaflet-bar leaflet-control"><a class="leaflet-control-zoom-in" href="#" title="Zoom in" role="button" aria-label="Zoom in" aria-disabled="false"><span aria-hidden="true">+</span></a><a class="leaflet-control-zoom-out" href="#" title="Zoom out" role="button" aria-label="Zoom out" aria-disabled="false"><span aria-hidden="true">−</span></a></div></div><div class="leaflet-top leaflet-right"></div><div class="leaflet-bottom leaflet-left"></div><div class="leaflet-bottom leaflet-right"><div class="leaflet-control-attribution leaflet-control"><a href="https://leafletjs.com" title="A JavaScript library for interactive maps"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" class="leaflet-attribution-flag"><path fill="#4C7BE1" d="M0 0h12v4H0z"></path><path fill="#FFD500" d="M0 4h12v3H0z"></path><path fill="#E0BC00" d="M0 7h12v1H0z"></path></svg> Leaflet</a> <span aria-hidden="true">|</span> © OpenStreetMap</div></div></div></div>
-  </div>
-</div>
-</div>
-
-<!-- ═══════════════ TOWED VEHICLES VIEW ═══════════════ -->
-<div class="view-towed" id="view-towed">
+    <div id="leaflet-map" style="width: 100%; height: 100%;"></div></div></div></div><div class="view-towed" id="view-towed">
 <div class="main">
   <div class="topbar">
     <div style="display:flex;align-items:center;gap:14px;">
@@ -3273,7 +3303,12 @@ try {
           <div class="edit-group">
             <div class="edit-label">פקח מטפל</div>
             <select class="edit-input" id="e-inspector">
-              
+              <option value="">— בחר פקח —</option>
+              <option value="גבי חותם">גבי חותם — מנהל פיקוח</option>
+              <option value="שימי רוזנברג">שימי רוזנברג — פקח</option>
+              <option value="פרנסיס ברוטמן">פרנסיס ברוטמן — פקח</option>
+              <option value="אייל ארצי">אייל ארצי — פקח</option>
+              <option value="מורן לוז">מורן לוז — מזכירה</option>
             </select>
           </div>
           <div class="edit-group">
@@ -3291,7 +3326,11 @@ try {
           <div class="status-chips" id="e-status-chips">
             <span class="status-chip sc-yellow" data-status="yellow" onclick="selectStatus(this)">🟡 מדבקה צהובה</span>
             <span class="status-chip sc-red active" data-status="red" onclick="selectStatus(this)">🔴 מדבקה אדומה</span>
+            <span class="status-chip sc-letter1" data-status="letter1_sent" onclick="selectStatus(this)">📮 נשלח מכתב ראשון</span>
+            <span class="status-chip sc-letter2" data-status="letter2_sent" onclick="selectStatus(this)">📮 נשלח מכתב שני</span>
             <span class="status-chip sc-towed" data-status="towed" onclick="selectStatus(this)">🚛 נגרר</span>
+            <span class="status-chip sc-scrapped" data-status="scrapped" onclick="selectStatus(this)">♻️ פינוי גרוטאה</span>
+            <span class="status-chip sc-waiver" data-status="waiver" onclick="selectStatus(this)">✍️ הצהרת ויתור</span>
             <span class="status-chip sc-closed" data-status="closed" onclick="selectStatus(this)">✅ סגור</span>
           </div>
         </div>
@@ -3727,6 +3766,63 @@ function confirmSent() {
 
   SENT[lid] = { date:d, regnum:n, deadline };
 
+  // ═══ NEW: Auto-update case status when letter is sent ═══
+  // letter1 → status = letter1_sent, letter2 → letter2_sent, letter4 → towed
+  var newStatus = null;
+  if (lid === 'letter1' && CASE.status !== 'closed') newStatus = 'letter1_sent';
+  else if (lid === 'letter2' && CASE.status !== 'closed') newStatus = 'letter2_sent';
+  else if (lid === 'letter4') newStatus = 'towed';
+
+  if (newStatus) {
+    CASE.status = newStatus;
+    currentStatus = newStatus;
+    // Update chips in edit form (if currently displayed)
+    document.querySelectorAll('.status-chip').forEach(function(c) {
+      c.classList.toggle('active', c.dataset.status === newStatus);
+    });
+    // Update the row in the cases-tbody table
+    try {
+      if (typeof upsertCaseRow === 'function') {
+        upsertCaseRow(CASE.plate, {
+          plate: CASE.plate,
+          date: CASE.date || (new Date()).toISOString().split('T')[0],
+          owner: CASE.ownerName || '',
+          location: (CASE.location || '').split(',')[0].trim(),
+          status: newStatus,
+          inspector: (document.getElementById('e-inspector') || {}).value || ''
+        }, Object.assign({}, CASE));
+      }
+      if (typeof markDirty === 'function') markDirty();
+    } catch(e) { console.warn('[confirmSent] status update failed:', e); }
+  }
+
+  // ═══ NEW: Save letter copy to Firebase archive (cases/{plate}/documents/) ═══
+  try {
+    if (typeof fbDb !== 'undefined' && fbDb && CASE.plate) {
+      var letterHtml = (document.getElementById('modal-preview') || {}).innerHTML || '';
+      var docKey = lid + '_' + Date.now();
+      var safePlate = String(CASE.plate).replace(/[^0-9A-Za-z\u0590-\u05FF\-]/g, '_');
+      var docPayload = {
+        type: lid,
+        title: meta.title,
+        sentDate: d,
+        deadline: deadline,
+        regnum: n || '',
+        html: letterHtml,
+        savedAt: Date.now(),
+        savedBy: (typeof currentUserEmail === 'string' && currentUserEmail) ||
+                 (document.getElementById('auth-status-email') || {}).textContent || ''
+      };
+      fbDb.ref('archives/' + safePlate + '/' + docKey).set(docPayload)
+        .then(function() {
+          console.log('[archive] ✓ saved letter to Firebase:', safePlate, docKey);
+        })
+        .catch(function(err) {
+          console.warn('[archive] ✗ Firebase save failed:', err);
+        });
+    }
+  } catch(e) { console.warn('[archive] error:', e); }
+
   // If this is letter4 (tow notification), add to towed panel
   if (lid === 'letter4') {
     CASE.towDate = d;
@@ -3735,7 +3831,187 @@ function confirmSent() {
 
   closeModal({target:document.getElementById('modal-overlay')});
   renderTimeline();
+  if (typeof loadCaseDocuments === 'function') loadCaseDocuments(CASE.plate);
   showToast('✅ ' + meta.title + ' — נשמר ועודכן!');
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   📁 CASE DOCUMENT ARCHIVE — Firebase storage of sent letter copies
+   Saves letter HTML under archives/{plate}/{docKey} and renders
+   the list inside the case view.
+   ═══════════════════════════════════════════════════════════════════ */
+
+window._archiveCache = window._archiveCache || {};
+
+function safePlateKey(plate) {
+  return String(plate || '').replace(/[^0-9A-Za-z\u0590-\u05FF\-]/g, '_');
+}
+
+function loadCaseDocuments(plate) {
+  if (!plate) return;
+  var listEl = document.getElementById('cv-archive-list');
+  var countEl = document.getElementById('cv-archive-count');
+  if (!listEl) return;
+
+  // If Firebase isn't ready, just show empty
+  if (typeof fbDb === 'undefined' || !fbDb) {
+    listEl.innerHTML =
+      '<div style="text-align:center;padding:30px 20px;color:var(--muted);font-size:13px;">' +
+      '<div style="font-size:36px;margin-bottom:8px;">📭</div>' +
+      '<div style="font-weight:600;margin-bottom:4px;">אין מסמכים שמורים בארכיון</div>' +
+      '<div style="font-size:11px;">בעת אישור שליחה של מכתב, עותק יישמר כאן אוטומטית</div>' +
+      '</div>';
+    if (countEl) countEl.textContent = '0 מסמכים';
+    return;
+  }
+
+  // Show loading state
+  listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">⏳ טוען מסמכים...</div>';
+
+  var safe = safePlateKey(plate);
+  fbDb.ref('archives/' + safe).once('value')
+    .then(function(snap) {
+      var data = snap.val() || {};
+      var items = [];
+      Object.keys(data).forEach(function(k) {
+        var doc = data[k];
+        if (doc) items.push({ key: k, doc: doc });
+      });
+      // Sort newest first
+      items.sort(function(a, b) {
+        return (b.doc.savedAt || 0) - (a.doc.savedAt || 0);
+      });
+      window._archiveCache[safe] = items;
+      renderArchive(plate, items);
+    })
+    .catch(function(err) {
+      console.warn('[archive] load failed:', err);
+      listEl.innerHTML =
+        '<div style="text-align:center;padding:20px;color:#c62828;font-size:13px;">' +
+        '⚠️ שגיאה בטעינת ארכיון. ייתכן שאין הרשאה. בדוק חיבור Firebase.' +
+        '</div>';
+    });
+}
+
+function renderArchive(plate, items) {
+  var listEl = document.getElementById('cv-archive-list');
+  var countEl = document.getElementById('cv-archive-count');
+  if (!listEl) return;
+
+  if (countEl) countEl.textContent = items.length + ' מסמכים';
+
+  if (!items.length) {
+    listEl.innerHTML =
+      '<div style="text-align:center;padding:30px 20px;color:var(--muted);font-size:13px;">' +
+      '<div style="font-size:36px;margin-bottom:8px;">📭</div>' +
+      '<div style="font-weight:600;margin-bottom:4px;">אין מסמכים שמורים בארכיון</div>' +
+      '<div style="font-size:11px;">בעת אישור שליחה של מכתב, עותק יישמר כאן אוטומטית</div>' +
+      '</div>';
+    return;
+  }
+
+  var iconMap = {
+    letter1: '📮', letter2: '📮', letter4: '🚛'
+  };
+  var typeLabelMap = {
+    letter1: 'מכתב ראשון', letter2: 'מכתב שני', letter4: 'הודעת גרירה'
+  };
+  var safe = safePlateKey(plate);
+
+  var html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">';
+  items.forEach(function(it) {
+    var d = it.doc;
+    var icon = iconMap[d.type] || '📄';
+    var typeLbl = typeLabelMap[d.type] || (d.title || 'מסמך');
+    var savedDate = d.savedAt ? new Date(d.savedAt).toLocaleDateString('he-IL') + ' ' + new Date(d.savedAt).toLocaleTimeString('he-IL', {hour:'2-digit',minute:'2-digit'}) : '';
+    var sentDate = d.sentDate ? new Date(d.sentDate).toLocaleDateString('he-IL') : '';
+    html +=
+      '<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px;">' +
+        '<div style="display:flex;align-items:center;gap:10px;">' +
+          '<div style="width:38px;height:38px;border-radius:10px;background:rgba(102,51,153,0.1);display:flex;align-items:center;justify-content:center;font-size:20px;">' + icon + '</div>' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div style="font-size:13px;font-weight:700;color:var(--navy);">' + typeLbl + '</div>' +
+            '<div style="font-size:11px;color:var(--muted);">נשלח: ' + sentDate + '</div>' +
+          '</div>' +
+        '</div>' +
+        (d.regnum ? '<div style="font-size:11px;color:var(--muted);font-family:monospace;direction:ltr;text-align:right;">דואר רשום: ' + d.regnum + '</div>' : '') +
+        '<div style="font-size:10px;color:#999;">נשמר: ' + savedDate + '</div>' +
+        '<div style="display:flex;gap:6px;margin-top:6px;">' +
+          '<button class="row-action" style="flex:1;background:#e3f2fd;color:#1565c0;font-size:11px;padding:6px;border:none;border-radius:6px;cursor:pointer;" onclick="viewArchivedDoc(\'' + safe + '\',\'' + it.key + '\')">👁️ צפה</button>' +
+          '<button class="row-action" style="flex:1;background:#e8f5e9;color:#2e7d32;font-size:11px;padding:6px;border:none;border-radius:6px;cursor:pointer;" onclick="printArchivedDoc(\'' + safe + '\',\'' + it.key + '\')">🖨️ הדפס</button>' +
+          '<button class="row-action" style="flex:1;background:#fff3e0;color:#e65100;font-size:11px;padding:6px;border:none;border-radius:6px;cursor:pointer;" onclick="downloadArchivedDoc(\'' + safe + '\',\'' + it.key + '\')">⬇️ הורד</button>' +
+        '</div>' +
+      '</div>';
+  });
+  html += '</div>';
+  listEl.innerHTML = html;
+}
+
+function _getArchivedDoc(safePlate, key) {
+  var items = (window._archiveCache && window._archiveCache[safePlate]) || [];
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].key === key) return items[i].doc;
+  }
+  return null;
+}
+
+function viewArchivedDoc(safePlate, key) {
+  var doc = _getArchivedDoc(safePlate, key);
+  if (!doc) { alert('לא נמצא המסמך'); return; }
+  var w = window.open('', '_blank', 'width=900,height=1100');
+  if (!w) { alert('הדפדפן חוסם חלונות נפתחים. אפשר חלונות נפתחים לאתר זה.'); return; }
+  w.document.write('<!DOCTYPE html><html dir="rtl" lang="he"><head><meta charset="UTF-8"><title>' + (doc.title || 'מסמך') + '</title>' +
+    '<style>body{font-family:"Heebo",Arial,sans-serif;background:#f5f5f5;padding:20px;margin:0;}' +
+    '.ml-header{display:flex;align-items:center;gap:12px;border-bottom:2px solid #1a237e;padding-bottom:8px;margin-bottom:10px;}' +
+    '.ml-logo{height:48px;width:48px;}.ml-hinfo{font-size:11pt;}' +
+    '.ml-body{font-size:11pt;line-height:1.6;}' +
+    '.ml-stamp{display:inline-block;background:#1a1a8c;color:#fff;padding:3px 12px;font-weight:700;letter-spacing:2px;margin-left:8px;}' +
+    '.ml-hl{background:#fff8e1;padding:8px;margin:8px 0;border-right:3px solid #f9a825;}' +
+    '.ml-warn{background:#ffebee;padding:8px;margin:8px 0;border-right:3px solid #c62828;color:#c62828;}' +
+    '.ml-footer-bar{margin-top:20px;padding-top:8px;border-top:1px solid #ddd;font-size:9pt;color:#555;text-align:center;}' +
+    '.ml-footer-bar span{margin:0 4px;}' +
+    '@media print{body{background:#fff;padding:0;}}</style></head><body>' +
+    '<div style="background:#fff;padding:30px;max-width:800px;margin:0 auto;border-radius:8px;">' +
+    (doc.html || '<div style="color:#c62828;text-align:center;padding:40px;">⚠️ תוכן המסמך לא זמין</div>') +
+    '</div></body></html>');
+  w.document.close();
+}
+
+function printArchivedDoc(safePlate, key) {
+  var doc = _getArchivedDoc(safePlate, key);
+  if (!doc) { alert('לא נמצא המסמך'); return; }
+  viewArchivedDoc(safePlate, key);
+  setTimeout(function() {
+    try {
+      var wins = window.open('', '_blank');
+      if (wins) wins.print();
+    } catch(e) {}
+  }, 500);
+}
+
+function downloadArchivedDoc(safePlate, key) {
+  var doc = _getArchivedDoc(safePlate, key);
+  if (!doc) { alert('לא נמצא המסמך'); return; }
+  var fullHtml = '<!DOCTYPE html><html dir="rtl" lang="he"><head><meta charset="UTF-8"><title>' +
+    (doc.title || 'מסמך') + '</title>' +
+    '<style>body{font-family:Arial,sans-serif;padding:20px;}' +
+    '.ml-header{display:flex;align-items:center;gap:12px;border-bottom:2px solid #1a237e;padding-bottom:8px;margin-bottom:10px;}' +
+    '.ml-logo{height:48px;width:48px;}' +
+    '.ml-stamp{display:inline-block;background:#1a1a8c;color:#fff;padding:3px 12px;font-weight:700;letter-spacing:2px;margin-left:8px;}' +
+    '.ml-hl{background:#fff8e1;padding:8px;margin:8px 0;border-right:3px solid #f9a825;}' +
+    '.ml-warn{background:#ffebee;padding:8px;margin:8px 0;border-right:3px solid #c62828;color:#c62828;}' +
+    '.ml-footer-bar{margin-top:20px;padding-top:8px;border-top:1px solid #ddd;font-size:9pt;color:#555;text-align:center;}' +
+    '</style></head><body>' + (doc.html || '') + '</body></html>';
+  var blob = new Blob([fullHtml], {type: 'text/html;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  var dateStr = doc.savedAt ? new Date(doc.savedAt).toISOString().split('T')[0] : 'unknown';
+  a.href = url;
+  a.download = (doc.type || 'doc') + '_' + safePlate + '_' + dateStr + '.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function() { URL.revokeObjectURL(url); }, 100);
 }
 
 function addToTowedPanel(caseData, deadline) {
@@ -4489,12 +4765,17 @@ function upsertCaseRow(oldPlate, c, fullData) {
 
   // Status info
   var statusInfo = {
-    yellow: { cls: 'sb-yellow', label: '🟡 מדבקה צהובה', days: 30, cd: 'ok' },
-    red:    { cls: 'sb-red',    label: '🔴 מדבקה אדומה', days: 14, cd: 'urgent' },
-    orange: { cls: 'sb-orange', label: '🚛 באחסנה',     days: 60, cd: 'warn' },
-    green:  { cls: 'sb-green',  label: '✅ סגור',         days: 0,  cd: 'ok' },
-    towed:  { cls: 'sb-orange', label: '🚛 נגרר',         days: 45, cd: 'warn' },
-    closed: { cls: 'sb-green',  label: '✅ סגור',         days: 0,  cd: 'ok' }
+    yellow:        { cls: 'sb-yellow', label: '🟡 מדבקה צהובה',    days: 30, cd: 'ok' },
+    red:           { cls: 'sb-red',    label: '🔴 מדבקה אדומה',    days: 14, cd: 'urgent' },
+    orange:        { cls: 'sb-orange', label: '🚛 באחסנה',         days: 60, cd: 'warn' },
+    green:         { cls: 'sb-green',  label: '✅ סגור',            days: 0,  cd: 'ok' },
+    towed:         { cls: 'sb-orange', label: '🚛 נגרר',            days: 45, cd: 'warn' },
+    closed:        { cls: 'sb-green',  label: '✅ סגור',            days: 0,  cd: 'ok' },
+    /* ═══ NEW STATUSES ═══ */
+    letter1_sent:  { cls: 'sb-blue',   label: '📮 נשלח מכתב ראשון', days: 30, cd: 'warn' },
+    letter2_sent:  { cls: 'sb-pink',   label: '📮 נשלח מכתב שני',   days: 14, cd: 'urgent' },
+    scrapped:      { cls: 'sb-brown',  label: '♻️ פינוי גרוטאה',    days: 0,  cd: 'ok' },
+    waiver:        { cls: 'sb-purple', label: '✍️ הצהרת ויתור',     days: 0,  cd: 'ok' }
   };
   var s = statusInfo[c.status] || statusInfo.yellow;
   var elapsed = 0;
@@ -5143,11 +5424,11 @@ body { font-family:'Rubik',sans-serif; direction:rtl; font-size:12.5px; line-hei
 .gx-fold-1 { top: 99mm; }
 .gx-fold-2 { top: 198mm; }
 
-/* Recipient block — positioned to align with DL envelope window
-   (window typically starts ~22mm from envelope top, 95mm wide, 45mm tall).
-   With recipient at top:25mm, the name+address fall within the window. */
+/* Recipient block — positioned to align with Israeli DL envelope window
+   (window on RIGHT side for Hebrew/RTL letters, ~50mm from envelope top,
+   90mm wide, 30mm tall, ~20mm from right edge of envelope). */
 .gx-to {
-  position: absolute; top: 25mm; left: 18mm; width: 95mm; min-height: 36mm;
+  position: absolute; top: 50mm; right: 20mm; width: 90mm; min-height: 30mm;
   padding: 4mm 6mm; background: #fff;
   border: 1px dashed #ccc;
   font-family: 'Rubik',Arial,sans-serif; z-index: 5;
@@ -5160,7 +5441,7 @@ body { font-family:'Rubik',sans-serif; direction:rtl; font-size:12.5px; line-hei
 /* License plate reference — yellow tag below recipient block, OUTSIDE the
    envelope window so the recipient sees it once they open the letter. */
 .gx-plate-ref {
-  position: absolute; top: 70mm; left: 18mm;
+  position: absolute; top: 90mm; right: 20mm;
   font-size: 10pt; color: #555; font-family: 'Rubik',Arial,sans-serif;
   background: #fff8e1; padding: 1.5mm 4mm; border-radius: 2mm;
   border: 0.5pt solid #fdd835;
@@ -6671,6 +6952,7 @@ function renderMapMarkers() {
     // mobile-source case)
     var rawLat = row.getAttribute('data-lat');
     var rawLon = row.getAttribute('data-lon');
+    var noGps = false;
     if (rawLat && rawLon) {
       var pLat = parseFloat(rawLat);
       var pLon = parseFloat(rawLon);
@@ -6682,7 +6964,7 @@ function renderMapMarkers() {
       if (TOWN_LATLON[townKey]) {
         lat = TOWN_LATLON[townKey][0];
         lon = TOWN_LATLON[townKey][1];
-      } else {
+      } else if (townKey) {
         // Try fuzzy match
         for (var k in TOWN_LATLON) {
           if (k.indexOf(townKey) !== -1 || townKey.indexOf(k) !== -1) {
@@ -6692,7 +6974,20 @@ function renderMapMarkers() {
         }
       }
     }
-    if (lat == null || lon == null) return; // can't map this case
+    // ═══ NEW: never lose a case — fall back to council HQ (Kfar Giladi) so
+    // every active case shows on the map. We slightly randomise the offset so
+    // multiple location-less cases don't stack into one marker. The popup
+    // makes it clear that this case has no GPS data. ═══
+    if (lat == null || lon == null) {
+      // Council headquarters area (Kfar Giladi) as central fallback
+      var hashSeed = (plate || owner || String(Math.random())).split('')
+        .reduce(function(a,c){ return a + c.charCodeAt(0); }, 0);
+      var jitter = ((hashSeed % 200) - 100) / 50000; // ~±0.002°
+      var jitter2 = (((hashSeed * 7) % 200) - 100) / 50000;
+      lat = 33.2422 + jitter;
+      lon = 35.5719 + jitter2;
+      noGps = true;
+    }
 
     totalActive++;
     if (loc) townSet[loc] = true;
@@ -6700,6 +6995,9 @@ function renderMapMarkers() {
     var color = '#fdd835';
     if (status === 'red') color = '#e53935';
     else if (status === 'orange' || status === 'towed') color = '#ff9800';
+    // Cases without geo data get a grey marker so the user knows the position
+    // is approximate and the case needs a location/GPS update.
+    if (noGps) color = '#9e9e9e';
 
     var icon = _buildPinIcon(color, plate ? plate.slice(-2) : '?');
     var marker = L.marker([lat, lon], { icon: icon }).addTo(map);
@@ -6709,14 +7007,20 @@ function renderMapMarkers() {
                   + '<div style="color:#333;margin-bottom:2px;">' + (owner || '—') + '</div>'
                   + '<div style="color:#888;font-size:12px;margin-bottom:4px;">📍 '
                   + (loc || '—') + '</div>'
+                  + (noGps ? '<div style="background:#fff3e0;color:#e65100;font-size:11px;'
+                                + 'padding:4px 6px;border-radius:4px;margin:4px 0;'
+                                + 'border:1px solid #ffb74d;">'
+                                + '⚠️ אין מיקום מדויק — יש להוסיף לתיק'
+                                + '</div>' : '')
                   + (inspector ? '<div style="font-size:11px;color:#555;">פקח: '
                                 + inspector + '</div>' : '')
-                  + '<a href="https://waze.com/ul?ll=' + lat + ',' + lon + '&navigate=yes"'
-                  + ' target="_blank" rel="noopener"'
-                  + ' style="display:block;margin-top:8px;padding:6px 10px;'
-                  + 'background:#33ccff;color:#fff;border-radius:6px;'
-                  + 'font-size:12px;text-align:center;text-decoration:none;'
-                  + 'font-weight:600;">🚗 נווט עם Waze</a>'
+                  + (noGps ? '' :
+                      '<a href="https://waze.com/ul?ll=' + lat + ',' + lon + '&navigate=yes"'
+                      + ' target="_blank" rel="noopener"'
+                      + ' style="display:block;margin-top:8px;padding:6px 10px;'
+                      + 'background:#33ccff;color:#fff;border-radius:6px;'
+                      + 'font-size:12px;text-align:center;text-decoration:none;'
+                      + 'font-weight:600;">🚗 נווט עם Waze</a>')
                   + '</div>';
     marker.bindPopup(popupHtml);
     leafletMarkers.push(marker);
@@ -6742,6 +7046,8 @@ function openExistingCase(rowEl) {
 
   fillCaseView({ plate:plate, owner:owner, city:city, inspector:inspector });
   showView('case');
+  // ═══ NEW: Load archive of saved letters for this case ═══
+  if (typeof loadCaseDocuments === 'function') loadCaseDocuments(plate);
 }
 
 // ═══════════════ STAFF MANAGEMENT ═══════════════
@@ -8388,10 +8694,16 @@ if (document.readyState === 'loading') {
     try { dt = c.date ? new Date(c.date).toLocaleDateString('he-IL', {day:'2-digit',month:'2-digit',year:'numeric'}) : ''; } catch(e){}
 
     var statusInfo = {
-      yellow: { cls: 'sb-yellow', label: '🟡 מדבקה צהובה', days: 30, cd: 'ok' },
-      red:    { cls: 'sb-red',    label: '🔴 מדבקה אדומה', days: 14, cd: 'urgent' },
-      orange: { cls: 'sb-orange', label: '🚛 באחסנה',     days: 60, cd: 'warn' },
-      green:  { cls: 'sb-green',  label: '✅ סגור',         days: 0,  cd: 'ok' }
+      yellow:        { cls: 'sb-yellow', label: '🟡 מדבקה צהובה',    days: 30, cd: 'ok' },
+      red:           { cls: 'sb-red',    label: '🔴 מדבקה אדומה',    days: 14, cd: 'urgent' },
+      orange:        { cls: 'sb-orange', label: '🚛 באחסנה',         days: 60, cd: 'warn' },
+      green:         { cls: 'sb-green',  label: '✅ סגור',            days: 0,  cd: 'ok' },
+      towed:         { cls: 'sb-orange', label: '🚛 נגרר',            days: 45, cd: 'warn' },
+      closed:        { cls: 'sb-green',  label: '✅ סגור',            days: 0,  cd: 'ok' },
+      letter1_sent:  { cls: 'sb-blue',   label: '📮 נשלח מכתב ראשון', days: 30, cd: 'warn' },
+      letter2_sent:  { cls: 'sb-pink',   label: '📮 נשלח מכתב שני',   days: 14, cd: 'urgent' },
+      scrapped:      { cls: 'sb-brown',  label: '♻️ פינוי גרוטאה',    days: 0,  cd: 'ok' },
+      waiver:        { cls: 'sb-purple', label: '✍️ הצהרת ויתור',     days: 0,  cd: 'ok' }
     };
     var s = statusInfo[c.status] || statusInfo.yellow;
     var elapsed = 0;
@@ -8519,6 +8831,7 @@ if (document.readyState === 'loading') {
 
       // Map mobile fields to new-case form fields
       setVal('nf-plate', c.plate);
+      setVal('nf-vehicle-type', c.vehicleType);
       setVal('nf-owner-name', c.owner);
       setVal('nf-owner-phone', c.phone);
       setVal('nf-owner-addr', c.address);
@@ -8655,6 +8968,7 @@ if (document.readyState === 'loading') {
 
         // Map mobile fields to new-case form fields
         setVal('nf-plate', c.plate);
+        setVal('nf-vehicle-type', c.vehicleType);
         setVal('nf-owner-name', c.owner);
         setVal('nf-owner-phone', c.phone);
         setVal('nf-owner-addr', c.address);
