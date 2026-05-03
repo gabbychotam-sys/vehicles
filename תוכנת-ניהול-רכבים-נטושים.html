@@ -2013,7 +2013,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.2 — blocking delete</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.3 — fresh start</div>
     </div>
   </div>
 
@@ -2087,7 +2087,7 @@ try {
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <div class="tb-notif">🔔<div class="notif-dot"></div></div>
       <button onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.2 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.3 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2668,7 +2668,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.2 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.3 ✓</span>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
     </div>
@@ -8944,14 +8944,120 @@ function _bootSequence() {
   loadState();
   updateReturnedCount();
   recomputeTowingStats();
-  // ═══ NEW: Recompute counters from the restored DOM. Without this, ═══
-  // ═══ stale baked-in numbers (e.g. "2") could remain in the UI even ═══
-  // ═══ after all cases have been deleted.                            ═══
   try {
     if (typeof updateAllCounters === 'function') updateAllCounters();
     if (typeof syncDashboardWithCases === 'function') syncDashboardWithCases();
     if (typeof refreshDashboardPanels === 'function') refreshDashboardPanels();
   } catch(e) { console.warn('[boot] counter refresh failed:', e); }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ═══ ONE-TIME AUTO-CLEANUP (v2.9.3): On the very first time this version  ═══
+  // ═══ runs, delete ALL cases from Firebase. The user has been struggling   ═══
+  // ═══ with old cases coming back, so this gives them a guaranteed clean    ═══
+  // ═══ slate. Marker is stored in localStorage so it only runs once.        ═══
+  // ═══════════════════════════════════════════════════════════════════════════
+  try {
+    var FRESH_FLAG = 'galilElyon_firebaseFreshStartV293';
+    if (!localStorage.getItem(FRESH_FLAG)) {
+      console.log('[FreshStart] First run of v2.9.3 — will clean Firebase shortly');
+      _scheduleFreshStartCleanup(FRESH_FLAG);
+    }
+  } catch(e) { console.warn('[FreshStart] check failed:', e); }
+}
+
+function _scheduleFreshStartCleanup(FRESH_FLAG) {
+  // Show a blocking overlay so the user knows this is happening
+  function _showFreshOverlay(text) {
+    var existing = document.getElementById('fresh-start-overlay');
+    if (existing) existing.remove();
+    var o = document.createElement('div');
+    o.id = 'fresh-start-overlay';
+    o.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;flex-direction:column;gap:24px;font-family:Heebo,sans-serif;';
+    o.innerHTML =
+      '<div style="font-size:72px;animation:fsspin 1s linear infinite;">🧹</div>' +
+      '<div id="fresh-start-text" style="font-size:24px;text-align:center;font-weight:700;">' + text + '</div>' +
+      '<div style="font-size:14px;color:#aaa;text-align:center;max-width:520px;">⚠️ אל תסגור את החלון — מתבצעת פעולת אתחול חד-פעמית של מסד הנתונים</div>' +
+      '<style>@keyframes fsspin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>';
+    document.body.appendChild(o);
+    return o;
+  }
+  function _updateFreshOverlay(text) {
+    var el = document.getElementById('fresh-start-text');
+    if (el) el.textContent = text;
+  }
+  function _removeFreshOverlay() {
+    var o = document.getElementById('fresh-start-overlay');
+    if (o) o.remove();
+  }
+  function _markDone() {
+    try { localStorage.setItem(FRESH_FLAG, String(Date.now())); } catch(e){}
+  }
+
+  _showFreshOverlay('מאתחל את מסד הנתונים — נא להמתין...');
+
+  // Wait for Firebase to be ready (with timeout). Polled because Firebase
+  // initializes inside its own IIFE later in the page lifecycle.
+  var attempts = 0;
+  var maxAttempts = 50; // 50 × 200ms = 10 seconds
+  function _waitForFb() {
+    attempts++;
+    var db = (typeof fbDb !== 'undefined' && fbDb) || window.fbDb;
+    var ready = (window.GalilSync && window.GalilSync.isReady && window.GalilSync.isReady()) || (db != null);
+
+    if (ready && db) {
+      _updateFreshOverlay('מוחק את כל התיקים מ-Firebase...');
+      // ═══ FULLY remove the whole "cases" branch ═══
+      db.ref('cases').remove()
+        .then(function() {
+          console.log('[FreshStart] ✓ cases branch removed');
+          _markDone();
+          // Also clear local state for good measure
+          try { localStorage.removeItem('galilElyon_appState_v1'); } catch(e){}
+          try { localStorage.removeItem('galilElyon_deletedIds'); } catch(e){}
+          try { localStorage.removeItem('galilElyon_resetAt'); } catch(e){}
+          // Clear DOM tables
+          ['cases-tbody', 'dash-urgent-tbody', 'tw-towed-tbody', 'towed-tbody', 'mobile-cases-tbody', 'tw-history-tbody', 'towns-cases-tbody'].forEach(function(tbId) {
+            var tb = document.getElementById(tbId);
+            if (tb) tb.innerHTML = '';
+          });
+          try {
+            if (typeof mobileCasesCache !== 'undefined') {
+              Object.keys(mobileCasesCache).forEach(function(k) { delete mobileCasesCache[k]; });
+            }
+          } catch(e){}
+          try {
+            if (typeof updateAllCounters === 'function') updateAllCounters();
+            if (typeof syncDashboardWithCases === 'function') syncDashboardWithCases();
+          } catch(e){}
+          _updateFreshOverlay('✅ הושלם! התוכנה נקייה לחלוטין.');
+          setTimeout(function() {
+            _removeFreshOverlay();
+            // Force a full page reload to ensure clean state
+            try { location.reload(); } catch(e){}
+          }, 1500);
+        })
+        .catch(function(err) {
+          console.error('[FreshStart] cleanup failed:', err);
+          _removeFreshOverlay();
+          alert('⚠️ ניקוי אוטומטי של Firebase נכשל:\n' + (err.message || err) +
+                '\n\nתוכל ללחוץ על "🗑️ נקה הכל" ידנית לאחר טעינת התוכנה.');
+          _markDone(); // Don't retry endlessly
+        });
+      return;
+    }
+
+    if (attempts >= maxAttempts) {
+      console.warn('[FreshStart] Firebase did not become ready in time — skipping cleanup');
+      _removeFreshOverlay();
+      // Don't mark as done — try again next time the user opens the app
+      return;
+    }
+
+    setTimeout(_waitForFb, 200);
+  }
+
+  // Give the page a moment to set up Firebase, then start polling
+  setTimeout(_waitForFb, 1500);
 }
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', _bootSequence);
