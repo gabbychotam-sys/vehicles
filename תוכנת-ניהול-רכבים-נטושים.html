@@ -2003,7 +2003,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.9 — GPS fix</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.10 — auto-geocode</div>
     </div>
   </div>
 
@@ -2077,7 +2077,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <div class="tb-notif">🔔<div class="notif-dot"></div></div>
       <button onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.9 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.10 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2658,7 +2658,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.9 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.10 ✓</span>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
     </div>
@@ -5659,6 +5659,29 @@ function openEditFullForm(tr) {
     CASE.lat = lat;
     CASE.lon = lon;
     console.log('[openEditFullForm] ✓ GPS shown:', lat, lon);
+
+    // ═══ v2.9.10: AUTO-FILL city + street from GPS coordinates ═══
+    // The mobile app captures GPS but doesn't always set a city/street.
+    // The desktop city dropdown then defaults to "מטולה" which is wrong.
+    // Use Nominatim reverse-geocoding to fill the actual city + street
+    // from the photo's GPS location.
+    // Pass force=false so we don't overwrite values the manager already typed,
+    // EXCEPT if the city is still on the default "מטולה" (=first option) and
+    // the GPS would resolve to something else.
+    if (typeof window._gx_reverseGeocodeForNewCaseForm === 'function') {
+      // Determine if the city dropdown is at default state (no manual selection).
+      // We treat "still on first option AND CASE has no location text" as default.
+      var citySel = document.getElementById('nf-location-city');
+      var streetEl = document.getElementById('nf-location-street');
+      var hasManualCity = false;
+      if (citySel && CASE.location && CASE.location.trim() && CASE.location.trim() !== ',') {
+        // CASE.location explicitly set by manager → don't overwrite
+        hasManualCity = true;
+      }
+      // Force overwrite when city looks like the default (manager didn't pick).
+      var doForce = !hasManualCity;
+      window._gx_reverseGeocodeForNewCaseForm(lat, lon, doForce);
+    }
   } else {
     if (navBox) navBox.style.display = 'none';
     if (emptyBox) emptyBox.style.display = 'block';
@@ -9484,6 +9507,112 @@ if (document.readyState === 'loading') {
       })
       .catch(function(err) {
         console.warn('[GeoCode/Edit] reverse geocoding failed:', err);
+      });
+  };
+
+  // ═══ v2.9.10: Variant for the FULL "new case" form (nf-* fields) ═══
+  // Called from openEditFullForm when a case has GPS coordinates so that
+  // the city dropdown and street field auto-populate from the photo's
+  // actual location, instead of leaving them at the default "מטולה".
+  // The `force` flag (default true) means: overwrite even if the city
+  // dropdown is already set, since the GPS is more accurate than whatever
+  // the user might have typed before. Pass force=false to only fill empty
+  // fields.
+  window._gx_reverseGeocodeForNewCaseForm = function(lat, lon, force) {
+    if (lat == null || lon == null || lat === '' || lon === '') return;
+    if (force === undefined) force = true;
+    var streetEl = document.getElementById('nf-location-street');
+    var citySel  = document.getElementById('nf-location-city');
+    if (!streetEl && !citySel) return;
+
+    var key = (+lat).toFixed(5) + ',' + (+lon).toFixed(5);
+
+    var doApply = function(result) {
+      // Only overwrite the street if it's empty (don't blow away user input)
+      if (streetEl && result.street && (force || !streetEl.value)) {
+        streetEl.value = result.street;
+      }
+      // City: use applyGeocodeResult logic but on the nf-* select
+      if (citySel && result.city) {
+        var city = String(result.city).trim();
+        var norm = function(s) {
+          return String(s || '').trim().replace(/\s+/g, ' ')
+            .replace(/יי/g, 'י').replace(/[״"׳']/g, '');
+        };
+        var cityN = norm(city);
+        var matched = false;
+        for (var i = 0; i < citySel.options.length; i++) {
+          if (norm(citySel.options[i].text) === cityN) {
+            citySel.value = citySel.options[i].value;
+            matched = true;
+            break;
+          }
+        }
+        if (!matched) {
+          var newOpt = document.createElement('option');
+          newOpt.value = city;
+          newOpt.text  = city;
+          // Insert just before "אחר" if it exists
+          var inserted = false;
+          for (var j = 0; j < citySel.options.length; j++) {
+            if (citySel.options[j].text === 'אחר') {
+              citySel.add(newOpt, citySel.options[j]);
+              inserted = true; break;
+            }
+          }
+          if (!inserted) citySel.add(newOpt);
+          citySel.value = city;
+        }
+        try { citySel.dispatchEvent(new Event('change', { bubbles: true })); } catch(e){}
+      }
+      // Update CASE.location so saveNewCase keeps the geocoded value
+      if (typeof CASE !== 'undefined') {
+        var c = (citySel && citySel.value) || '';
+        var s = (streetEl && streetEl.value) || '';
+        CASE.location = s ? (c + ', ' + s) : c;
+      }
+      console.log('[GeoCode/NewForm] filled:', result);
+    };
+
+    // Cache hit?
+    if (geocodeCache && geocodeCache.hasOwnProperty(key)) {
+      doApply(geocodeCache[key]);
+      return;
+    }
+
+    var url = 'https://nominatim.openstreetmap.org/reverse'
+            + '?format=jsonv2&accept-language=he'
+            + '&zoom=18&addressdetails=1'
+            + '&lat=' + encodeURIComponent(lat)
+            + '&lon=' + encodeURIComponent(lon);
+
+    fetch(url, { headers: { 'Accept': 'application/json' } })
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(data) {
+        if (!data) return;
+        var a = data.address || {};
+        var road = a.road || a.pedestrian || a.path || a.footway
+                || a.cycleway || a.residential || a.living_street
+                || a.tourism || a.amenity || a.shop || '';
+        var num  = a.house_number || '';
+        var streetText = '';
+        if (road && num) streetText = road + ' ' + num;
+        else if (road) streetText = road;
+        else if (a.neighbourhood) streetText = a.neighbourhood;
+        else if (a.suburb) streetText = a.suburb;
+        else if (a.hamlet) streetText = a.hamlet;
+        else if (a.quarter) streetText = a.quarter;
+        else if (data.name) streetText = data.name;
+        else if (data.display_name) streetText = data.display_name.split(',')[0];
+
+        var cityText = a.city || a.town || a.village || a.municipality
+                     || a.suburb || a.county || '';
+        var result = { street: streetText, city: cityText };
+        if (geocodeCache) geocodeCache[key] = result;
+        doApply(result);
+      })
+      .catch(function(err) {
+        console.warn('[GeoCode/NewForm] reverse geocoding failed:', err);
       });
   };
 
