@@ -2013,7 +2013,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.8.1 — verified</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.0 — refreshNow fixed</div>
     </div>
   </div>
 
@@ -2026,7 +2026,7 @@ try {
     <div class="sb-item">
       <div class="si-icon">📋</div>
       <span class="si-label">כל התיקים</span>
-      <span class="sb-badge" id="sb-badge-cases">2</span>
+      <span class="sb-badge" id="sb-badge-cases">0</span>
     </div>
     <div class="sb-item">
       <div class="si-icon">🗺️</div>
@@ -2087,7 +2087,7 @@ try {
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <div class="tb-notif">🔔<div class="notif-dot"></div></div>
       <button onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.8.1 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.0 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2099,12 +2099,12 @@ try {
     <div class="stats-row">
       <div class="stat-card blue" onclick="goToCasesFilter('all')" style="cursor:pointer;">
         <div class="stat-icon">📋</div>
-        <div class="stat-num" id="dash-stat-total">2</div>
+        <div class="stat-num" id="dash-stat-total">0</div>
         <div class="stat-label">סה"כ תיקים פתוחים</div>
       </div>
       <div class="stat-card yellow" onclick="goToCasesFilter('yellow')" style="cursor:pointer;">
         <div class="stat-icon">🟡</div>
-        <div class="stat-num" id="dash-stat-yellow">2</div>
+        <div class="stat-num" id="dash-stat-yellow">0</div>
         <div class="stat-label">מדבקה צהובה</div>
       </div>
       <div class="stat-card red" onclick="goToCasesFilter('red')" style="cursor:pointer;">
@@ -2663,12 +2663,12 @@ try {
   <div class="topbar">
     <div>
       <div class="tb-title">כל התיקים</div>
-      <div class="tb-sub" style="color:rgba(255,255,255,0.7);font-size:12px;margin-top:2px;"><span id="cases-list-subtitle">2 תיקים פתוחים</span> · ממוינים לפי תאריך פתיחה</div>
+      <div class="tb-sub" style="color:rgba(255,255,255,0.7);font-size:12px;margin-top:2px;"><span id="cases-list-subtitle">0 תיקים פתוחים</span> · ממוינים לפי תאריך פתיחה</div>
     </div>
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.8.1 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.0 ✓</span>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
     </div>
@@ -2679,9 +2679,9 @@ try {
         <div style="display:flex;align-items:center;gap:12px;">
           <div class="panel-title">📋 רשימת תיקים</div>
           <div style="display:flex;gap:6px;" id="cases-filter-pills">
-            <span class="cases-filter-pill active" data-filter="all" onclick="setCasesFilter('all')">הכל (2)</span>
+            <span class="cases-filter-pill active" data-filter="all" onclick="setCasesFilter('all')">הכל (0)</span>
             <span class="cases-filter-pill" data-filter="red" onclick="setCasesFilter('red')">🔴 אדום (0)</span>
-            <span class="cases-filter-pill" data-filter="yellow" onclick="setCasesFilter('yellow')">🟡 צהוב (2)</span>
+            <span class="cases-filter-pill" data-filter="yellow" onclick="setCasesFilter('yellow')">🟡 צהוב (0)</span>
             <span class="cases-filter-pill" data-filter="orange" onclick="setCasesFilter('orange')">🚛 באחסנה (0)</span>
             <span class="cases-filter-pill" data-filter="green" onclick="setCasesFilter('green')">✅ סגור (0)</span>
           </div>
@@ -8896,13 +8896,24 @@ document.addEventListener('keydown', function(e) {
 });
 
 // Restore on page load (run after all DOM + scripts are ready)
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', function(){ injectSaveButtons(); loadState(); updateReturnedCount(); recomputeTowingStats(); });
-} else {
+function _bootSequence() {
   injectSaveButtons();
   loadState();
   updateReturnedCount();
   recomputeTowingStats();
+  // ═══ NEW: Recompute counters from the restored DOM. Without this, ═══
+  // ═══ stale baked-in numbers (e.g. "2") could remain in the UI even ═══
+  // ═══ after all cases have been deleted.                            ═══
+  try {
+    if (typeof updateAllCounters === 'function') updateAllCounters();
+    if (typeof syncDashboardWithCases === 'function') syncDashboardWithCases();
+    if (typeof refreshDashboardPanels === 'function') refreshDashboardPanels();
+  } catch(e) { console.warn('[boot] counter refresh failed:', e); }
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _bootSequence);
+} else {
+  _bootSequence();
 }
 
 </script>
@@ -9538,15 +9549,46 @@ if (document.readyState === 'loading') {
       .then(function(snap) {
         var data = snap.val() || {};
         var count = 0;
+        var skipped = 0;
+        // ═══ Read tombstone list to filter out deleted cases ═══
+        var deletedIds = [];
+        var resetAt = 0;
+        try {
+          deletedIds = JSON.parse(localStorage.getItem('galilElyon_deletedIds') || '[]');
+          if (!Array.isArray(deletedIds)) deletedIds = [];
+          resetAt = parseInt(localStorage.getItem('galilElyon_resetAt') || '0', 10) || 0;
+        } catch(e){}
+
         Object.keys(data).forEach(function(id) {
           var c = data[id];
-          if (c && c.source === 'mobile') {
+          if (!c) return;
+          // ═══ Skip cases marked as deleted (tombstone) ═══
+          if (deletedIds.indexOf(id) !== -1) { skipped++; return; }
+          // ═══ Skip cases marked with _deleted flag ═══
+          if (c._deleted) { skipped++; return; }
+          // ═══ Skip cases older than resetAt ═══
+          if (resetAt) {
+            var updatedAt = +(c.updatedAt) || 0;
+            if (updatedAt && updatedAt < resetAt) { skipped++; return; }
+            if (!updatedAt) {
+              var dateMs = 0;
+              try { if (c.date) dateMs = new Date(c.date).getTime() || 0; } catch(e){}
+              if (dateMs && dateMs < resetAt) { skipped++; return; }
+              if (!dateMs) { skipped++; return; }
+            }
+          }
+          if (c.source === 'mobile') {
             mobileCasesCache[id] = c;
             addOrUpdateMobileRow(c);
             count++;
           }
         });
-        if (typeof showToast === 'function') showToast('🔄 רוענן: ' + count + ' תיקים מהשטח');
+        if (typeof showToast === 'function') {
+          var msg = '🔄 רוענן: ' + count + ' תיקים מהשטח';
+          if (skipped > 0) msg += ' (' + skipped + ' נמחקו)';
+          showToast(msg);
+        }
+        console.log('[refreshNow] loaded ' + count + ', skipped ' + skipped + ' (deleted/stale)');
       })
       .catch(function(err) {
         if (typeof showToast === 'function') showToast('⚠️ שגיאה: ' + err.message);
@@ -9781,6 +9823,35 @@ if (document.readyState === 'loading') {
     if (!tbody) return;
     if (typeof upsertCaseRow !== 'function') return;
 
+    // ═══ TOMBSTONE CHECK: never re-add a case that the user has deleted ═══
+    try {
+      var deletedIds = JSON.parse(localStorage.getItem('galilElyon_deletedIds') || '[]');
+      if (Array.isArray(deletedIds) && deletedIds.indexOf(c.id) !== -1) {
+        console.log('[addOrUpdateManualRow] ✗ skipped (tombstoned):', c.id, c.plate);
+        return;
+      }
+    } catch(e){}
+
+    // ═══ resetAt check ═══
+    try {
+      var resetAt = parseInt(localStorage.getItem('galilElyon_resetAt') || '0', 10) || 0;
+      if (resetAt) {
+        var updatedAt = +(c.updatedAt) || 0;
+        var isStale = false;
+        if (updatedAt) {
+          isStale = updatedAt < resetAt;
+        } else {
+          var dateMs = 0;
+          try { if (c.date) dateMs = new Date(c.date).getTime() || 0; } catch(e){}
+          isStale = !dateMs || dateMs < resetAt;
+        }
+        if (isStale) {
+          console.log('[addOrUpdateManualRow] ✗ skipped (stale):', c.id, c.plate);
+          return;
+        }
+      }
+    } catch(e){}
+
     // Build row data from the Firebase payload
     var rowData = {
       plate:     c.plate || '',
@@ -9835,6 +9906,39 @@ if (document.readyState === 'loading') {
   function addOrUpdateMobileRow(c, isNew) {
     var tbody = document.getElementById('cases-tbody');
     if (!tbody) return;
+
+    // ═══ TOMBSTONE CHECK: never re-add a case that the user has deleted ═══
+    // This catches every code path (Firebase listener, refreshNow, etc.) so
+    // we don't have to remember to filter at every call site.
+    try {
+      var deletedIds = JSON.parse(localStorage.getItem('galilElyon_deletedIds') || '[]');
+      if (Array.isArray(deletedIds)) {
+        if (deletedIds.indexOf(c.id) !== -1) {
+          console.log('[addOrUpdateMobileRow] ✗ skipped (tombstoned):', c.id, c.plate);
+          return;
+        }
+      }
+    } catch(e){}
+
+    // ═══ Also respect resetAt timestamp ═══
+    try {
+      var resetAt = parseInt(localStorage.getItem('galilElyon_resetAt') || '0', 10) || 0;
+      if (resetAt) {
+        var updatedAt = +(c.updatedAt) || 0;
+        var isStale = false;
+        if (updatedAt) {
+          isStale = updatedAt < resetAt;
+        } else {
+          var dateMs = 0;
+          try { if (c.date) dateMs = new Date(c.date).getTime() || 0; } catch(e){}
+          isStale = !dateMs || dateMs < resetAt;
+        }
+        if (isStale) {
+          console.log('[addOrUpdateMobileRow] ✗ skipped (stale before reset):', c.id, c.plate);
+          return;
+        }
+      }
+    } catch(e){}
 
     // Skip if this case was already promoted to an active case
     // (prevents duplicate rows after a page reload re-broadcasts mobile cases)
