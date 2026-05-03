@@ -2013,7 +2013,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.7.0 — 03.05.26</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.8.0 — autosave</div>
     </div>
   </div>
 
@@ -8200,6 +8200,53 @@ var TRACKED_CSS_VARS = ['--bg','--card','--card2','--border','--text','--muted',
 
 var __saveTimer = null;
 var __isLoading = false;  // suppress auto-save while restoring
+
+// ═══════════════════════════════════════════════════════════════════
+// AUTO-SAVE on app close (beforeunload) — captures any pending changes
+// before the EXE shuts down. Without this, changes made in the last
+// 800ms (debounce window) before close would be lost.
+// ═══════════════════════════════════════════════════════════════════
+window.addEventListener('beforeunload', function() {
+  try {
+    if (__saveTimer) { clearTimeout(__saveTimer); __saveTimer = null; }
+    if (typeof saveState === 'function' && !__isLoading) {
+      saveState();
+      console.log('[autosave] ✓ saved on beforeunload');
+    }
+  } catch(e) { console.warn('[autosave] beforeunload failed:', e); }
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// Periodic auto-save — every 15 seconds, save the current state.
+// Cheap insurance against data loss from crashes / forced close /
+// power outages. Skipped while loading.
+// ═══════════════════════════════════════════════════════════════════
+setInterval(function() {
+  try {
+    if (__isLoading) return;
+    if (typeof saveState === 'function') {
+      saveState();
+    }
+  } catch(e){}
+}, 15000);
+
+// ═══════════════════════════════════════════════════════════════════
+// Save on tab visibility change (e.g. user alt-tabs away or minimizes
+// the window — common before closing). Browsers don't always fire
+// beforeunload reliably (especially in webview/EXE contexts), but
+// visibilitychange is fired immediately.
+// ═══════════════════════════════════════════════════════════════════
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'hidden') {
+    try {
+      if (__saveTimer) { clearTimeout(__saveTimer); __saveTimer = null; }
+      if (typeof saveState === 'function' && !__isLoading) {
+        saveState();
+        console.log('[autosave] ✓ saved on visibilitychange');
+      }
+    } catch(e){}
+  }
+});
 
 function buildStateSnapshot() {
   var tables = {};
