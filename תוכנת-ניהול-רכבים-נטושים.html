@@ -1004,6 +1004,19 @@ body {
   text-transform:uppercase;
 }
 select.edit-input { cursor:pointer; }
+/* ═══ NEW: read-only display field for auto-populated values ═══ */
+.edit-input-readonly {
+  background:#f0f4f8 !important;
+  border:1.5px dashed #b0bec5 !important;
+  color:#37474f !important;
+  font-weight:600 !important;
+  cursor:not-allowed !important;
+  display:flex; align-items:center; gap:6px;
+  user-select:none;
+}
+.edit-input-readonly::before {
+  content:"🔒"; font-size:11px; opacity:0.6;
+}
 .status-chips { display:flex; gap:8px; flex-wrap:wrap; }
 .status-chip {
   padding:7px 14px; border-radius:20px; font-size:11px; font-weight:700;
@@ -3301,15 +3314,9 @@ try {
             <input class="edit-input" id="e-location-street" type="text" placeholder="רחוב ומספר">
           </div>
           <div class="edit-group">
-            <div class="edit-label">פקח מטפל</div>
-            <select class="edit-input" id="e-inspector">
-              <option value="">— בחר פקח —</option>
-              <option value="גבי חותם">גבי חותם — מנהל פיקוח</option>
-              <option value="שימי רוזנברג">שימי רוזנברג — פקח</option>
-              <option value="פרנסיס ברוטמן">פרנסיס ברוטמן — פקח</option>
-              <option value="אייל ארצי">אייל ארצי — פקח</option>
-              <option value="מורן לוז">מורן לוז — מזכירה</option>
-            </select>
+            <div class="edit-label">פקח מטפל <span style="font-size:10px;color:var(--muted);font-weight:400;">(אוטומטי)</span></div>
+            <div class="edit-input edit-input-readonly" id="e-inspector-display">— לא נקבע פקח —</div>
+            <input type="hidden" id="e-inspector" value="">
           </div>
           <div class="edit-group">
             <div class="edit-label">תאריך גילוי</div>
@@ -3833,6 +3840,33 @@ function confirmSent() {
   renderTimeline();
   if (typeof loadCaseDocuments === 'function') loadCaseDocuments(CASE.plate);
   showToast('✅ ' + meta.title + ' — נשמר ועודכן!');
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   👮 INSPECTOR AUTO-DETECTION
+   Maps signed-in user email → inspector display name.
+   Used by openEditModal() to auto-fill "פקח מטפל" without selection.
+   ═══════════════════════════════════════════════════════════════════ */
+var EMAIL_TO_INSPECTOR_NAME = {
+  'gabbyc@galil-elion.org.il':  'גבי חותם',
+  'shimi@galil-elion.org.il':   'שימי רוזנברג',
+  'francis@galil-elion.org.il': 'פרנסיס ברוטמן',
+  'eyal@galil-elion.org.il':    'אייל ארצי',
+  'moranl@galil-elion.org.il':  'מורן לוז'
+};
+
+function getCurrentInspectorName() {
+  // Try Firebase Auth first (most reliable)
+  try {
+    if (typeof currentUser !== 'undefined' && currentUser && currentUser.email) {
+      var n = EMAIL_TO_INSPECTOR_NAME[String(currentUser.email).toLowerCase().trim()];
+      if (n) return n;
+    }
+  } catch(e) {}
+  // Fall back to the DOM-displayed email
+  var emailEl = document.getElementById('auth-status-email');
+  var email = emailEl ? String(emailEl.textContent || '').toLowerCase().trim() : '';
+  return EMAIL_TO_INSPECTOR_NAME[email] || '';
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -4391,6 +4425,25 @@ function openEditModal() {
   document.getElementById('e-owner-addr').value    = CASE.ownerAddr;
   document.getElementById('e-owner-phone').value   = CASE.ownerPhone || '';
   document.getElementById('e-notes').value         = CASE.notes || '';
+
+  // ═══ NEW: Auto-populate "פקח מטפל" — display only, not editable ═══
+  // Priority: 1) inspector saved on the case  2) "נפתח בשטח ע״י" note
+  // 3) currently signed-in user (mapped from email)
+  var autoInsp = '';
+  if (CASE.inspector && String(CASE.inspector).trim()) {
+    autoInsp = String(CASE.inspector).trim();
+  } else {
+    var cardInspText = ((document.getElementById('cv-card-inspector') || {}).textContent || '').replace('פקח:', '').trim();
+    if (cardInspText && cardInspText !== '—') {
+      autoInsp = cardInspText;
+    } else {
+      autoInsp = (typeof getCurrentInspectorName === 'function') ? getCurrentInspectorName() : '';
+    }
+  }
+  var inspHidden = document.getElementById('e-inspector');
+  var inspDisplay = document.getElementById('e-inspector-display');
+  if (inspHidden) inspHidden.value = autoInsp;
+  if (inspDisplay) inspDisplay.textContent = autoInsp || '— לא נקבע פקח —';
 
   const colorSel = document.getElementById('e-color');
   for (let o of colorSel.options) { if (o.value === CASE.color) { o.selected=true; break; } }
