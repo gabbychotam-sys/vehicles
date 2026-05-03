@@ -2003,7 +2003,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.7 — full edit form</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.8 — fields persist</div>
     </div>
   </div>
 
@@ -2077,7 +2077,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <div class="tb-notif">🔔<div class="notif-dot"></div></div>
       <button onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.7 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.8 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2658,7 +2658,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.7 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.8 ✓</span>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
     </div>
@@ -7246,16 +7246,31 @@ function saveNewCase() {
         // Push to Firebase if we have an id
         var dbForUpdate = (typeof fbDb !== 'undefined' && fbDb) || window.fbDb;
         if (dbForUpdate && existingId) {
+          // ═══ Send all top-level fields (so they're queryable) AND fullData (so ═══
+          // ═══ the entire case state survives a Firebase round-trip)              ═══
+          var inspectorVal = document.getElementById('nf-inspector')?.value || CASE.inspector || '';
           var payload = {
-            plate: CASE.plate || '',
-            owner: CASE.ownerName || '',
-            location: CASE.location || '',
-            inspector: document.getElementById('nf-inspector')?.value || CASE.inspector || '',
-            updatedAt: Date.now(),
-            fullData: fullSnap
+            id:          existingId,
+            plate:       CASE.plate || '',
+            vehicleType: CASE.vehicleType || '',
+            color:       CASE.color || '',
+            owner:       CASE.ownerName || '',          // legacy field for mobile app compat
+            ownerName:   CASE.ownerName || '',
+            ownerId:     CASE.ownerId || '',
+            address:     CASE.ownerAddr || '',          // legacy
+            ownerAddr:   CASE.ownerAddr || '',
+            phone:       CASE.ownerPhone || '',         // legacy
+            ownerPhone:  CASE.ownerPhone || '',
+            location:    CASE.location || '',
+            notes:       CASE.notes || '',
+            status:      CASE.status || 'yellow',
+            inspector:   inspectorVal,
+            date:        CASE.date || (new Date()).toISOString().split('T')[0],
+            updatedAt:   Date.now(),
+            fullData:    fullSnap     // entire CASE object as a single field
           };
           dbForUpdate.ref('cases/' + existingId).update(payload)
-            .then(function(){ console.log('[saveNewCase EDIT] ✓ pushed update to Firebase:', existingId); })
+            .then(function(){ console.log('[saveNewCase EDIT] ✓ pushed update to Firebase:', existingId, 'ownerAddr=', CASE.ownerAddr); })
             .catch(function(err){ console.warn('[saveNewCase EDIT] FB update failed:', err); });
         }
 
@@ -10314,14 +10329,24 @@ if (document.readyState === 'loading') {
     // ═══ opened, viewed, AND EDITED via the standard openCaseFromRow flow.═══
     // ═══ Also normalize field names (mobile uses owner/address/phone,    ═══
     // ═══ desktop uses ownerName/ownerAddr/ownerPhone).                   ═══
-    var fullCaseData = Object.assign({}, c, {
-      ownerName:  c.ownerName  || c.owner   || '',
-      ownerAddr:  c.ownerAddr  || c.address || '',
-      ownerPhone: c.ownerPhone || c.phone   || '',
-      ownerId:    c.ownerId    || c.id_num  || c.identityNumber || '',
-      vehicleType: c.vehicleType || c.type   || '',
-      color:      c.color || 'כסף',
-      status:     c.status || 'yellow'
+    // ═══ v2.9.8: prefer c.fullData (saved by edit-mode) over c top-level ═══
+    // ═══ so manager-edited values (ownerAddr, ownerPhone, etc.) survive ═══
+    // ═══ Firebase round-trips and reload.                                ═══
+    var src = (c && c.fullData) ? c.fullData : c;
+    var fullCaseData = Object.assign({}, src, {
+      id:         c.id || src.id,                                    // always keep canonical id
+      plate:      src.plate || c.plate || '',
+      ownerName:  src.ownerName  || src.owner   || c.ownerName  || c.owner   || '',
+      ownerAddr:  src.ownerAddr  || src.address || c.ownerAddr  || c.address || '',
+      ownerPhone: src.ownerPhone || src.phone   || c.ownerPhone || c.phone   || '',
+      ownerId:    src.ownerId    || src.id_num  || src.identityNumber || c.ownerId || '',
+      vehicleType: src.vehicleType || src.type  || c.vehicleType || '',
+      color:      src.color || c.color || 'כסף',
+      status:     src.status || c.status || 'yellow',
+      location:   src.location || c.location || '',
+      notes:      src.notes || c.notes || '',
+      inspector:  src.inspector || c.inspector || '',
+      photos:     Array.isArray(src.photos) ? src.photos : (Array.isArray(c.photos) ? c.photos : [])
     });
     try { tr.setAttribute('data-case', JSON.stringify(fullCaseData)); } catch(e){}
     tr.onclick = function() {
