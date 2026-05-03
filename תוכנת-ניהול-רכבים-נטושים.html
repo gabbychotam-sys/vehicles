@@ -2013,7 +2013,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.1 — Firebase tombstone</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.2 — blocking delete</div>
     </div>
   </div>
 
@@ -2087,7 +2087,7 @@ try {
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <div class="tb-notif">🔔<div class="notif-dot"></div></div>
       <button onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.1 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.2 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2668,7 +2668,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.1 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.2 ✓</span>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
     </div>
@@ -6794,96 +6794,133 @@ function nukeAllVisibleCases() {
     }
   } catch(e){}
 
-  if (typeof showToast === 'function') showToast('⏳ מוחק את כל התיקים...');
+  // ═══ Show blocking overlay so the user knows to wait for Firebase ═══
+  function _showBlockingOverlay(text) {
+    var existing = document.getElementById('nuke-overlay');
+    if (existing) existing.remove();
+    var overlay = document.createElement('div');
+    overlay.id = 'nuke-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:center;justify-content:center;color:#fff;font-size:24px;font-weight:700;flex-direction:column;gap:20px;';
+    overlay.innerHTML = '<div style="font-size:64px;animation:spin 1s linear infinite;">⏳</div>' +
+      '<div id="nuke-overlay-text" style="font-size:24px;text-align:center;line-height:1.5;">' + text + '</div>' +
+      '<div style="font-size:14px;color:#aaa;max-width:500px;text-align:center;">⚠️ אל תסגור את החלון!<br>אם תסגור — המחיקה לא תיכנס לתוקף ב-Firebase</div>' +
+      '<style>@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}</style>';
+    document.body.appendChild(overlay);
+    return overlay;
+  }
+  function _updateOverlay(text) {
+    var el = document.getElementById('nuke-overlay-text');
+    if (el) el.textContent = text;
+  }
+  function _removeOverlay() {
+    var el = document.getElementById('nuke-overlay');
+    if (el) el.remove();
+  }
 
-  // ═══ Helper: tombstone + delete + remove from DOM ═══
-  function _processIds(ids) {
-    ids.forEach(function(id) {
-      if (window.GalilSync && window.GalilSync._markDeleted) {
-        window.GalilSync._markDeleted(id);
-      }
-      if (db) {
-        // ═══ NEW STRATEGY (v2.9.1): Write _deleted: true FIRST as the primary  ═══
-        // ═══ delete mechanism. This is more reliable than remove() because:    ═══
-        // ═══   1. Firebase rules usually allow update() even if remove() fails ═══
-        // ═══   2. The marker survives in Firebase and syncs to ALL devices    ═══
-        // ═══   3. Even if Chrome wipes localStorage, the deletion persists     ═══
-        // ═══      because the listener checks c._deleted on every load        ═══
-        db.ref('cases/' + id).update({
-          _deleted: true,
-          _deletedAt: Date.now(),
-          _deletedBy: (window.currentUser && window.currentUser.email) || 'admin'
-        })
-          .then(function() {
-            console.log('[nukeAll] ✓ marked _deleted:', id);
-            // Now ALSO try to remove() as a cleanup. Best effort.
-            db.ref('cases/' + id).remove()
-              .then(function() { console.log('[nukeAll] ✓ also fully removed:', id); })
-              .catch(function() { /* fine — the _deleted marker handles it */ });
-          })
-          .catch(function(err) {
-            console.warn('[nukeAll] could not mark _deleted for ' + id + ':', err);
-            // If even update failed, try remove and set(null) as last resorts
-            db.ref('cases/' + id).remove()
-              .catch(function() {
-                db.ref('cases/' + id).set(null).catch(function(){});
-              });
-          });
-      }
-    });
-    // Remove all rows from all tables
+  var overlay = _showBlockingOverlay('שולף רשימת תיקים מ-Firebase...');
+
+  // ═══ Helper: clear DOM tables and caches ═══
+  function _clearDom() {
     ['cases-tbody', 'dash-urgent-tbody', 'tw-towed-tbody', 'towed-tbody', 'mobile-cases-tbody', 'tw-history-tbody', 'towns-cases-tbody'].forEach(function(tbId) {
       var tb = document.getElementById(tbId);
       if (tb) tb.innerHTML = '';
     });
-    // Clear caches
     try {
       if (typeof mobileCasesCache !== 'undefined') {
         Object.keys(mobileCasesCache).forEach(function(k) { delete mobileCasesCache[k]; });
       }
       if (typeof MAP_CASES !== 'undefined' && Array.isArray(MAP_CASES)) MAP_CASES.length = 0;
     } catch(e){}
-    // Refresh counters
     try {
       if (typeof updateAllCounters === 'function') updateAllCounters();
       if (typeof syncDashboardWithCases === 'function') syncDashboardWithCases();
       if (typeof refreshDashboardPanels === 'function') refreshDashboardPanels();
     } catch(e){}
-    // ═══ Auto-save to localStorage (best-effort; doesn't matter if it gets cleared) ═══
-    try {
-      if (typeof saveState === 'function') {
-        saveState();
-        console.log('[nukeAll] ✓ auto-saved empty state to localStorage');
-      }
-    } catch(e) { console.warn('[nukeAll] auto-save failed:', e); }
+    try { if (typeof saveState === 'function') saveState(); } catch(e){}
   }
 
-  // ═══ ALSO query Firebase directly to catch any IDs not in our caches ═══
+  // ═══ Process all IDs synchronously with Promise.all (BLOCKING until Firebase confirms) ═══
+  function _processIdsBlocking(ids) {
+    if (!ids.length) {
+      _clearDom();
+      _removeOverlay();
+      if (typeof showToast === 'function') showToast('✅ אין תיקים למחוק');
+      return;
+    }
+
+    _updateOverlay('מוחק ' + ids.length + ' תיקים ב-Firebase...');
+
+    // Mark in localStorage tombstone (best-effort, may be cleared by Chrome)
+    ids.forEach(function(id) {
+      if (window.GalilSync && window.GalilSync._markDeleted) {
+        try { window.GalilSync._markDeleted(id); } catch(e){}
+      }
+    });
+
+    if (!db) {
+      _clearDom();
+      _removeOverlay();
+      alert('⚠️ Firebase לא מאותחל!\n\nהתיקים נמחקו מהמסך אבל לא מ-Firebase.\nאם תסגור ותפתח — הם יחזרו.\n\nבדוק שאתה מחובר לאינטרנט ונסה שוב.');
+      return;
+    }
+
+    // ═══ Use multi-path atomic update to write _deleted: true on all cases at once ═══
+    // ═══ This is faster and more reliable than sequential updates                  ═══
+    var multiUpdate = {};
+    var deletedAt = Date.now();
+    var deletedBy = (window.currentUser && window.currentUser.email) || 'admin';
+    ids.forEach(function(id) {
+      multiUpdate['cases/' + id + '/_deleted'] = true;
+      multiUpdate['cases/' + id + '/_deletedAt'] = deletedAt;
+      multiUpdate['cases/' + id + '/_deletedBy'] = deletedBy;
+    });
+
+    db.ref().update(multiUpdate)
+      .then(function() {
+        console.log('[nukeAll] ✓ marked ' + ids.length + ' cases as _deleted in Firebase');
+        _updateOverlay('הסר רשומות מ-Firebase...');
+
+        // ═══ Now also try to remove() the records as cleanup ═══
+        // ═══ If this fails, no problem — _deleted: true already protects us ═══
+        var removePromises = ids.map(function(id) {
+          return db.ref('cases/' + id).remove()
+            .then(function() { return {id: id, removed: true}; })
+            .catch(function() { return {id: id, removed: false}; });
+        });
+
+        return Promise.all(removePromises);
+      })
+      .then(function(results) {
+        var removed = results.filter(function(r){return r.removed;}).length;
+        console.log('[nukeAll] ✓ fully removed ' + removed + '/' + ids.length + ' cases');
+        _clearDom();
+        _removeOverlay();
+        if (typeof showToast === 'function') {
+          showToast('✅ נמחקו ' + ids.length + ' תיקים — לא יחזרו לעולם!');
+        }
+      })
+      .catch(function(err) {
+        console.error('[nukeAll] FATAL: multi-update failed:', err);
+        _removeOverlay();
+        alert('❌ המחיקה ב-Firebase נכשלה!\n\nשגיאה: ' + (err && err.message ? err.message : err) + '\n\nהתיקים יחזרו אם תסגור ותפתח.\n\n👉 פתרון: פתח את Firebase Console ועדכן את ה-rules כדי לאפשר כתיבה.');
+      });
+  }
+
+  // ═══ Query Firebase to get the COMPLETE list of IDs ═══
   if (db) {
     db.ref('cases').once('value')
       .then(function(snap) {
         snap.forEach(function(child) { idsToDelete[child.key] = true; });
         var allIds = Object.keys(idsToDelete);
         console.log('[nukeAll] processing ' + allIds.length + ' IDs');
-        _processIds(allIds);
-        if (typeof showToast === 'function') {
-          showToast('🗑️ נמחקו ' + allIds.length + ' תיקים — לא יחזרו לעולם');
-        }
+        _processIdsBlocking(allIds);
       })
       .catch(function(err) {
-        // Firebase read failed — process what we already have
-        var allIds = Object.keys(idsToDelete);
-        _processIds(allIds);
-        if (typeof showToast === 'function') {
-          showToast('🗑️ נמחקו ' + allIds.length + ' תיקים מהמסך');
-        }
+        console.warn('[nukeAll] Firebase read failed, using local IDs:', err);
+        _processIdsBlocking(Object.keys(idsToDelete));
       });
   } else {
-    var allIds = Object.keys(idsToDelete);
-    _processIds(allIds);
-    if (typeof showToast === 'function') {
-      showToast('🗑️ נמחקו ' + allIds.length + ' תיקים מהמסך');
-    }
+    _processIdsBlocking(Object.keys(idsToDelete));
   }
 }
 
