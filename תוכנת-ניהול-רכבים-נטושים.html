@@ -7,6 +7,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
 <title>מערכת ניהול רכבים נטושים — הגליל העליון</title>
 
+<!-- ═══════════ PWA: Progressive Web App ═══════════ -->
+<!-- Lets users install the app as a desktop/mobile shortcut with our purple icon. -->
+<link rel="manifest" href="manifest-admin.json">
+<meta name="theme-color" content="#7c3aed">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ניהול רכבים">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icon-152.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icon-167.png">
+
 <style>
 /* ═══════════════ DASHBOARD STYLES ═══════════════ */
 
@@ -2037,7 +2051,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.13 — change pwd</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.14 — PWA install</div>
     </div>
   </div>
 
@@ -2111,7 +2125,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <div class="tb-notif">🔔<div class="notif-dot"></div></div>
       <button onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.13 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.14 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2692,7 +2706,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.13 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.14 ✓</span>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
     </div>
@@ -11065,5 +11079,78 @@ if (document.readyState === 'loading') {
 })();
 </script>
 
+
+<!-- ═══════════ PWA INSTALL PROMPT (v2.9.14) ═══════════ -->
+<div id="pwa-install-banner" style="display:none;position:fixed;bottom:20px;right:20px;background:#7c3aed;color:#fff;padding:14px 20px;border-radius:12px;box-shadow:0 8px 24px rgba(124,58,237,0.4);z-index:99998;font-family:Heebo,sans-serif;direction:rtl;max-width:340px;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div style="font-size:32px;">📥</div>
+    <div style="flex:1;">
+      <div style="font-weight:700;font-size:15px;margin-bottom:4px;">התקן כאפליקציה</div>
+      <div style="font-size:12px;opacity:0.9;">קיצור דרך נוח על שולחן העבודה</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:12px;">
+    <button id="pwa-install-btn" style="flex:1;padding:9px;background:#fff;color:#7c3aed;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">התקן</button>
+    <button id="pwa-dismiss-btn" style="padding:9px 14px;background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:8px;font-size:13px;cursor:pointer;">לא עכשיו</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('sw.js').catch(function(err) {
+        console.log('[PWA] SW registration failed:', err);
+      });
+    });
+  }
+
+  var deferredPrompt = null;
+  var banner = document.getElementById('pwa-install-banner');
+  var installBtn = document.getElementById('pwa-install-btn');
+  var dismissBtn = document.getElementById('pwa-dismiss-btn');
+  var DISMISS_KEY = 'galilElyon_pwaDismissedAt';
+
+  function recentlyDismissed() {
+    try {
+      var t = localStorage.getItem(DISMISS_KEY);
+      if (!t) return false;
+      var days = (Date.now() - parseInt(t, 10)) / (1000*60*60*24);
+      return days < 7;
+    } catch(e) { return false; }
+  }
+
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (banner && !recentlyDismissed()) {
+      setTimeout(function(){ banner.style.display = 'block'; }, 4000);
+    }
+  });
+
+  if (installBtn) {
+    installBtn.addEventListener('click', function() {
+      if (!deferredPrompt) return;
+      banner.style.display = 'none';
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function(result) {
+        console.log('[PWA] User choice:', result.outcome);
+        deferredPrompt = null;
+      });
+    });
+  }
+  if (dismissBtn) {
+    dismissBtn.addEventListener('click', function() {
+      banner.style.display = 'none';
+      try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch(e){}
+    });
+  }
+
+  window.addEventListener('appinstalled', function() {
+    console.log('[PWA] App installed!');
+    if (banner) banner.style.display = 'none';
+  });
+})();
+</script>
 
 </body></html>
