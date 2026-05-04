@@ -1981,6 +1981,118 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
 <script>
 /* Auto-restore on open — REMOVED in v2.9.5 (was forcing old cases into localStorage on every load) */
 </script>
+<style>
+/* ═══════════ v2.9.16: VIEWER-ONLY MODE ═══════════ */
+/* Hide all action buttons that would let the user modify state */
+body.viewer-mode .tb-new-case,                  /* "פתח תיק חדש" header button */
+body.viewer-mode #clear-all-btn,                /* "נקה הכל" header button */
+body.viewer-mode .tb-actions,                   /* Top action bar (in case view) */
+body.viewer-mode .nf-save-btn,                  /* "שמור שינויים" / "שמור ופתח תיק" */
+body.viewer-mode #nf-save-btn,
+body.viewer-mode #nf-save-only-btn,
+body.viewer-mode #nf-cancel-btn,
+body.viewer-mode .nav-btn[onclick*="newCase"],
+body.viewer-mode .nav-btn[onclick*="openNewCase"],
+body.viewer-mode .nav-btn[onclick*="addStaff"],
+body.viewer-mode .row-action[onclick*="delete"],
+body.viewer-mode .row-action[onclick*="trash"],
+body.viewer-mode button[onclick*="deleteCase"],
+body.viewer-mode button[onclick*="removeCase"],
+body.viewer-mode .add-staff-btn,
+body.viewer-mode .delete-action,
+body.viewer-mode .edit-action:not([data-allow-viewer]),
+body.viewer-mode .doc-action-btn:not([data-action="download"]):not([data-action="view"]),
+body.viewer-mode #archive-trash-btn,
+body.viewer-mode .case-actions button:not([data-action="download"]):not([data-action="view"]):not(.cv-close),
+body.viewer-mode #send-letter-btn,
+body.viewer-mode #place-sticker-btn,
+body.viewer-mode .sticker-action-btn,
+body.viewer-mode .letter-send-btn,
+body.viewer-mode .nf-photo-add-btn,
+body.viewer-mode #nf-photos-add,
+body.viewer-mode .photo-remove-btn,
+body.viewer-mode .add-photo-btn {
+  display: none !important;
+}
+
+/* Disable form inputs in viewer mode */
+body.viewer-mode input,
+body.viewer-mode textarea,
+body.viewer-mode select {
+  pointer-events: none !important;
+  background-color: rgba(0,0,0,0.03) !important;
+  cursor: not-allowed !important;
+}
+
+/* Banner at the top of every screen */
+body.viewer-mode::before {
+  content: "👁️  מצב צפייה בלבד  ·  כל הפעולות חסומות";
+  display: block;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: white;
+  text-align: center;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  z-index: 99996;
+  box-shadow: 0 2px 8px rgba(124,58,237,0.4);
+  font-family: Heebo, sans-serif;
+  letter-spacing: 0.5px;
+}
+body.viewer-mode {
+  padding-top: 36px;
+}
+
+/* ═══════════ v2.9.17: INSPECTOR MODE ═══════════ */
+/* Inspectors (non-admin, non-viewer) cannot delete cases or change settings.
+   They CAN: open new cases, edit cases they own (handled by JS).
+   They CANNOT: delete cases, "clear all", edit staff/settings, edit other inspectors' cases. */
+body.inspector-mode #clear-all-btn,                                /* "נקה הכל" */
+body.inspector-mode .tb-new-case[onclick*="nukeAllVisibleCases"],  /* duplicate clear-all */
+body.inspector-mode button[onclick*="nukeAllVisibleCases"],
+body.inspector-mode button[onclick*="resetSavedData"],
+body.inspector-mode .row-action[onclick*="deleteCase"],
+body.inspector-mode .row-action[onclick*="trash"],
+body.inspector-mode .delete-action,
+body.inspector-mode #archive-trash-btn,
+body.inspector-mode .add-staff-btn,
+body.inspector-mode .staff-edit-btn,
+body.inspector-mode .staff-delete-btn,
+body.inspector-mode .town-edit-btn,
+body.inspector-mode .town-delete-btn,
+body.inspector-mode .add-town-btn,
+body.inspector-mode #staff-add-btn,
+body.inspector-mode #towns-add-btn {
+  display: none !important;
+}
+
+/* Banner for inspector mode */
+body.inspector-mode::before {
+  content: "🔒  גישה מוגבלת  ·  ניתן לפתוח תיקים חדשים ולערוך תיקים שלך בלבד";
+  display: block;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+  color: white;
+  text-align: center;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  z-index: 99996;
+  box-shadow: 0 2px 8px rgba(30,64,175,0.4);
+  font-family: Heebo, sans-serif;
+  letter-spacing: 0.5px;
+}
+body.inspector-mode {
+  padding-top: 36px;
+}
+</style>
 </head>
 <body class="">
 
@@ -2051,7 +2163,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.15 — PWA fixed</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.17 — inspector mode</div>
     </div>
   </div>
 
@@ -2125,7 +2237,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <div class="tb-notif">🔔<div class="notif-dot"></div></div>
       <button onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.15 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.17 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2706,7 +2818,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.15 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.17 ✓</span>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
     </div>
@@ -3902,8 +4014,97 @@ var EMAIL_TO_INSPECTOR_NAME = {
   'shimi@galil-elion.org.il':   'שימי רוזנברג',
   'francis@galil-elion.org.il': 'פרנסיס ברוטמן',
   'eyal@galil-elion.org.il':    'אייל ארצי',
-  'moranl@galil-elion.org.il':  'מורן לוז'
+  'moranl@galil-elion.org.il':  'מורן לוז',
+  'mayag@galil-elion.org.il':   'מאיה גורדון'
 };
+
+// ═══ v2.9.16: VIEWER-ONLY users ═══
+// Emails in this list have READ-ONLY access:
+//   ✓ See all cases, photos, and archived documents
+//   ✓ Download archived PDFs
+//   ✗ Cannot create/edit/delete cases
+//   ✗ Cannot send letters or place stickers
+//   ✗ No access to mobile app
+var VIEWER_EMAILS = [
+  'mayag@galil-elion.org.il'
+];
+
+// ═══ v2.9.17: ADMIN users (full access — can edit/delete anything) ═══
+// Everyone else is treated as an "inspector" (limited access).
+var ADMIN_EMAILS = [
+  'gabbyc@galil-elion.org.il',  // גבי חותם — מנהל פיקוח
+  'moranl@galil-elion.org.il'   // מורן לוז — מזכירה
+];
+
+function isViewerOnly() {
+  try {
+    var email = '';
+    if (typeof currentUser !== 'undefined' && currentUser && currentUser.email) {
+      email = String(currentUser.email).toLowerCase().trim();
+    }
+    if (!email) return false;
+    return VIEWER_EMAILS.indexOf(email) !== -1;
+  } catch(e) { return false; }
+}
+
+// ═══ v2.9.17: returns true if current user is admin (Gabby or Moran) ═══
+function isAdmin() {
+  try {
+    var email = '';
+    if (typeof currentUser !== 'undefined' && currentUser && currentUser.email) {
+      email = String(currentUser.email).toLowerCase().trim();
+    }
+    if (!email) return false;
+    return ADMIN_EMAILS.indexOf(email) !== -1;
+  } catch(e) { return false; }
+}
+
+// ═══ v2.9.17: returns true if current user is an inspector (NOT admin, NOT viewer) ═══
+// Inspectors can: open new cases, edit cases they own. CANNOT: delete, edit
+// other inspectors' cases, change settings, clear all.
+function isInspector() {
+  try {
+    if (isAdmin() || isViewerOnly()) return false;
+    var email = '';
+    if (typeof currentUser !== 'undefined' && currentUser && currentUser.email) {
+      email = String(currentUser.email).toLowerCase().trim();
+    }
+    return !!email; // any logged-in non-admin, non-viewer user is an inspector
+  } catch(e) { return false; }
+}
+
+// ═══ v2.9.17: ownership check — does the current inspector OWN this case? ═══
+// A case is owned by the inspector whose email/name appears in case.inspector
+// or case.savedBy. Admins can always edit/delete; viewers can never.
+// For inspectors, returns true only if they own the case.
+function canEditCase(caseObj) {
+  if (isAdmin()) return true;
+  if (isViewerOnly()) return false;
+  if (!caseObj) return false;
+  try {
+    var myEmail = (currentUser && currentUser.email) ? String(currentUser.email).toLowerCase().trim() : '';
+    var myName = '';
+    try { myName = (typeof getCurrentInspectorName === 'function') ? getCurrentInspectorName() : ''; } catch(e) {}
+
+    // Check savedBy email match (most reliable)
+    if (caseObj.savedBy && myEmail) {
+      var savedByEmail = String(caseObj.savedBy).toLowerCase().trim();
+      if (savedByEmail === myEmail) return true;
+    }
+    // Check inspector name match
+    if (caseObj.inspector && myName) {
+      if (String(caseObj.inspector).trim() === String(myName).trim()) return true;
+    }
+    // No owner field at all → fall back to allowing (legacy cases)
+    if (!caseObj.savedBy && !caseObj.inspector) return true;
+    return false;
+  } catch(e) { return true; }  // on error, default to allow (don't block legitimate edits)
+}
+
+window.isViewerOnly = isViewerOnly;
+window.isAdmin = isAdmin;
+window.isInspector = isInspector;
+window.canEditCase = canEditCase;
 
 function getCurrentInspectorName() {
   // Try Firebase Auth first (most reliable)
@@ -5740,12 +5941,15 @@ function openEditFullForm(tr) {
   }
 
   // ═══ Change the title from "תיק חדש" → "✏️ עריכת תיק 12-345-67" ═══
+  // ═══ v2.9.16: viewer-only users see "👁️ צפייה בתיק" instead ═══
+  var isViewerMode = (typeof isViewerOnly === 'function') && isViewerOnly();
   var titleEl = document.getElementById('cv-bc-title');
-  if (titleEl) titleEl.textContent = '✏️ עריכת תיק ' + (CASE.plate || '');
+  if (titleEl) titleEl.textContent = (isViewerMode ? '👁️ צפייה בתיק ' : '✏️ עריכת תיק ') + (CASE.plate || '');
   var ownerEl = document.getElementById('cv-owner');
-  if (ownerEl) ownerEl.textContent = CASE.ownerName || 'עריכת תיק';
+  if (ownerEl) ownerEl.textContent = CASE.ownerName || (isViewerMode ? 'צפייה בתיק' : 'עריכת תיק');
   var pillsEl = document.getElementById('cv-pills');
-  if (pillsEl) pillsEl.innerHTML = '<span class="chip chip-blue">🚗 רכב נטוש</span><span class="chip chip-yellow">✏️ במצב עריכה</span>';
+  if (pillsEl) pillsEl.innerHTML = '<span class="chip chip-blue">🚗 רכב נטוש</span>' +
+    (isViewerMode ? '<span class="chip" style="background:rgba(124,58,237,0.15);color:#7c3aed;border:1px solid rgba(124,58,237,0.3);">👁️ צפייה בלבד</span>' : '<span class="chip chip-yellow">✏️ במצב עריכה</span>');
 
   // Show the case header so plate/owner are visible
   var hdr = document.querySelector('.case-header');
@@ -6987,6 +7191,16 @@ function renderNewCasePhotoThumbs() {
    only allow per-record writes.
    ═══════════════════════════════════════════════════════════════════ */
 function nukeAllVisibleCases() {
+  // ═══ v2.9.16: BLOCK viewer-only users ═══
+  if (typeof isViewerOnly === 'function' && isViewerOnly()) {
+    alert('👁️ מצב צפייה בלבד - לא ניתן למחוק תיקים.');
+    return;
+  }
+  // ═══ v2.9.17: BLOCK inspectors (non-admin) — only Gabby/Moran can clear all ═══
+  if (typeof isInspector === 'function' && isInspector()) {
+    alert('🔒 פעולה זו זמינה רק למנהל הפיקוח (גבי) או למזכירה (מורן).\nלכל מחיקה - פנה אליהם.');
+    return;
+  }
   if (!confirm('⚠️ למחוק את כל התיקים מהמערכת?\n\nהפעולה תמחק:\n• כל התיקים שמופיעים בכל המסכים\n• כל התיקים שיש ב-Firebase\n• רישום ברשימה שחורה כך שלא יחזרו לעולם\n\n⚠️ פעולה זו לא ניתנת לביטול')) return;
 
   var db = (typeof fbDb !== 'undefined' && fbDb) || window.fbDb;
@@ -7147,6 +7361,11 @@ function nukeAllVisibleCases() {
 }
 
 function openNewCase() {
+  // ═══ v2.9.16: BLOCK viewer-only users from creating new cases ═══
+  if (typeof isViewerOnly === 'function' && isViewerOnly()) {
+    alert('👁️ מצב צפייה בלבד - לא ניתן לפתוח תיק חדש.\nליצירת תיק חדש - פנה למנהל הפיקוח.');
+    return;
+  }
   // Reset CASE data
   Object.assign(CASE, CASE_EMPTY);
   Object.assign(SENT, SENT_EMPTY);
@@ -7268,6 +7487,11 @@ function bindNewCaseInputs() {
 }
 
 function saveNewCase() {
+  // ═══ v2.9.16: BLOCK viewer-only users from saving cases ═══
+  if (typeof isViewerOnly === 'function' && isViewerOnly()) {
+    alert('👁️ מצב צפייה בלבד - לא ניתן לשמור שינויים.');
+    return;
+  }
   var btn = document.getElementById('nf-save-btn');
   btn.textContent = '⏳ שומר...';
   btn.disabled = true;
@@ -7276,6 +7500,23 @@ function saveNewCase() {
   var isEditing = !!window._editingExistingRow;
   var existingRow = window._editingExistingRow;
   var existingId = window._editingExistingId;
+
+  // ═══ v2.9.17: BLOCK inspectors from editing cases they don't own ═══
+  // (admins and case owners pass through fine. viewer is already blocked above.)
+  if (isEditing && typeof isInspector === 'function' && isInspector()) {
+    var existingCaseData = null;
+    try {
+      var dataAttr = existingRow.getAttribute('data-case');
+      if (dataAttr) existingCaseData = JSON.parse(dataAttr);
+    } catch(e) {}
+    if (existingCaseData && typeof canEditCase === 'function' && !canEditCase(existingCaseData)) {
+      var ownerName = existingCaseData.inspector || 'פקח אחר';
+      alert('🔒 לא ניתן לערוך תיק זה.\n\nתיק זה נפתח על ידי: ' + ownerName + '\nניתן לערוך רק תיקים שאתה פתחת בעצמך.\n\nלעריכת תיק של פקח אחר - פנה לגבי או למורן.');
+      btn.textContent = '💾 שמור שינויים';
+      btn.disabled = false;
+      return;
+    }
+  }
 
   // Read all fields into CASE
   _newCaseReadFields();
@@ -7956,6 +8197,16 @@ function updateAllCounters() {
 }
 
 function confirmDeleteCase() {
+  // ═══ v2.9.16: BLOCK viewer-only users ═══
+  if (typeof isViewerOnly === 'function' && isViewerOnly()) {
+    alert('👁️ מצב צפייה בלבד - לא ניתן למחוק תיקים.');
+    return;
+  }
+  // ═══ v2.9.17: BLOCK inspectors — only Gabby/Moran can delete cases ═══
+  if (typeof isInspector === 'function' && isInspector()) {
+    alert('🔒 מחיקת תיק זמינה רק למנהל הפיקוח (גבי) או למזכירה (מורן).\nאם יש צורך במחיקת תיק - פנה אליהם.');
+    return;
+  }
   deletingPlate = CASE.plate || document.getElementById('cv-plate')?.textContent || '';
   document.getElementById('delete-plate-label').textContent = deletingPlate || 'תיק חדש';
   var overlay = document.getElementById('delete-modal-overlay');
@@ -8330,7 +8581,8 @@ var staffList = [
   { id:2, name:'פרנסיס ברוטמן', role:'פקח', phone:'054-452-7582', email:'francis@galil-elion.org.il', cases:9, color:'#e74c3c,#7b241c' },
   { id:3, name:'אייל ארצי', role:'פקח', phone:'052-619-1985', email:'eyal@galil-elion.org.il', cases:7, color:'#9b59b6,#4a235a' },
   { id:4, name:'מורן לוז', role:'מזכירה', phone:'052-379-1659', email:'moranl@galil-elion.org.il', cases:0, color:'#f39c12,#d68910' },
-  { id:5, name:'גבי חותם', role:'מנהל פיקוח', phone:'050-757-4451', email:'gabbyc@galil-elion.org.il', cases:0, color:'#1abc9c,#0e6655' }
+  { id:5, name:'גבי חותם', role:'מנהל פיקוח', phone:'050-757-4451', email:'gabbyc@galil-elion.org.il', cases:0, color:'#1abc9c,#0e6655' },
+  { id:6, name:'מאיה גורדון', role:'מנהלת אגף', phone:'052-558-5201', email:'mayag@galil-elion.org.il', cases:0, color:'#7c3aed,#5b21b6' }
 ];
 var staffEditId = null;
 var staffColors = ['#3498db,#1a4268','#e74c3c,#7b241c','#9b59b6,#4a235a','#f39c12,#d68910','#1abc9c,#0e6655','#e67e22,#a04000','#2c3e50,#1a252f','#16a085,#0e6251'];
@@ -8453,6 +8705,15 @@ function saveStaff() {
 }
 
 function deleteStaff(id) {
+  // ═══ v2.9.17: BLOCK inspectors and viewers from editing staff ═══
+  if (typeof isViewerOnly === 'function' && isViewerOnly()) {
+    alert('👁️ מצב צפייה בלבד - לא ניתן לערוך הגדרות.');
+    return;
+  }
+  if (typeof isInspector === 'function' && isInspector()) {
+    alert('🔒 ניהול צוות פיקוח זמין רק למנהל (גבי) או למזכירה (מורן).');
+    return;
+  }
   var s = staffList.find(function(x) { return x.id === id; });
   if (!s) return;
   if (!confirm('למחוק את ' + s.name + '?')) return;
@@ -8674,7 +8935,8 @@ function loadState() {
         { id:2, name:'פרנסיס ברוטמן', role:'פקח', phone:'054-452-7582', email:'francis@galil-elion.org.il', cases:0, color:'#e74c3c,#7b241c' },
         { id:3, name:'אייל ארצי', role:'פקח', phone:'052-619-1985', email:'eyal@galil-elion.org.il', cases:0, color:'#9b59b6,#4a235a' },
         { id:4, name:'מורן לוז', role:'מזכירה', phone:'052-379-1659', email:'moranl@galil-elion.org.il', cases:0, color:'#f39c12,#d68910' },
-        { id:5, name:'גבי חותם', role:'מנהל פיקוח', phone:'050-757-4451', email:'gabbyc@galil-elion.org.il', cases:0, color:'#1abc9c,#0e6655' }
+        { id:5, name:'גבי חותם', role:'מנהל פיקוח', phone:'050-757-4451', email:'gabbyc@galil-elion.org.il', cases:0, color:'#1abc9c,#0e6655' },
+        { id:6, name:'מאיה גורדון', role:'מנהלת אגף', phone:'052-558-5201', email:'mayag@galil-elion.org.il', cases:0, color:'#7c3aed,#5b21b6' }
       ];
       defaults.forEach(function(d) {
         var exists = loaded.some(function(x) { return x.id === d.id || x.name === d.name; });
@@ -9134,6 +9396,16 @@ function setSaveStatus(state, savedAtIso) {
 }
 
 function resetSavedData() {
+  // ═══ v2.9.16: BLOCK viewer-only users ═══
+  if (typeof isViewerOnly === 'function' && isViewerOnly()) {
+    alert('👁️ מצב צפייה בלבד - לא ניתן למחוק תיקים.');
+    return;
+  }
+  // ═══ v2.9.17: BLOCK inspectors — only admins can reset everything ═══
+  if (typeof isInspector === 'function' && isInspector()) {
+    alert('🔒 פעולה זו זמינה רק למנהל הפיקוח (גבי) או למזכירה (מורן).');
+    return;
+  }
   if (!confirm('⚠️ פעולה זו תמחק:\n\n• כל התיקים שמופיעים במערכת (במחשב + Firebase)\n• כל ארכיון המסמכים\n• כל הנתונים בדפדפן\n\n⚠️ הנתונים יימחקו גם אצל מורן ובאפליקציית האייפון!\n\nלהמשיך?')) return;
   if (!confirm('🚨 אישור אחרון!\n\nכל התיקים יימחקו לצמיתות מהמערכת — אצל כל המשתמשים.\n\nהאם אתה בטוח?')) return;
 
@@ -10317,6 +10589,28 @@ if (document.readyState === 'loading') {
           handleAuthStateChange(user);
           // Expose currentUser globally too
           window.currentUser = user || null;
+          // ═══ v2.9.16: toggle viewer-only mode on body ═══
+          // ═══ v2.9.17: also toggle inspector-mode for non-admin/non-viewer users ═══
+          // When Maya signs in → body.viewer-mode (everything blocked)
+          // When inspector signs in → body.inspector-mode (delete/settings blocked)
+          // When Gabby/Moran sign in → no mode class (full access)
+          try {
+            // Always remove both first to handle role transitions
+            document.body.classList.remove('viewer-mode');
+            document.body.classList.remove('inspector-mode');
+
+            var isViewer = (typeof isViewerOnly === 'function') && isViewerOnly();
+            var isInsp = (typeof isInspector === 'function') && isInspector();
+            if (isViewer) {
+              document.body.classList.add('viewer-mode');
+              console.log('[ViewerMode] Active for', user && user.email);
+            } else if (isInsp) {
+              document.body.classList.add('inspector-mode');
+              console.log('[InspectorMode] Active for', user && user.email);
+            } else {
+              console.log('[AdminMode] Full access for', user && user.email);
+            }
+          } catch(e) { console.warn('[AccessMode] toggle failed', e); }
         });
       }
 
