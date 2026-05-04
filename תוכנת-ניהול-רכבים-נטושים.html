@@ -1992,8 +1992,39 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
     <label style="display:block;font-size:13px;color:#444;margin-bottom:6px;font-weight:500;">סיסמה</label>
     <input id="auth-password" type="password" autocomplete="current-password" style="width:100%;padding:11px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;direction:ltr;text-align:left;margin-bottom:18px;box-sizing:border-box;" placeholder="••••••••">
     <button id="auth-login-btn" style="width:100%;padding:12px;background:#0f3460;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;transition:background .2s;">כניסה</button>
+    <button id="auth-change-pwd-btn" type="button" style="width:100%;padding:10px;background:transparent;color:#0f3460;border:1px solid #0f3460;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;margin-top:10px;">🔑 שינוי סיסמה</button>
     <div style="margin-top:14px;text-align:center;font-size:12px;color:#888;">
       שכחת סיסמה? פנה למנהל המערכת
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ CHANGE PASSWORD MODAL (v2.9.13) ═══════════ -->
+<div id="change-pwd-overlay" style="display:none;position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;font-family:inherit;">
+  <div style="background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.4);padding:32px 28px;width:380px;max-width:92vw;direction:rtl;">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:40px;margin-bottom:6px;">🔑</div>
+      <h2 style="margin:0;font-size:20px;color:#0f3460;font-weight:600;">שינוי סיסמה</h2>
+      <p style="margin:6px 0 0;font-size:12px;color:#666;">בחר סיסמה אישית חדשה</p>
+    </div>
+    <div id="change-pwd-error" style="display:none;background:#fee;border:1px solid #fcc;color:#c00;padding:9px 11px;border-radius:8px;font-size:13px;margin-bottom:12px;"></div>
+    <div id="change-pwd-success" style="display:none;background:#e8f5e9;border:1px solid #4caf50;color:#2e7d32;padding:9px 11px;border-radius:8px;font-size:13px;margin-bottom:12px;"></div>
+
+    <label style="display:block;font-size:13px;color:#444;margin-bottom:5px;font-weight:500;">דוא"ל</label>
+    <input id="cpwd-email" type="email" autocomplete="username" style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;font-size:14px;direction:ltr;text-align:left;margin-bottom:12px;box-sizing:border-box;" placeholder="name@galil-elion.org.il">
+
+    <label style="display:block;font-size:13px;color:#444;margin-bottom:5px;font-weight:500;">סיסמה נוכחית (טלפון או סיסמה ששינית)</label>
+    <input id="cpwd-current" type="password" autocomplete="current-password" style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;font-size:14px;direction:ltr;text-align:left;margin-bottom:12px;box-sizing:border-box;" placeholder="הסיסמה הנוכחית שלך">
+
+    <label style="display:block;font-size:13px;color:#444;margin-bottom:5px;font-weight:500;">סיסמה חדשה (לפחות 6 תווים)</label>
+    <input id="cpwd-new" type="password" autocomplete="new-password" style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;font-size:14px;direction:ltr;text-align:left;margin-bottom:12px;box-sizing:border-box;" placeholder="••••••••">
+
+    <label style="display:block;font-size:13px;color:#444;margin-bottom:5px;font-weight:500;">אישור סיסמה חדשה</label>
+    <input id="cpwd-confirm" type="password" autocomplete="new-password" style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;font-size:14px;direction:ltr;text-align:left;margin-bottom:18px;box-sizing:border-box;" placeholder="••••••••">
+
+    <div style="display:flex;gap:8px;">
+      <button id="cpwd-cancel-btn" type="button" style="flex:1;padding:11px;background:#f5f5f5;color:#333;border:1px solid #ddd;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;">ביטול</button>
+      <button id="cpwd-save-btn" type="button" style="flex:2;padding:11px;background:#0f3460;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">שמור סיסמה חדשה</button>
     </div>
   </div>
 </div>
@@ -2006,7 +2037,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.12 — multi-user</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.13 — change pwd</div>
     </div>
   </div>
 
@@ -2080,7 +2111,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <div class="tb-notif">🔔<div class="notif-dot"></div></div>
       <button onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.12 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.13 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2661,7 +2692,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.12 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.13 ✓</span>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
     </div>
@@ -9951,6 +9982,122 @@ if (document.readyState === 'loading') {
       inp.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') doLogin();
       });
+    });
+
+    // ═══ v2.9.13: Change password flow ═══
+    // Lets users change their temporary password (which is their phone number)
+    // to something personal. Firebase requires re-authenticating with the
+    // current password before allowing the password change.
+    var changePwdBtn = document.getElementById('auth-change-pwd-btn');
+    if (changePwdBtn) {
+      changePwdBtn.addEventListener('click', function() {
+        var modal = document.getElementById('change-pwd-overlay');
+        if (modal) {
+          // Pre-fill email from the login form if entered
+          var cpwdEmail = document.getElementById('cpwd-email');
+          if (cpwdEmail && emailInput.value) cpwdEmail.value = emailInput.value;
+          modal.style.display = 'flex';
+          // Clear any previous messages
+          var errBox2 = document.getElementById('change-pwd-error');
+          var sucBox  = document.getElementById('change-pwd-success');
+          if (errBox2) errBox2.style.display = 'none';
+          if (sucBox)  sucBox.style.display = 'none';
+        }
+      });
+    }
+    initChangePasswordUI();
+  }
+
+  // ═══ v2.9.13: Wire up the "change password" modal ═══
+  function initChangePasswordUI() {
+    var saveBtn   = document.getElementById('cpwd-save-btn');
+    var cancelBtn = document.getElementById('cpwd-cancel-btn');
+    var modal     = document.getElementById('change-pwd-overlay');
+    if (!saveBtn || !cancelBtn || !modal) return;
+
+    function showErr(msg) {
+      var box = document.getElementById('change-pwd-error');
+      var suc = document.getElementById('change-pwd-success');
+      if (suc) suc.style.display = 'none';
+      if (box) { box.textContent = msg; box.style.display = 'block'; }
+    }
+    function showSuccess(msg) {
+      var box = document.getElementById('change-pwd-error');
+      var suc = document.getElementById('change-pwd-success');
+      if (box) box.style.display = 'none';
+      if (suc) { suc.textContent = msg; suc.style.display = 'block'; }
+    }
+    function clearMsgs() {
+      var box = document.getElementById('change-pwd-error');
+      var suc = document.getElementById('change-pwd-success');
+      if (box) box.style.display = 'none';
+      if (suc) suc.style.display = 'none';
+    }
+
+    cancelBtn.addEventListener('click', function() {
+      modal.style.display = 'none';
+      // Clear inputs
+      ['cpwd-email','cpwd-current','cpwd-new','cpwd-confirm'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      clearMsgs();
+    });
+
+    saveBtn.addEventListener('click', function doChangePwd() {
+      clearMsgs();
+      var email     = (document.getElementById('cpwd-email').value || '').trim();
+      var current   = document.getElementById('cpwd-current').value || '';
+      var newPwd    = document.getElementById('cpwd-new').value || '';
+      var confirm_  = document.getElementById('cpwd-confirm').value || '';
+
+      // Validate
+      if (!email)              { showErr('יש להזין דוא"ל'); return; }
+      if (!current)            { showErr('יש להזין את הסיסמה הנוכחית'); return; }
+      if (!newPwd)             { showErr('יש להזין סיסמה חדשה'); return; }
+      if (newPwd.length < 6)   { showErr('הסיסמה החדשה חייבת להכיל לפחות 6 תווים'); return; }
+      if (newPwd !== confirm_) { showErr('הסיסמה החדשה ואישור הסיסמה אינם תואמים'); return; }
+      if (!fbAuth)             { showErr('Firebase Authentication לא הופעל'); return; }
+
+      saveBtn.textContent = 'משנה סיסמה...';
+      saveBtn.disabled = true;
+
+      // First sign in with current password to verify, then update password.
+      fbAuth.signInWithEmailAndPassword(email, current)
+        .then(function(cred) {
+          // Successfully signed in — now change the password
+          return cred.user.updatePassword(newPwd);
+        })
+        .then(function() {
+          showSuccess('✅ הסיסמה שונתה בהצלחה! מתחבר...');
+          saveBtn.textContent = 'הצליח';
+          // Clear inputs
+          setTimeout(function() {
+            ['cpwd-email','cpwd-current','cpwd-new','cpwd-confirm'].forEach(function(id) {
+              var el = document.getElementById(id);
+              if (el) el.value = '';
+            });
+            modal.style.display = 'none';
+            saveBtn.textContent = 'שמור סיסמה חדשה';
+            saveBtn.disabled = false;
+            // User is now signed in with new password — onAuthStateChanged will hide login overlay
+          }, 1500);
+        })
+        .catch(function(err) {
+          saveBtn.textContent = 'שמור סיסמה חדשה';
+          saveBtn.disabled = false;
+          var code = (err && err.code) || '';
+          var msg  = 'שינוי הסיסמה נכשל';
+          if (code === 'auth/wrong-password')        msg = 'הסיסמה הנוכחית שגויה';
+          else if (code === 'auth/user-not-found')   msg = 'המשתמש לא נמצא';
+          else if (code === 'auth/invalid-email')    msg = 'כתובת דוא"ל לא תקינה';
+          else if (code === 'auth/weak-password')    msg = 'הסיסמה החדשה חלשה מדי (לפחות 6 תווים)';
+          else if (code === 'auth/requires-recent-login') msg = 'נדרשת התחברות מחדש לפני שינוי סיסמה';
+          else if (code === 'auth/network-request-failed') msg = 'אין חיבור לאינטרנט';
+          else if (code === 'auth/too-many-requests') msg = 'יותר מדי ניסיונות. נסה שוב מאוחר יותר.';
+          showErr(msg);
+          console.error('[ChangePwd] failed:', err);
+        });
     });
   }
 
