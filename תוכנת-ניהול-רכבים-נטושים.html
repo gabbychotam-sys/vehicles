@@ -2006,7 +2006,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.11 — photographed status</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.12 — multi-user</div>
     </div>
   </div>
 
@@ -2080,7 +2080,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <div class="tb-notif">🔔<div class="notif-dot"></div></div>
       <button onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.11 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.12 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2661,7 +2661,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.11 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.12 ✓</span>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
     </div>
@@ -3149,7 +3149,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
       </div>
       <!-- ═══ NEW: signed-in user badge + logout button ═══ -->
       <div id="auth-status-row" style="display: flex; align-items: center; justify-content: space-between; background: rgba(46, 125, 50, 0.08); border: 1px solid rgba(46, 125, 50, 0.18); border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; font-size: 13px;">
-        <span>🔐 מחובר כ-<strong id="auth-status-email" style="font-family:monospace;">gabbyc@galil-elion.org.il</strong></span>
+        <span>🔐 מחובר כ-<strong id="auth-status-email" style="font-family:monospace;">—</strong></span>
         <button onclick="window.GalilSync &amp;&amp; window.GalilSync.logout()" style="background:transparent;border:1px solid rgba(46,125,50,0.3);color:#2e7d32;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer;">התנתק</button>
       </div>
       <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px;">
@@ -9209,18 +9209,15 @@ function _bootSequence() {
   } catch(e) { console.warn('[boot] counter refresh failed:', e); }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // ═══ ONE-TIME AUTO-CLEANUP (v2.9.3): On the very first time this version  ═══
-  // ═══ runs, delete ALL cases from Firebase. The user has been struggling   ═══
-  // ═══ with old cases coming back, so this gives them a guaranteed clean    ═══
-  // ═══ slate. Marker is stored in localStorage so it only runs once.        ═══
+  // ═══ DISABLED in v2.9.12: previously, on first run of v2.9.4 we           ═══
+  // ═══ auto-deleted all Firebase cases to fix recurring zombie cases.       ═══
+  // ═══ Now the system is hosted online (GitHub Pages) and shared by 5      ═══
+  // ═══ users — running this would wipe everyone's data the first time      ═══
+  // ═══ each user opens the page. The original problem is fixed by other   ═══
+  // ═══ means (tombstones, _deleted flags), so this cleanup is no longer    ═══
+  // ═══ needed and would cause catastrophic data loss if re-enabled.        ═══
   // ═══════════════════════════════════════════════════════════════════════════
-  try {
-    var FRESH_FLAG = 'galilElyon_firebaseFreshStartV294';
-    if (!localStorage.getItem(FRESH_FLAG)) {
-      console.log('[FreshStart] First run of v2.9.4 — will clean Firebase shortly');
-      _scheduleFreshStartCleanup(FRESH_FLAG);
-    }
-  } catch(e) { console.warn('[FreshStart] check failed:', e); }
+  // (intentionally a no-op)
 }
 
 function _scheduleFreshStartCleanup(FRESH_FLAG) {
