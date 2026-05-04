@@ -1,0 +1,2000 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="פיקוח רכבים">
+<meta name="theme-color" content="#7c3aed">
+<link rel="manifest" href="manifest-mobile.json">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icon-152.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icon-167.png">
+<title>פיקוח רכבים</title>
+<style>
+  :root {
+    --primary-color: #0f3460;
+    --primary-color-light: #16213e;
+    --bg-color: #f4f6fb;
+    --card-bg: #fff;
+    --text-color: #1a1a2e;
+    --text-muted: #777;
+    --border-color: #eef1f5;
+  }
+
+  /* Dark mode */
+  body.dark {
+    --bg-color: #1a1a2e;
+    --card-bg: #2d3748;
+    --text-color: #e8e8f0;
+    --text-muted: #a0aec0;
+    --border-color: #3d4663;
+  }
+  body.dark .home-action,
+  body.dark .mini-case,
+  body.dark .modal-box {
+    background: var(--card-bg) !important;
+    color: var(--text-color);
+  }
+  body.dark .home-action-title,
+  body.dark .mc-plate,
+  body.dark .my-cases-title {
+    color: var(--text-color) !important;
+  }
+  body.dark .field-input,
+  body.dark .login-input,
+  body.dark .modal-input {
+    background: #3d4663 !important;
+    color: #e8e8f0 !important;
+    border-color: #5c6bc0 !important;
+  }
+  body.dark .modal-title {
+    color: #5c6bc0;
+  }
+
+  /* Settings buttons */
+  .theme-btn {
+    flex: 1;
+    padding: 14px 8px;
+    border: 2px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-color);
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .theme-btn.active {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    color: #fff;
+  }
+  .color-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 4px solid var(--border-color);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .color-btn.active {
+    border-color: #fff;
+    box-shadow: 0 0 0 3px var(--primary-color);
+    transform: scale(1.1);
+  }
+
+  /* Archive (פריטים ישנים) */
+  .archive-section {
+    margin-top: 20px;
+    border-top: 2px dashed var(--border-color);
+    padding-top: 16px;
+  }
+  .archive-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .archive-sub {
+    font-size: 15px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .archive-item {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    border: 1px solid var(--border-color);
+    opacity: 0.92;
+  }
+  .archive-item .arc-info { flex: 1; }
+  .archive-item .arc-plate {
+    font-family: 'Courier New', monospace;
+    font-size: 19px;
+    font-weight: 800;
+    color: var(--primary-color);
+  }
+  .archive-item .arc-meta {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .arc-delete-btn {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: #ffebee;
+    border: 1px solid #ef9a9a;
+    color: #c62828;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .arc-delete-btn:active { transform: scale(0.92); }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    background: #f4f6fb;
+    font-family: 'Segoe UI', Arial, sans-serif;
+  }
+
+  /* ═══ SCREEN SYSTEM ═══ */
+  .screen { display:none; position:fixed; inset:0; flex-direction:column; overflow:hidden; }
+  .screen.active { display:flex; }
+
+  /* ═══ HEADER — exact from your design ═══ */
+  .header {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-color-light));
+    padding: 32px 14px 14px; color: #fff;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .back-btn {
+    width: 30px; height: 30px; background: rgba(255,255,255,0.15);
+    border-radius: 9px; display: flex; align-items: center; justify-content: center;
+    font-size: 30px; cursor: pointer; flex-shrink: 0; border: none; color: #fff;
+  }
+  .header-title { font-size: 30px; font-weight: 700; }
+  .header-sub { margin-top: 3px; }
+  .type-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(255,255,255,0.15); border-radius: 20px;
+    padding: 3px 9px; font-size: 19px; font-weight: 700; color: #fff;
+  }
+  .edit-btn {
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 9px; color: #fff; font-size: 19px; font-weight: 700;
+    padding: 6px 11px; cursor: pointer; white-space: nowrap; font-family: inherit;
+  }
+  .edit-btn.active { background: #2e7d32; border-color: #2e7d32; }
+
+  /* ═══ COUNTDOWN — exact from your design ═══ */
+  .header-countdown {
+    background: rgba(255,255,255,0.08);
+    margin: 0 14px 10px; border-radius: 10px; padding: 8px 12px; flex-shrink: 0;
+  }
+  .countdown-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+  .countdown-label { font-size: 19px; color: rgba(255,255,255,0.7); font-weight: 600; }
+  .countdown-days { font-size: 20px; font-weight: 800; padding: 2px 8px; border-radius: 20px; }
+  .days-yellow { background: #fff8e1; color: #f57f17; }
+  .days-red    { background: #ffebee; color: #c62828; }
+  .days-orange { background: #fff3e0; color: #e65100; }
+  .days-green  { background: #e8f5e9; color: #2e7d32; }
+  .progress-bar-bg { height: 5px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; border-radius: 10px; }
+  .fill-yellow { background: linear-gradient(90deg, #66bb6a, #ffd54f); }
+  .fill-red    { background: linear-gradient(90deg, #ffd54f, #ef5350); }
+  .fill-orange { background: linear-gradient(90deg, #ffa726, #ff7043); }
+  .fill-green  { background: linear-gradient(90deg, #66bb6a, #4caf50); }
+
+  /* ═══ PHOTO STRIP — exact from your design ═══ */
+  .photo-strip {
+    background: var(--primary-color-light); padding: 8px 10px;
+    display: flex; gap: 7px; flex-shrink: 0; overflow-x: auto;
+  }
+  .photo-thumb {
+    width: 56px; height: 56px; border-radius: 9px; background: #2d2d4e;
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 44px; border: 2px solid #3d3d6e; overflow: hidden;
+  }
+  .photo-thumb img { width:100%; height:100%; object-fit:cover; }
+  .add-photo {
+    width: 56px; height: 56px; border-radius: 9px;
+    background: rgba(255,255,255,0.05); border: 2px dashed rgba(255,255,255,0.2);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 34px; color: rgba(255,255,255,0.4); cursor: pointer; flex-shrink: 0;
+  }
+  .add-photo span { font-size: 17px; margin-top: 2px; }
+
+  /* ═══ CONTENT / CARDS — exact from your design ═══ */
+  .content {
+    flex: 1; overflow-y: auto; padding: 10px 14px 14px;
+    display: flex; flex-direction: column; gap: 9px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .card {
+    background: #fff; border-radius: 12px; padding: 10px 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .card-title {
+    font-size: 19px; font-weight: 700; color: var(--primary-color);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    border-bottom: 1px solid #f0f0f0; padding-bottom: 6px;
+  }
+  .field-row { display: flex; flex-direction: column; gap: 2px; }
+  .field-label { font-size: 18px; color: #bbb; font-weight: 600; }
+  .field-value { font-size: 25px; color: #1a1a2e; font-weight: 600; padding: 1px 0; }
+  .field-value.plate { font-size: 34px; letter-spacing: 2px; color: var(--primary-color); font-weight: 800; }
+  .field-value.muted { font-size: 22px; color: #555; font-weight: 400; line-height: 1.5; }
+
+  .phone-row { display: flex; align-items: center; gap: 7px; }
+  .phone-row .field-value { flex: 1; }
+  .call-btn {
+    width: 32px; height: 32px; background: #e8f5e9; border: 1px solid #a5d6a7;
+    border-radius: 9px; display: flex; align-items: center; justify-content: center;
+    font-size: 30px; cursor: pointer; flex-shrink: 0; text-decoration: none;
+  }
+
+  /* ═══ EDIT INPUTS — exact from your design ═══ */
+  .field-input {
+    background: #f8f9ff; border: 1.5px solid #9fa8da; border-radius: 10px;
+    padding: 13px 12px; font-size: 22px; color: #1a1a2e; direction: rtl;
+    width: 100%; font-family: inherit; outline: none;
+  }
+  .field-input:focus { border-color: #5c6bc0; }
+  .field-input.plate {
+    font-size: 34px; font-weight: 700; letter-spacing: 2px;
+    text-align: center; color: var(--primary-color); background: #e8eaf6; border-color: #5c6bc0;
+    padding: 14px 12px;
+  }
+  select.field-input {
+    appearance: none; -webkit-appearance: none; background-color: #f8f9ff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='%23999'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: left 12px center;
+  }
+  textarea.field-input { resize: none; height: 80px; line-height: 1.5; }
+  .phone-row .field-input { flex: 1; }
+  .coord-row { display: flex; gap: 6px; }
+  .coord-row .field-value { flex: 1; text-align: center; font-size: 20px; color: #666; font-weight: 400; }
+  .coord-row .field-input { flex: 1; text-align: center; font-size: 19px; }
+
+  .save-btn {
+    background: linear-gradient(135deg, #2e7d32, #1b5e20);
+    color: #fff; border: none; border-radius: 12px; padding: 18px;
+    font-size: 29px; font-weight: 700; width: 100%; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-family: inherit;
+  }
+
+  /* ═══ HOME SCREEN ═══ */
+  .home-header {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-color-light));
+    padding: 36px 14px 16px; color: #fff; flex-shrink: 0;
+  }
+  .home-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .home-logo { font-size: 52px; }
+  .home-title { font-size: 34px; font-weight: 800; }
+  .home-sub { font-size: 19px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+  .home-user { font-size: 20px; color: rgba(255,255,255,0.6); margin-top: 8px; }
+
+  .home-content {
+    flex: 1; overflow-y: auto; padding: 14px;
+    display: flex; flex-direction: column; gap: 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .home-action {
+    background: #fff; border-radius: 14px; padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    display: flex; align-items: center; gap: 16px;
+    cursor: pointer; transition: transform 0.1s; border: 1px solid #eef1f5;
+  }
+  .home-action:active { transform: scale(0.97); }
+  .home-action-icon {
+    width: 64px; height: 64px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 49px; flex-shrink: 0;
+  }
+  .home-action-title { font-size: 29px; font-weight: 700; color: #1a1a2e; }
+  .home-action-desc { font-size: 20px; color: #999; margin-top: 4px; }
+
+  .my-cases-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 6px; margin-bottom: -4px;
+  }
+  .my-cases-title { font-size: 25px; font-weight: 700; color: var(--primary-color); }
+  .my-cases-count { font-size: 19px; color: #999; font-weight: 600; }
+
+  .mini-case {
+    background: #fff; border-radius: 12px; padding: 14px 14px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.04); display: flex; gap: 12px; align-items: center;
+    cursor: pointer; border: 1px solid #eef1f5;
+  }
+  .mini-case:active { transform: scale(0.98); }
+  .mc-bar { width: 4px; height: 46px; border-radius: 2px; flex-shrink: 0; }
+  .mc-bar.yellow { background: #ffd54f; } .mc-bar.red { background: #ef5350; }
+  .mc-bar.orange { background: #ffa726; } .mc-bar.green { background: #66bb6a; }
+  .mc-body { flex: 1; }
+  .mc-top { display: flex; justify-content: space-between; align-items: center; }
+  .mc-plate { font-family: 'Courier New', monospace; font-size: 28px; font-weight: 800; color: var(--primary-color); }
+  .mc-badge { font-size: 17px; font-weight: 700; padding: 4px 9px; border-radius: 12px; }
+  .mc-badge.yellow { background:#fff8e1; color:#f57f17; }
+  .mc-badge.red { background:#ffebee; color:#c62828; }
+  .mc-badge.orange { background:#fff3e0; color:#e65100; }
+  .mc-badge.green { background:#e8f5e9; color:#2e7d32; }
+  .mc-loc { font-size: 19px; color: #bbb; margin-top: 4px; }
+
+  /* ═══ TOAST ═══ */
+  .toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    background: #2e7d32; color: #fff; padding: 10px 20px; border-radius: 12px;
+    font-size: 22px; font-weight: 700; z-index: 99;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    animation: toastAnim 2.5s ease forwards;
+  }
+  @keyframes toastAnim {
+    0% { opacity:0; transform:translateX(-50%) translateY(20px); }
+    10% { opacity:1; transform:translateX(-50%) translateY(0); }
+    80% { opacity:1; }
+    100% { opacity:0; transform:translateX(-50%) translateY(-10px); }
+  }
+
+  .hidden { display: none; }
+
+  /* ═══ SYNC INDICATOR ═══ */
+  .sync-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(255,255,255,0.12); border-radius: 20px;
+    padding: 3px 9px; font-size: 18px; font-weight: 700;
+    color: rgba(255,255,255,0.9); margin-top: 6px;
+  }
+  .sync-chip.ok { background: rgba(46,125,50,0.5); }
+  .sync-chip.err { background: rgba(198,40,40,0.5); }
+  .sync-chip.pending { background: rgba(245,127,23,0.5); }
+  @keyframes spin { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
+  .sync-chip.pending .sync-icon { display:inline-block; animation: spin 1s linear infinite; }
+
+  /* ═══ LOGIN SCREEN ═══ */
+  .login-wrap {
+    flex: 1; display: flex; flex-direction: column; justify-content: center;
+    padding: 28px; background: linear-gradient(135deg, var(--primary-color), var(--primary-color-light)); color: #fff;
+  }
+  .login-logo { text-align: center; margin-bottom: 22px; }
+  .login-logo img { width: 64px; height: 64px; border-radius: 14px; }
+  .login-title { font-size: 42px; font-weight: 800; text-align: center; }
+  .login-sub { font-size: 22px; color: rgba(255,255,255,0.6); text-align: center; margin-top: 4px; margin-bottom: 26px; }
+  .login-label { font-size: 20px; color: rgba(255,255,255,0.7); margin-bottom: 6px; font-weight: 600; }
+  .login-input {
+    width: 100%; background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.2);
+    border-radius: 12px; padding: 14px; font-size: 29px; color: #fff;
+    font-family: inherit; outline: none; margin-bottom: 14px; direction: rtl;
+  }
+  .login-input::placeholder { color: rgba(255,255,255,0.4); }
+  .login-input:focus { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.16); }
+  .login-btn {
+    width: 100%; background: #2e7d32; color: #fff; border: none;
+    border-radius: 12px; padding: 14px; font-size: 29px; font-weight: 700;
+    cursor: pointer; font-family: inherit; margin-top: 8px;
+  }
+  .login-note { font-size: 19px; color: rgba(255,255,255,0.5); text-align: center; margin-top: 14px; line-height: 1.5; }
+
+  /* Case type selector (רכב נטוש / גרוטאת רכב) */
+  .case-type-row {
+    display: flex; gap: 10px;
+  }
+  .case-type-btn {
+    flex: 1;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 14px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .case-type-btn:active { transform: scale(0.97); }
+  .case-type-btn.active {
+    border-color: var(--primary-color);
+    background: rgba(15, 52, 96, 0.06);
+  }
+  body.dark .case-type-btn.active {
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .case-type-icon {
+    font-size: 36px; line-height: 1;
+  }
+  .case-type-label {
+    font-size: 22px; font-weight: 700;
+    color: var(--primary-color);
+    margin-top: 4px;
+  }
+  .case-type-desc {
+    font-size: 16px; color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* settings cog button */
+  .settings-cog {
+    position: absolute; top: 28px; left: 14px; width: 50px; height: 50px;
+    background: rgba(255,255,255,0.18); border-radius: 12px; display: flex;
+    align-items: center; justify-content: center; cursor: pointer; border: none;
+    color: #fff; font-size: 36px; z-index: 5;
+  }
+  /* settings modal */
+  .modal-bg {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100;
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-bg.open { display: flex; }
+  .modal-box {
+    background: #fff; border-radius: 16px; padding: 18px;
+    max-width: 360px; width: 100%; max-height: 90vh; overflow-y: auto;
+  }
+  .modal-title { font-size: 30px; font-weight: 700; color: var(--primary-color); margin-bottom: 6px; }
+  .modal-sub { font-size: 20px; color: #999; margin-bottom: 14px; line-height: 1.5; }
+  .modal-label { font-size: 19px; color: #777; font-weight: 600; margin-bottom: 4px; }
+  .modal-input {
+    width: 100%; background: #f8f9ff; border: 1.5px solid #9fa8da; border-radius: 9px;
+    padding: 9px 10px; font-size: 22px; color: #1a1a2e; direction: ltr;
+    font-family: inherit; outline: none; margin-bottom: 10px;
+  }
+  .modal-actions { display: flex; gap: 8px; margin-top: 6px; }
+  .modal-btn {
+    flex: 1; padding: 11px; border-radius: 10px; font-size: 25px; font-weight: 700;
+    border: none; cursor: pointer; font-family: inherit;
+  }
+  .modal-btn.primary { background: #2e7d32; color: #fff; }
+  .modal-btn.secondary { background: #eef1f5; color: #555; }
+</style>
+
+<!-- Firebase SDK (compat v8 — works without ES modules) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     FIREBASE AUTH OVERLAY — appears only after auth is enforced.
+     Shown above the existing inspector-pick screen, gating Firebase access.
+     ════════════════════════════════════════════════════════════════════ -->
+<div id="auth-overlay" style="display:none;position:fixed;inset:0;z-index:99999;background:linear-gradient(135deg,#0f3460 0%,#16213e 100%);align-items:center;justify-content:center;font-family:inherit;padding:16px;box-sizing:border-box;">
+  <div style="background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.4);padding:32px 24px;width:100%;max-width:380px;direction:rtl;">
+    <div style="text-align:center;margin-bottom:22px;">
+      <div style="font-size:44px;margin-bottom:6px;">🔐</div>
+      <h2 style="margin:0;font-size:20px;color:#0f3460;font-weight:600;">פיקוח רכבים</h2>
+      <p style="margin:4px 0 0;font-size:12px;color:#666;">גליל עליון</p>
+    </div>
+    <div id="auth-error" style="display:none;background:#fee;border:1px solid #fcc;color:#c00;padding:9px 11px;border-radius:8px;font-size:13px;margin-bottom:12px;"></div>
+    <label style="display:block;font-size:13px;color:#444;margin-bottom:5px;font-weight:500;">בחר את שמך</label>
+    <select id="auth-name-select" onchange="onAuthNameChange()" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:15px;direction:rtl;text-align:right;margin-bottom:12px;box-sizing:border-box;background:#fff;cursor:pointer;-webkit-appearance:none;">
+      <option value="">— בחר —</option>
+    </select>
+    <label style="display:block;font-size:13px;color:#444;margin-bottom:5px;font-weight:500;">דוא"ל</label>
+    <input id="auth-email" type="email" autocomplete="username" inputmode="email" readonly style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:15px;direction:ltr;text-align:left;margin-bottom:12px;box-sizing:border-box;background:#f5f5f5;-webkit-appearance:none;" placeholder="ייקבע אוטומטית לאחר בחירת שם">
+    <label style="display:block;font-size:13px;color:#444;margin-bottom:5px;font-weight:500;">סיסמה</label>
+    <input id="auth-password" type="password" autocomplete="current-password" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:15px;direction:ltr;text-align:left;margin-bottom:16px;box-sizing:border-box;-webkit-appearance:none;" placeholder="••••••••">
+    <button id="auth-login-btn" style="width:100%;padding:13px;background:#0f3460;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;-webkit-appearance:none;">כניסה</button>
+    <button id="auth-change-pwd-btn" type="button" style="width:100%;padding:11px;background:transparent;color:#0f3460;border:1px solid #0f3460;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;margin-top:10px;-webkit-appearance:none;">🔑 שינוי סיסמה</button>
+    <div style="margin-top:14px;text-align:center;font-size:11px;color:#888;">
+      שכחת סיסמה? פנה למנהל המערכת
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ CHANGE PASSWORD MODAL (v3.3) ═══════════ -->
+<div id="change-pwd-overlay" style="display:none;position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;font-family:inherit;padding:16px;box-sizing:border-box;">
+  <div style="background:#fff;border-radius:14px;padding:24px 20px;width:100%;max-width:380px;direction:rtl;max-height:92vh;overflow-y:auto;">
+    <div style="text-align:center;margin-bottom:18px;">
+      <div style="font-size:36px;margin-bottom:4px;">🔑</div>
+      <h2 style="margin:0;font-size:18px;color:#0f3460;font-weight:600;">שינוי סיסמה</h2>
+      <p style="margin:4px 0 0;font-size:11px;color:#666;">בחר סיסמה אישית חדשה</p>
+    </div>
+    <div id="change-pwd-error" style="display:none;background:#fee;border:1px solid #fcc;color:#c00;padding:8px 10px;border-radius:8px;font-size:12px;margin-bottom:10px;"></div>
+    <div id="change-pwd-success" style="display:none;background:#e8f5e9;border:1px solid #4caf50;color:#2e7d32;padding:8px 10px;border-radius:8px;font-size:12px;margin-bottom:10px;"></div>
+
+    <label style="display:block;font-size:12px;color:#444;margin-bottom:4px;font-weight:500;">דוא"ל</label>
+    <input id="cpwd-email" type="email" autocomplete="username" inputmode="email" style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;font-size:14px;direction:ltr;text-align:left;margin-bottom:10px;box-sizing:border-box;-webkit-appearance:none;" placeholder="name@galil-elion.org.il">
+
+    <label style="display:block;font-size:12px;color:#444;margin-bottom:4px;font-weight:500;">סיסמה נוכחית (טלפון או סיסמה ששינית)</label>
+    <input id="cpwd-current" type="password" autocomplete="current-password" style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;font-size:14px;direction:ltr;text-align:left;margin-bottom:10px;box-sizing:border-box;-webkit-appearance:none;" placeholder="הסיסמה הנוכחית">
+
+    <label style="display:block;font-size:12px;color:#444;margin-bottom:4px;font-weight:500;">סיסמה חדשה (לפחות 6 תווים)</label>
+    <input id="cpwd-new" type="password" autocomplete="new-password" style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;font-size:14px;direction:ltr;text-align:left;margin-bottom:10px;box-sizing:border-box;-webkit-appearance:none;" placeholder="••••••••">
+
+    <label style="display:block;font-size:12px;color:#444;margin-bottom:4px;font-weight:500;">אישור סיסמה חדשה</label>
+    <input id="cpwd-confirm" type="password" autocomplete="new-password" style="width:100%;padding:11px;border:1px solid #ddd;border-radius:8px;font-size:14px;direction:ltr;text-align:left;margin-bottom:14px;box-sizing:border-box;-webkit-appearance:none;" placeholder="••••••••">
+
+    <div style="display:flex;gap:8px;">
+      <button id="cpwd-cancel-btn" type="button" style="flex:1;padding:11px;background:#f5f5f5;color:#333;border:1px solid #ddd;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;-webkit-appearance:none;">ביטול</button>
+      <button id="cpwd-save-btn" type="button" style="flex:2;padding:11px;background:#0f3460;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;-webkit-appearance:none;">שמור סיסמה חדשה</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ LOGIN SCREEN (first time only) ═══════════ -->
+<div class="screen" id="scr-login">
+  <div class="login-wrap">
+    <div class="login-logo"><img src="data:image/jpeg;base64,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"></div>
+    <div class="login-title">פיקוח רכבים</div>
+    <div class="login-sub">מועצה אזורית הגליל העליון</div>
+
+    <div class="login-label">בחר את שמך מהרשימה</div>
+    <select id="login-inspector-select" class="login-input" style="background:#fff;cursor:pointer;" onchange="onInspectorSelected()">
+      <option value="">— בחר את שמך —</option>
+    </select>
+
+    <div id="login-selected-info" style="display:none;background:#f0f7ff;border:1.5px solid #c8e0ff;border-radius:12px;padding:14px;margin:12px 0;font-size:18px;">
+      <div id="login-info-name" style="font-weight:700;font-size:22px;margin-bottom:4px;"></div>
+      <div id="login-info-role" style="color:#666;font-size:16px;margin-bottom:8px;"></div>
+      <div id="login-info-phone" style="font-size:17px;" dir="ltr"></div>
+      <div id="login-info-email" style="color:#0066cc;font-size:17px;" dir="ltr"></div>
+    </div>
+
+    <button class="login-btn" onclick="doLogin()" id="login-btn-go" disabled style="opacity:0.5;">המשך →</button>
+
+    <div class="login-note">השמות הינם רשימת הפקחים והעובדים<br>של מועצה אזורית הגליל העליון</div>
+  </div>
+</div>
+
+<!-- ═══════════ HOME SCREEN ═══════════ -->
+<div class="screen active" id="scr-home">
+
+  <div class="home-header" style="position:relative;">
+    <button class="settings-cog" onclick="openSettings()" title="הגדרות סנכרון">⚙️</button>
+    <div class="home-brand">
+      <div class="home-logo"><img src="data:image/jpeg;base64,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" style="width:36px;height:36px;border-radius:8px;"></div>
+      <div>
+        <div class="home-title">פיקוח רכבים</div>
+        <div class="home-sub">מועצה אזורית הגליל העליון <span style="background:#10b981;color:#fff;padding:2px 8px;border-radius:6px;font-size:13px;font-weight:700;margin-right:6px;">v3.3</span></div>
+      </div>
+    </div>
+    <div class="home-user" id="home-user-line">👷 פקח</div>
+    <div id="home-sync-chip"></div>
+  </div>
+
+  <div class="home-content">
+
+    <div class="home-action" onclick="newCase()" style="border:2px solid var(--primary-color);">
+      <div class="home-action-icon" style="background:#e3f2fd;">📸</div>
+      <div>
+        <div class="home-action-title">פתח תיק חדש</div>
+        <div class="home-action-desc">צלם רכב, מלא פרטים ושלח לתוכנת הניהול<br><span style="color:#10b981;font-weight:600;">📍 GPS נקלט אוטומטית בזמן הצילום</span></div>
+      </div>
+    </div>
+
+    <div class="home-action" onclick="showScreen('list')">
+      <div class="home-action-icon" style="background:#fff8e1;">📋</div>
+      <div>
+        <div class="home-action-title">התיקים שלי</div>
+        <div class="home-action-desc" id="my-count">0 תיקים שנפתחו מהנייד</div>
+      </div>
+    </div>
+
+    <div class="my-cases-header" id="recent-header" style="display:none;">
+      <div class="my-cases-title">📌 תיקים אחרונים</div>
+      <div class="my-cases-count" id="recent-count"></div>
+    </div>
+
+    <div id="recent-cases"></div>
+
+    <!-- ═════ ARCHIVE / פריטים ישנים ═════ -->
+    <div id="archive-wrap" class="archive-section" style="display:none;">
+      <div class="archive-title">📁 פריטים ישנים</div>
+      <div class="archive-sub" id="archive-sub">תיקים שכבר נשלחו לתוכנת הניהול</div>
+      <div id="archive-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════ LIST SCREEN ═══════════ -->
+<div class="screen" id="scr-list">
+  <div class="header">
+    <div class="header-right">
+      <button class="back-btn" onclick="showScreen('home')">→</button>
+      <div><div class="header-title">📋 התיקים שלי</div></div>
+    </div>
+  </div>
+  <div class="content" id="list-content"></div>
+</div>
+
+<!-- ═══════════ CASE DETAIL — VIEW ═══════════ -->
+<div class="screen" id="scr-view">
+  <div class="header">
+    <div class="header-right">
+      <button class="back-btn" onclick="goBackFromView()">→</button>
+      <div>
+        <div class="header-title" id="v-title">תיק</div>
+        <div class="header-sub"><span class="type-badge">🚗 רכב נטוש</span></div>
+      </div>
+    </div>
+    <button class="edit-btn" onclick="startEdit()">✏️ עריכה</button>
+  </div>
+  <div class="header-countdown" id="v-countdown" style="margin-top:-4px"></div>
+  <div class="photo-strip" id="v-photos"></div>
+  <div class="content" id="v-content"></div>
+</div>
+
+<!-- ═══════════ CASE DETAIL — EDIT ═══════════ -->
+<div class="screen" id="scr-edit">
+  <div class="header">
+    <div class="header-right">
+      <button class="back-btn" onclick="cancelEdit()">→</button>
+      <div>
+        <div class="header-title" id="e-title">תיק</div>
+        <div class="header-sub"><span class="type-badge">🚗 רכב נטוש</span></div>
+      </div>
+    </div>
+    <button class="edit-btn active" onclick="saveCase()">✅ שמור</button>
+  </div>
+  <div class="header-countdown" id="e-countdown" style="margin-top:-4px"></div>
+  <div class="photo-strip" id="e-photos"></div>
+  <div class="content" id="e-content"></div>
+</div>
+
+<!-- ═══════════ SETTINGS MODAL ═══════════ -->
+<div class="modal-bg" id="settings-modal" onclick="closeSettings(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">⚙️ הגדרות</div>
+
+    <!-- Inspector info -->
+    <div class="modal-label" style="margin-top:6px;font-size:24px;color:var(--primary-color);font-weight:700;">👷 פרטי הפקח</div>
+    <div class="modal-label">בחר את שמך</div>
+    <select id="cfg-inspector-select" class="modal-input" style="background:#fff;cursor:pointer;" onchange="onCfgInspectorChange()">
+      <option value="">— בחר את שמך —</option>
+    </select>
+    <div id="cfg-inspector-info" style="display:none;background:#f0f7ff;border:1.5px solid #c8e0ff;border-radius:10px;padding:10px;margin:8px 0;font-size:16px;">
+      <div id="cfg-info-role" style="color:#666;font-size:14px;margin-bottom:6px;"></div>
+      <div id="cfg-info-phone" style="font-size:15px;" dir="ltr"></div>
+      <div id="cfg-info-email" style="color:#0066cc;font-size:15px;" dir="ltr"></div>
+    </div>
+
+    <!-- Send all cases by email -->
+    <button class="modal-btn primary" onclick="emailAllCases()" style="width:100%;margin-top:14px;background:var(--primary-color);">📧 שלח לי את כל התיקים שלי במייל</button>
+
+    <!-- Appearance -->
+    <div class="modal-label" style="margin-top:18px;font-size:24px;color:var(--primary-color);font-weight:700;border-top:2px solid #eee;padding-top:14px;">🎨 מראה האפליקציה</div>
+
+    <div class="modal-label">גודל פונטים</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <button class="theme-btn" onclick="setFontSize(0.85)" id="fs-s">קטן</button>
+      <button class="theme-btn" onclick="setFontSize(1.0)" id="fs-m">רגיל</button>
+      <button class="theme-btn" onclick="setFontSize(1.2)" id="fs-l">גדול</button>
+      <button class="theme-btn" onclick="setFontSize(1.4)" id="fs-xl">ענק</button>
+    </div>
+
+    <div class="modal-label">צבע ראשי</div>
+    <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+      <button class="color-btn" data-color="#0f3460" onclick="setThemeColor('#0f3460')" style="background:#0f3460"></button>
+      <button class="color-btn" data-color="#1565c0" onclick="setThemeColor('#1565c0')" style="background:#1565c0"></button>
+      <button class="color-btn" data-color="#2e7d32" onclick="setThemeColor('#2e7d32')" style="background:#2e7d32"></button>
+      <button class="color-btn" data-color="#6a1b9a" onclick="setThemeColor('#6a1b9a')" style="background:#6a1b9a"></button>
+      <button class="color-btn" data-color="#c62828" onclick="setThemeColor('#c62828')" style="background:#c62828"></button>
+      <button class="color-btn" data-color="#37474f" onclick="setThemeColor('#37474f')" style="background:#37474f"></button>
+    </div>
+
+    <div class="modal-label">מצב</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <button class="theme-btn" onclick="setMode('light')" id="md-light">☀️ בהיר</button>
+      <button class="theme-btn" onclick="setMode('dark')" id="md-dark">🌙 כהה</button>
+    </div>
+
+    <div class="modal-actions" style="margin-top:18px;">
+      <button class="modal-btn secondary" onclick="closeSettings()">סגור</button>
+      <button class="modal-btn primary" onclick="saveSettings()">💾 שמור שינויים</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" accept="image/*" capture="environment" class="hidden" id="cam" onchange="onPhoto(this)">
+
+<script>
+// ═══ STORAGE ═══
+var DB = 'galil_mobile_cases';
+var CFG_KEY = 'galil_mobile_cfg';
+var INSPECTOR_KEY = 'galil_mobile_inspector';
+var cases = loadDB();
+var cur = null; // current case being viewed/edited
+var photos = [];
+
+// ═══ INSPECTOR / CONFIG ═══
+// Default Firebase config — baked in for distribution to inspectors.
+// Inspectors don't need to enter anything; everything just works on first open.
+var FB_DEFAULTS = {
+  apiKey:      "AIzaSyBvTzz4d__umScNiSIrculeQuogSIHSddY",
+  databaseURL: "https://galil-elyon-vehicles-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:   "galil-elyon-vehicles"
+};
+
+function loadCfg() {
+  try {
+    var saved = JSON.parse(localStorage.getItem(CFG_KEY)) || {};
+    // Saved values (if any) override defaults; missing fields fall back to defaults
+    return {
+      apiKey:      saved.apiKey      || FB_DEFAULTS.apiKey,
+      databaseURL: saved.databaseURL || FB_DEFAULTS.databaseURL,
+      projectId:   saved.projectId   || FB_DEFAULTS.projectId
+    };
+  } catch(e) { return Object.assign({}, FB_DEFAULTS); }
+}
+function saveCfg(c) { try { localStorage.setItem(CFG_KEY, JSON.stringify(c)); } catch(e) {} }
+function loadInspector() {
+  try { return JSON.parse(localStorage.getItem(INSPECTOR_KEY)) || null; } catch(e) { return null; }
+}
+function saveInspector(i) { try { localStorage.setItem(INSPECTOR_KEY, JSON.stringify(i)); } catch(e) {} }
+
+// ═══ FIREBASE ═══
+var fbApp = null, fbDb = null, fbReady = false;
+// ═══ NEW: Auth state ═══
+var fbAuth = null;
+var authRequired = false;
+var currentAuthUser = null;
+
+function initFirebase() {
+  var cfg = loadCfg();
+  if (!cfg.apiKey || !cfg.databaseURL) {
+    setSyncChip('off', 'לא מוגדר');
+    return;
+  }
+  if (typeof firebase === 'undefined') {
+    setSyncChip('err', 'Firebase SDK לא נטען');
+    return;
+  }
+  try {
+    if (firebase.apps && firebase.apps.length) {
+      fbApp = firebase.app();
+    } else {
+      fbApp = firebase.initializeApp({
+        apiKey: cfg.apiKey,
+        databaseURL: cfg.databaseURL,
+        projectId: cfg.projectId || ''
+      });
+    }
+    fbDb = firebase.database();
+    // ═══ NEW: initialize Auth (no-op if Firebase Authentication isn't enabled). ═══
+    try {
+      if (typeof fbApp.auth === 'function') {
+        fbAuth = fbApp.auth();
+        fbAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(){});
+        fbAuth.onAuthStateChanged(function(user) {
+          handleAuthStateChange(user);
+        });
+      }
+    } catch(e) { console.warn('Auth init skipped:', e); }
+
+    fbReady = true;
+    setSyncChip('ok', 'מסונכרן');
+    // Test connection
+    fbDb.ref('.info/connected').on('value', function(snap) {
+      if (snap.val() === true) setSyncChip('ok', 'מסונכרן');
+      else setSyncChip('pending', 'מתחבר...');
+    });
+
+    // ═══ v3.3: DISABLED — deletions are now app-only. ═══
+    // Previously we listened for `child_removed` from Firebase and synced
+    // local deletions, plus did a reconcile-on-connect to remove local
+    // cases that no longer exist on the server. Per Gabbi's instruction:
+    // a case can ONLY be deleted from within the mobile app itself; even
+    // if the management software deletes it from Firebase, it stays in
+    // the app's archive on the inspector's phone.
+    // (No listener registered — deletions on the server are ignored.)
+    // ═══ NEW: probe whether auth is required (only first time after connect)
+    setTimeout(function() {
+      if (fbDb && !currentAuthUser) probeAuthRequired();
+    }, 2500);
+
+  } catch(e) {
+    console.error('Firebase init failed:', e);
+    setSyncChip('err', 'שגיאת חיבור');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  AUTH GATE — soft mode (no auth set up) vs hard mode (auth enforced).
+// ═══════════════════════════════════════════════════════════════════
+
+function handleAuthStateChange(user) {
+  currentAuthUser = user || null;
+  var overlay = document.getElementById('auth-overlay');
+  if (user) {
+    if (overlay) overlay.style.display = 'none';
+    authRequired = true;
+    console.log('[Auth] signed in as', user.email);
+  } else {
+    if (authRequired && overlay) {
+      overlay.style.display = 'flex';
+      // Build the staff name picker (with email auto-fill on selection)
+      // so the user can pick their name and only type the password.
+      if (typeof populateAuthNameDropdown === 'function') populateAuthNameDropdown();
+    }
+  }
+}
+
+function probeAuthRequired() {
+  if (!fbDb) return;
+  fbDb.ref('cases').limitToFirst(1).once('value')
+    .then(function() {
+      if (!currentAuthUser) {
+        authRequired = false;
+        console.log('[Auth] rules are public — login not required');
+      }
+    })
+    .catch(function(err) {
+      if (err && (err.code === 'PERMISSION_DENIED' || /permission/i.test(err.message || ''))) {
+        authRequired = true;
+        console.log('[Auth] login required — rules are protected');
+        if (!currentAuthUser) {
+          var overlay = document.getElementById('auth-overlay');
+          if (overlay) overlay.style.display = 'flex';
+          // Build the staff name picker so user can pick their name
+          // and have their email auto-filled
+          if (typeof populateAuthNameDropdown === 'function') populateAuthNameDropdown();
+        }
+      }
+    });
+}
+
+function initLoginUI() {
+  var btn = document.getElementById('auth-login-btn');
+  var emailInput = document.getElementById('auth-email');
+  var pwdInput = document.getElementById('auth-password');
+  var errBox = document.getElementById('auth-error');
+  if (!btn) return;
+
+  function showError(msg) {
+    if (!errBox) return;
+    errBox.textContent = msg;
+    errBox.style.display = 'block';
+  }
+  function clearError() { if (errBox) errBox.style.display = 'none'; }
+
+  function doLogin() {
+    clearError();
+    var email = (emailInput.value || '').trim();
+    var pwd = pwdInput.value || '';
+    if (!email || !pwd) { showError('יש להזין דוא"ל וסיסמה'); return; }
+    if (!fbAuth) { showError('Firebase Authentication לא הופעל. פנה למנהל המערכת.'); return; }
+
+    btn.textContent = 'מתחבר...';
+    btn.disabled = true;
+    fbAuth.signInWithEmailAndPassword(email, pwd)
+      .then(function(){
+        btn.textContent = 'כניסה';
+        btn.disabled = false;
+        pwdInput.value = '';
+        // Save inspector identity from name picker so user doesn't have to
+        // pick the name again on the post-auth login screen.
+        var nameSel = document.getElementById('auth-name-select');
+        if (nameSel && nameSel.value !== '' && nameSel._sortedList) {
+          var picked = nameSel._sortedList[parseInt(nameSel.value, 10)];
+          if (picked) {
+            saveInspector({
+              name: picked.name,
+              email: picked.email || '',
+              phone: picked.phone || '',
+              role: picked.role || ''
+            });
+            if (typeof refreshHomeUser === 'function') refreshHomeUser();
+            // Skip the post-auth login screen and go straight to home
+            if (typeof showScreen === 'function') showScreen('home');
+          }
+        }
+      })
+      .catch(function(err) {
+        btn.textContent = 'כניסה';
+        btn.disabled = false;
+        var code = (err && err.code) || '';
+        var msg = 'שם משתמש או סיסמה שגויים';
+        if (code === 'auth/user-not-found')      msg = 'המשתמש לא נמצא';
+        else if (code === 'auth/wrong-password') msg = 'סיסמה שגויה';
+        else if (code === 'auth/invalid-email')  msg = 'כתובת דוא"ל לא תקינה';
+        else if (code === 'auth/user-disabled')  msg = 'החשבון הושבת. פנה למנהל המערכת.';
+        else if (code === 'auth/too-many-requests') msg = 'יותר מדי ניסיונות כושלים. נסה שוב מאוחר יותר.';
+        else if (code === 'auth/network-request-failed') msg = 'אין חיבור לאינטרנט';
+        showError(msg);
+        console.error('[Auth] login failed:', err);
+      });
+  }
+
+  btn.addEventListener('click', doLogin);
+  [emailInput, pwdInput].forEach(function(inp) {
+    inp.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') doLogin();
+    });
+  });
+
+  // ═══ v3.3: Wire up change password button ═══
+  var changePwdBtn = document.getElementById('auth-change-pwd-btn');
+  if (changePwdBtn) {
+    changePwdBtn.addEventListener('click', function() {
+      var modal = document.getElementById('change-pwd-overlay');
+      if (modal) {
+        var cpwdEmail = document.getElementById('cpwd-email');
+        if (cpwdEmail && emailInput.value) cpwdEmail.value = emailInput.value;
+        modal.style.display = 'flex';
+        var errBox2 = document.getElementById('change-pwd-error');
+        var sucBox  = document.getElementById('change-pwd-success');
+        if (errBox2) errBox2.style.display = 'none';
+        if (sucBox)  sucBox.style.display = 'none';
+      }
+    });
+  }
+  initChangePasswordUI();
+}
+
+// ═══ v3.3: Change password flow ═══
+// Lets users change the temporary password (= their phone number) to
+// something personal. Firebase requires re-authenticating with the
+// current password before allowing the password change.
+function initChangePasswordUI() {
+  var saveBtn   = document.getElementById('cpwd-save-btn');
+  var cancelBtn = document.getElementById('cpwd-cancel-btn');
+  var modal     = document.getElementById('change-pwd-overlay');
+  if (!saveBtn || !cancelBtn || !modal) return;
+
+  function showErr(msg) {
+    var box = document.getElementById('change-pwd-error');
+    var suc = document.getElementById('change-pwd-success');
+    if (suc) suc.style.display = 'none';
+    if (box) { box.textContent = msg; box.style.display = 'block'; }
+  }
+  function showSuccess(msg) {
+    var box = document.getElementById('change-pwd-error');
+    var suc = document.getElementById('change-pwd-success');
+    if (box) box.style.display = 'none';
+    if (suc) { suc.textContent = msg; suc.style.display = 'block'; }
+  }
+  function clearMsgs() {
+    var box = document.getElementById('change-pwd-error');
+    var suc = document.getElementById('change-pwd-success');
+    if (box) box.style.display = 'none';
+    if (suc) suc.style.display = 'none';
+  }
+
+  cancelBtn.addEventListener('click', function() {
+    modal.style.display = 'none';
+    ['cpwd-email','cpwd-current','cpwd-new','cpwd-confirm'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    clearMsgs();
+  });
+
+  saveBtn.addEventListener('click', function() {
+    clearMsgs();
+    var email     = (document.getElementById('cpwd-email').value || '').trim();
+    var current   = document.getElementById('cpwd-current').value || '';
+    var newPwd    = document.getElementById('cpwd-new').value || '';
+    var confirm_  = document.getElementById('cpwd-confirm').value || '';
+
+    if (!email)              { showErr('יש להזין דוא"ל'); return; }
+    if (!current)            { showErr('יש להזין את הסיסמה הנוכחית'); return; }
+    if (!newPwd)             { showErr('יש להזין סיסמה חדשה'); return; }
+    if (newPwd.length < 6)   { showErr('הסיסמה החדשה חייבת להכיל לפחות 6 תווים'); return; }
+    if (newPwd !== confirm_) { showErr('הסיסמה החדשה ואישור הסיסמה אינם תואמים'); return; }
+    if (!fbAuth)             { showErr('Firebase Authentication לא הופעל'); return; }
+
+    saveBtn.textContent = 'משנה סיסמה...';
+    saveBtn.disabled = true;
+
+    fbAuth.signInWithEmailAndPassword(email, current)
+      .then(function(cred) {
+        return cred.user.updatePassword(newPwd);
+      })
+      .then(function() {
+        showSuccess('✅ הסיסמה שונתה בהצלחה!');
+        saveBtn.textContent = 'הצליח';
+        setTimeout(function() {
+          ['cpwd-email','cpwd-current','cpwd-new','cpwd-confirm'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.value = '';
+          });
+          modal.style.display = 'none';
+          saveBtn.textContent = 'שמור סיסמה חדשה';
+          saveBtn.disabled = false;
+        }, 1500);
+      })
+      .catch(function(err) {
+        saveBtn.textContent = 'שמור סיסמה חדשה';
+        saveBtn.disabled = false;
+        var code = (err && err.code) || '';
+        var msg  = 'שינוי הסיסמה נכשל';
+        if (code === 'auth/wrong-password')        msg = 'הסיסמה הנוכחית שגויה';
+        else if (code === 'auth/user-not-found')   msg = 'המשתמש לא נמצא';
+        else if (code === 'auth/invalid-email')    msg = 'כתובת דוא"ל לא תקינה';
+        else if (code === 'auth/weak-password')    msg = 'הסיסמה החדשה חלשה מדי (לפחות 6 תווים)';
+        else if (code === 'auth/requires-recent-login') msg = 'נדרשת התחברות מחדש לפני שינוי סיסמה';
+        else if (code === 'auth/network-request-failed') msg = 'אין חיבור לאינטרנט';
+        else if (code === 'auth/too-many-requests') msg = 'יותר מדי ניסיונות. נסה שוב מאוחר יותר.';
+        showErr(msg);
+        console.error('[ChangePwd] failed:', err);
+      });
+  });
+}
+
+// Wire up login UI on page load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initLoginUI);
+} else {
+  initLoginUI();
+}
+
+function setSyncChip(state, text) {
+  var el = document.getElementById('home-sync-chip');
+  if (!el) return;
+  var icons = { ok:'✓', err:'⚠', pending:'⟳', off:'⚙️' };
+  el.innerHTML = '<span class="sync-chip ' + state + '"><span class="sync-icon">' + icons[state] + '</span> ' + text + '</span>';
+}
+
+function pushCaseToFirebase(c) {
+  if (!fbReady || !fbDb) return Promise.resolve(false);
+  setSyncChip('pending', 'מעלה...');
+  var data = Object.assign({}, c, {
+    inspector: (loadInspector() || {}).name || c.inspector || '',
+    inspectorPhone: (loadInspector() || {}).phone || '',
+    source: 'mobile',
+    syncedAt: new Date().toISOString()
+  });
+  return fbDb.ref('cases/' + c.id).set(data)
+    .then(function() {
+      setSyncChip('ok', 'מסונכרן');
+      // ═══ NEW: mark local case as synced so reconciliation knows it was pushed.
+      // If the server later loses this case, we know it was deleted (not offline). ═══
+      try {
+        c.synced = true;
+        saveDB();
+      } catch(e) {}
+      return true;
+    })
+    .catch(function(err) {
+      console.error('Push failed:', err);
+      setSyncChip('err', 'שמירה ל-Firebase נכשלה');
+      return false;
+    });
+}
+
+// ═══ LOGIN / SETTINGS ═══
+
+// Staff list - matches the staff in the management software.
+// To add/remove staff, update this list AND the management software's staffList.
+var STAFF_LIST = [
+  { name: 'שימי רוזנברג',  role: 'פקח',         phone: '054-669-3634', email: 'shimi@galil-elion.org.il' },
+  { name: 'פרנסיס ברוטמן', role: 'פקח',         phone: '054-452-7582', email: 'francis@galil-elion.org.il' },
+  { name: 'אייל ארצי',      role: 'פקח',         phone: '052-619-1985', email: 'eyal@galil-elion.org.il' },
+  { name: 'מורן לוז',        role: 'מזכירה',     phone: '052-379-1659', email: 'moranl@galil-elion.org.il' },
+  { name: 'גבי חותם',        role: 'מנהל פיקוח', phone: '050-757-4451', email: 'gabbyc@galil-elion.org.il' }
+];
+
+// Populate the dropdown when login screen opens
+function populateInspectorDropdown() {
+  var sel = document.getElementById('login-inspector-select');
+  if (!sel) return;
+  // Sort alphabetically (Hebrew)
+  var sorted = STAFF_LIST.slice().sort(function(a, b) {
+    return a.name.localeCompare(b.name, 'he');
+  });
+  var html = '<option value="">— בחר את שמך —</option>';
+  sorted.forEach(function(s, idx) {
+    html += '<option value="' + idx + '">' + s.name + ' · ' + s.role + '</option>';
+  });
+  sel.innerHTML = html;
+  // Store sorted list for lookup by index
+  sel._sortedList = sorted;
+}
+
+// ═══ Auth screen: name picker ═══
+// Same staff list as the post-auth login screen, but here selecting the name
+// auto-fills the email so the user only needs to type their password.
+function populateAuthNameDropdown() {
+  var sel = document.getElementById('auth-name-select');
+  if (!sel) return;
+  var sorted = STAFF_LIST.slice().sort(function(a, b) {
+    return a.name.localeCompare(b.name, 'he');
+  });
+  var html = '<option value="">— בחר את שמך —</option>';
+  sorted.forEach(function(s, idx) {
+    html += '<option value="' + idx + '">' + s.name + ' · ' + s.role + '</option>';
+  });
+  sel.innerHTML = html;
+  sel._sortedList = sorted;
+}
+
+function onAuthNameChange() {
+  var sel = document.getElementById('auth-name-select');
+  var emailInput = document.getElementById('auth-email');
+  var pwdInput = document.getElementById('auth-password');
+  if (!sel || !emailInput) return;
+  var idx = sel.value;
+  if (idx === '' || !sel._sortedList) {
+    emailInput.value = '';
+    return;
+  }
+  var s = sel._sortedList[parseInt(idx, 10)];
+  if (!s) return;
+  emailInput.value = s.email || '';
+  // Move focus to password field so user can start typing immediately
+  if (pwdInput) {
+    setTimeout(function() { pwdInput.focus(); }, 50);
+  }
+}
+
+// Called when user picks a name from dropdown
+function onInspectorSelected() {
+  var sel = document.getElementById('login-inspector-select');
+  var info = document.getElementById('login-selected-info');
+  var btn = document.getElementById('login-btn-go');
+  var idx = sel.value;
+
+  if (idx === '' || !sel._sortedList) {
+    info.style.display = 'none';
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    return;
+  }
+
+  var s = sel._sortedList[parseInt(idx, 10)];
+  if (!s) return;
+
+  document.getElementById('login-info-name').textContent = '👷 ' + s.name;
+  document.getElementById('login-info-role').textContent = s.role;
+  document.getElementById('login-info-phone').textContent = s.phone ? '📱 ' + s.phone : '';
+  document.getElementById('login-info-email').textContent = s.email ? '📧 ' + s.email : '';
+  info.style.display = '';
+  btn.disabled = false;
+  btn.style.opacity = '1';
+}
+
+function doLogin() {
+  var sel = document.getElementById('login-inspector-select');
+  var idx = sel.value;
+  if (idx === '' || !sel._sortedList) {
+    alert('אנא בחר את שמך מהרשימה');
+    return;
+  }
+  var s = sel._sortedList[parseInt(idx, 10)];
+  if (!s) {
+    alert('שגיאה - אנא נסה שוב');
+    return;
+  }
+  saveInspector({ name: s.name, email: s.email || '', phone: s.phone || '', role: s.role || '' });
+  refreshHomeUser();
+  showScreen('home');
+}
+
+function refreshHomeUser() {
+  var i = loadInspector();
+  var el = document.getElementById('home-user-line');
+  if (el) el.textContent = '👷 ' + (i ? i.name : 'פקח') + ' · ' + (i && i.role ? i.role : 'פקח');
+}
+
+// ═══ THEME / SETTINGS STATE ═══
+var THEME_KEY = 'galil_mobile_theme';
+
+function loadTheme() {
+  try {
+    return JSON.parse(localStorage.getItem(THEME_KEY)) || { color:'#0f3460', mode:'light', fontSize:1.0 };
+  } catch(e) { return { color:'#0f3460', mode:'light', fontSize:1.0 }; }
+}
+function saveTheme(t) { try { localStorage.setItem(THEME_KEY, JSON.stringify(t)); } catch(e){} }
+
+// Darken a hex color by a percentage (0-100)
+function darkenColor(hex, percent) {
+  hex = hex.replace('#', '');
+  var r = parseInt(hex.substr(0, 2), 16);
+  var g = parseInt(hex.substr(2, 2), 16);
+  var b = parseInt(hex.substr(4, 2), 16);
+  r = Math.max(0, Math.floor(r * (100 - percent) / 100));
+  g = Math.max(0, Math.floor(g * (100 - percent) / 100));
+  b = Math.max(0, Math.floor(b * (100 - percent) / 100));
+  return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+function applyTheme() {
+  var t = loadTheme();
+  document.documentElement.style.setProperty('--primary-color', t.color);
+  // Compute a darker variant for gradient (15% darker)
+  document.documentElement.style.setProperty('--primary-color-light', darkenColor(t.color, 25));
+  // Apply mode
+  if (t.mode === 'dark') document.body.classList.add('dark');
+  else document.body.classList.remove('dark');
+  // Apply font size via zoom
+  document.documentElement.style.zoom = t.fontSize || 1;
+
+  // Update active states in settings UI (if open)
+  document.querySelectorAll('.color-btn').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.color === t.color);
+  });
+  ['fs-s','fs-m','fs-l','fs-xl'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.classList.remove('active');
+  });
+  var fsMap = { 0.85:'fs-s', 1.0:'fs-m', 1.2:'fs-l', 1.4:'fs-xl' };
+  var activeFs = fsMap[t.fontSize] || 'fs-m';
+  var fsEl = document.getElementById(activeFs); if (fsEl) fsEl.classList.add('active');
+
+  ['md-light','md-dark'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.classList.remove('active');
+  });
+  var mdEl = document.getElementById(t.mode === 'dark' ? 'md-dark' : 'md-light');
+  if (mdEl) mdEl.classList.add('active');
+}
+
+function setThemeColor(color) {
+  var t = loadTheme(); t.color = color; saveTheme(t); applyTheme();
+}
+function setMode(mode) {
+  var t = loadTheme(); t.mode = mode; saveTheme(t); applyTheme();
+}
+function setFontSize(size) {
+  var t = loadTheme(); t.fontSize = size; saveTheme(t); applyTheme();
+}
+
+// ═══ SETTINGS ═══
+function openSettings() {
+  // Populate the dropdown if not already done
+  var sel = document.getElementById('cfg-inspector-select');
+  if (sel && !sel._sortedList) {
+    var sorted = STAFF_LIST.slice().sort(function(a, b) {
+      return a.name.localeCompare(b.name, 'he');
+    });
+    var html = '<option value="">— בחר את שמך —</option>';
+    sorted.forEach(function(s, idx) {
+      html += '<option value="' + idx + '">' + s.name + ' · ' + s.role + '</option>';
+    });
+    sel.innerHTML = html;
+    sel._sortedList = sorted;
+  }
+  // Pre-select current inspector
+  var i = loadInspector() || {};
+  if (sel && sel._sortedList) {
+    var matchIdx = -1;
+    sel._sortedList.forEach(function(s, idx) {
+      if (s.name === i.name) matchIdx = idx;
+    });
+    sel.value = matchIdx >= 0 ? String(matchIdx) : '';
+    onCfgInspectorChange();
+  }
+  applyTheme(); // refresh active states
+  document.getElementById('settings-modal').classList.add('open');
+}
+
+// Show info when user picks a name in settings dropdown
+function onCfgInspectorChange() {
+  var sel = document.getElementById('cfg-inspector-select');
+  var info = document.getElementById('cfg-inspector-info');
+  if (!sel || !info) return;
+  var idx = sel.value;
+  if (idx === '' || !sel._sortedList) {
+    info.style.display = 'none';
+    return;
+  }
+  var s = sel._sortedList[parseInt(idx, 10)];
+  if (!s) return;
+  document.getElementById('cfg-info-role').textContent = s.role || '';
+  document.getElementById('cfg-info-phone').textContent = s.phone ? '📱 ' + s.phone : '';
+  document.getElementById('cfg-info-email').textContent = s.email ? '📧 ' + s.email : '';
+  info.style.display = '';
+}
+
+function closeSettings(e) {
+  if (e && e.target.id !== 'settings-modal' && e.type === 'click') return;
+  document.getElementById('settings-modal').classList.remove('open');
+}
+function saveSettings() {
+  var sel = document.getElementById('cfg-inspector-select');
+  var idx = sel.value;
+  if (idx === '' || !sel._sortedList) {
+    alert('אנא בחר את שמך מהרשימה');
+    return;
+  }
+  var s = sel._sortedList[parseInt(idx, 10)];
+  if (!s) { alert('שגיאה - אנא נסה שוב'); return; }
+  saveInspector({
+    name: s.name,
+    email: s.email || '',
+    phone: s.phone || '',
+    role: s.role || ''
+  });
+  refreshHomeUser();
+  closeSettings();
+  toast('✅ ההגדרות נשמרו');
+}
+
+// ═══ EMAIL ALL CASES ═══
+function emailAllCases() {
+  var i = loadInspector() || {};
+  if (!i.email) {
+    alert('נא להזין כתובת מייל בהגדרות תחילה');
+    return;
+  }
+  if (!cases.length) {
+    alert('אין תיקים לשליחה');
+    return;
+  }
+  var inspName = i.name || 'פקח';
+  var subject = 'דוח תיקים מהשטח - ' + inspName + ' - ' + (new Date()).toLocaleDateString('he-IL');
+
+  var body = 'דוח תיקים מהשטח\n';
+  body += '═══════════════════════════════════\n';
+  body += 'פקח: ' + inspName + '\n';
+  body += 'תאריך: ' + (new Date()).toLocaleString('he-IL') + '\n';
+  body += 'מספר תיקים: ' + cases.length + '\n';
+  body += '═══════════════════════════════════\n\n';
+
+  cases.slice().reverse().forEach(function(c, idx) {
+    var dt = c.date ? new Date(c.date).toLocaleDateString('he-IL') : '';
+    body += '── תיק ' + (idx + 1) + ' ──\n';
+    body += 'לוחית: ' + (c.plate || '—') + '\n';
+    body += 'בעל הרכב: ' + (c.owner || '—') + '\n';
+    if (c.phone) body += 'טלפון בעלים: ' + c.phone + '\n';
+    if (c.address) body += 'כתובת בעלים: ' + c.address + '\n';
+    body += 'יישוב: ' + (c.location || '—') + '\n';
+    if (c.locAddress) body += 'מיקום מדויק: ' + c.locAddress + '\n';
+    if (c.lat && c.lon) body += 'GPS: ' + c.lat + ', ' + c.lon + '\n';
+    body += 'סטטוס: ' + (c.badge || c.status || '—') + '\n';
+    body += 'תאריך פתיחה: ' + dt + '\n';
+    if (c.notes) body += 'הערות: ' + c.notes + '\n';
+    if (c.archived) body += '📁 [תיק ישן - נשלח לתוכנת הניהול]\n';
+    body += '\n';
+  });
+
+  body += '═══════════════════════════════════\n';
+  body += 'נשלח אוטומטית מאפליקציית פיקוח רכבים\n';
+  body += 'מועצה אזורית הגליל העליון\n';
+
+  var mailtoUrl = 'mailto:' + encodeURIComponent(i.email)
+    + '?subject=' + encodeURIComponent(subject)
+    + '&body=' + encodeURIComponent(body);
+
+  // Use location.href to open Mail app on iOS
+  window.location.href = mailtoUrl;
+  toast('📧 פותח אפליקציית מייל...');
+}
+
+function loadDB() { try { return JSON.parse(localStorage.getItem(DB)) || []; } catch(e) { return []; } }
+function saveDB() { try { localStorage.setItem(DB, JSON.stringify(cases)); } catch(e) {} }
+
+// ═══ ARCHIVE ═══
+function deleteArchivedCase(id) {
+  if (!confirm('למחוק את התיק לצמיתות מהמכשיר?\n(לא משפיע על תוכנת הניהול)')) return;
+  cases = cases.filter(function(c) { return c.id !== id; });
+  saveDB();
+  renderHome();
+  toast('🗑️ התיק נמחק מהמכשיר');
+}
+
+// ═══ HOME ═══
+function renderHome() {
+  // Split cases: active (not archived) vs archived
+  var active = cases.filter(function(c) { return !c.archived; });
+  var archived = cases.filter(function(c) { return c.archived; });
+
+  // ─── Active cases (recent) ───
+  document.getElementById('my-count').textContent = active.length + ' תיקים פעילים';
+  var rc = document.getElementById('recent-cases');
+  var rh = document.getElementById('recent-header');
+  if (!active.length) {
+    rh.style.display = 'none';
+    rc.innerHTML = '';
+  } else {
+    rh.style.display = '';
+    document.getElementById('recent-count').textContent = active.length + ' תיקים';
+    var h = '';
+    var recent = active.slice().reverse().slice(0, 5);
+    recent.forEach(function(c) {
+      h += '<div class="mini-case" onclick="viewCase(\'' + c.id + '\')">';
+      h += '<div class="mc-bar ' + c.status + '"></div><div class="mc-body">';
+      h += '<div class="mc-top"><span class="mc-plate">' + (c.plate || '—') + '</span>';
+      h += '<span class="mc-badge ' + c.status + '">' + (c.badge || '') + '</span></div>';
+      h += '<div class="mc-loc">📍 ' + (c.location || '—') + '</div>';
+      h += '</div></div>';
+    });
+    rc.innerHTML = h;
+  }
+
+  // ─── Archive section ───
+  var arcWrap = document.getElementById('archive-wrap');
+  var arcList = document.getElementById('archive-list');
+  var arcSub = document.getElementById('archive-sub');
+  if (!archived.length) {
+    arcWrap.style.display = 'none';
+  } else {
+    arcWrap.style.display = '';
+    arcSub.textContent = archived.length + ' תיקים שכבר נשלחו לתוכנת הניהול';
+    var ah = '';
+    archived.slice().reverse().forEach(function(c) {
+      var dt = c.date ? new Date(c.date).toLocaleDateString('he-IL') : '';
+      ah += '<div class="archive-item">';
+      ah += '<div class="arc-info" onclick="viewCase(\'' + c.id + '\')" style="cursor:pointer;">';
+      ah += '<div class="arc-plate">' + (c.plate || '—') + '</div>';
+      ah += '<div class="arc-meta">' + (c.owner || '—') + ' · ' + (c.location || '—') + ' · ' + dt + '</div>';
+      ah += '</div>';
+      ah += '<button class="arc-delete-btn" onclick="event.stopPropagation();deleteArchivedCase(\'' + c.id + '\')" title="מחק מהמכשיר">🗑️</button>';
+      ah += '</div>';
+    });
+    arcList.innerHTML = ah;
+  }
+}
+
+// ═══ LIST ═══
+function renderList() {
+  var el = document.getElementById('list-content');
+  if (!cases.length) {
+    el.innerHTML = '<div style="text-align:center;padding:60px 20px;color:#bbb"><div style="font-size:70px;margin-bottom:10px">📋</div><div style="font-size:26px;font-weight:600;color:#666">עדיין לא נפתחו תיקים</div><div style="font-size:20px;margin-top:6px">חזור למסך הראשי ולחץ "פתח תיק חדש"</div></div>';
+    return;
+  }
+  var h = '';
+  cases.slice().reverse().forEach(function(c) {
+    var dt = c.date ? new Date(c.date).toLocaleDateString('he-IL', {day:'2-digit',month:'2-digit',year:'numeric'}) : '';
+    h += '<div class="card" style="cursor:pointer;padding:12px" onclick="viewCase(\'' + c.id + '\')">';
+    h += '<div style="display:flex;gap:10px;align-items:center">';
+    h += '<div class="mc-bar ' + c.status + '"></div>';
+    h += '<div style="flex:1">';
+    h += '<div style="display:flex;justify-content:space-between;align-items:center">';
+    h += '<span class="mc-plate">' + (c.plate || '—') + '</span>';
+    h += '<span class="mc-badge ' + c.status + '">' + (c.badge || '') + '</span></div>';
+    h += '<div style="font-size:22px;font-weight:600;margin-top:2px">' + (c.owner || '—') + '</div>';
+    h += '<div style="font-size:19px;color:#bbb;margin-top:1px">📍 ' + (c.location || '—') + ' · ' + dt + '</div>';
+    h += '</div></div></div>';
+  });
+  el.innerHTML = h;
+}
+
+// ═══ VIEW CASE ═══
+function viewCase(id) {
+  cur = cases.find(function(c) { return c.id === id; });
+  if (!cur) return;
+  photos = cur.photos ? cur.photos.slice() : [];
+  renderView();
+  showScreen('view');
+}
+
+function renderView() {
+  var c = cur;
+  document.getElementById('v-title').textContent = 'תיק #' + (c.plate || 'חדש');
+  // Update type badge in header
+  var typeBadgeV = document.querySelector('#scr-view .type-badge');
+  if (typeBadgeV) {
+    typeBadgeV.innerHTML = (c.caseType === 'scrap') ? '🔧 גרוטאת רכב' : '🚗 רכב נטוש';
+  }
+  renderCountdown('v-countdown', c);
+  renderPhotos('v-photos', false);
+
+  var h = '';
+  h += '<div class="card"><div class="card-title">🚗 פרטי הרכב</div>';
+  h += F('לוחית רישוי', '<div class="field-value plate">' + (c.plate||'—') + '</div>');
+  h += F('בעל הרכב', '<div class="field-value">' + (c.owner||'—') + '</div>');
+  h += F('📱 נייד בעל הרכב', '<div class="phone-row"><div class="field-value" style="flex:1">' + (c.phone||'—') + '</div>' + (c.phone ? '<a href="tel:'+c.phone+'" class="call-btn">📞</a>' : '') + '</div>');
+  h += F('🏠 כתובת בעל הרכב', '<div class="field-value" style="font-size:22px">' + (c.address||'—') + '</div>');
+  h += '</div>';
+
+  h += '<div class="card"><div class="card-title">📍 מיקום ואיש קשר</div>';
+  h += F('קיבוץ / יישוב', '<div class="field-value">' + (c.location||'—') + '</div>');
+  h += F('איש קשר', '<div class="field-value">' + (c.contact||'—') + '</div>');
+  h += F('📱 נייד איש קשר', '<div class="phone-row"><div class="field-value" style="flex:1">' + (c.contactPhone||'—') + '</div>' + (c.contactPhone ? '<a href="tel:'+c.contactPhone+'" class="call-btn">📞</a>' : '') + '</div>');
+  h += F('כתובת', '<div class="field-value" style="font-size:22px">' + (c.locAddress||'—') + '</div>');
+  if (c.lat && c.lon) h += F('קורדינטות GPS', '<div class="coord-row"><div class="field-value">' + c.lat + '</div><div class="field-value">' + c.lon + '</div></div>');
+  // ═══ v3.3: 3 location buttons moved here from renderEdit. ═══
+  // For an OLD case (this screen), these are useful:
+  //  • "Get current location" — re-capture GPS if the inspector is back at the vehicle
+  //  • "Waze" / "Google Maps" — navigate back to where the photo was taken
+  h += '<button type="button" id="gps-grab-btn" onclick="captureCurrentLocation()" style="width:100%;padding:14px;background:linear-gradient(135deg,#ff6b6b,#ee5a52);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px;box-shadow:0 2px 8px rgba(238,90,82,0.3);">📍 קבל מיקום נוכחי (קיצור דרך)</button>';
+  h += '<div style="display:flex;gap:8px;margin-top:8px;">';
+  h += '<button type="button" onclick="openWaze()" style="flex:1;padding:12px;background:#33ccff;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">🚗 נווט עם Waze</button>';
+  h += '<button type="button" onclick="openGoogleMaps()" style="flex:1;padding:12px;background:#34a853;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">🗺️ פתח במפת גוגל</button>';
+  h += '</div>';
+  h += '</div>';
+
+  h += '<div class="card"><div class="card-title">⚡ מה נעשה</div><div class="field-value" style="font-size:22px">' + (c.badge||'—') + '</div></div>';
+  h += '<div class="card"><div class="card-title">📝 הערות</div><div class="field-value muted">' + (c.notes||'אין הערות') + '</div></div>';
+
+  document.getElementById('v-content').innerHTML = h;
+}
+
+// ═══ EDIT / NEW CASE ═══
+function selectCaseType(type) {
+  // Preserve any values already typed before re-rendering
+  var v = function(id) { var el = document.getElementById(id); return el ? el.value : null; };
+  var fields = ['f-plate','f-vehicleType','f-owner','f-phone','f-address','f-location','f-contact','f-cphone','f-locaddr','f-lat','f-lon','f-status','f-notes'];
+  var keyMap = { 'f-plate':'plate','f-vehicleType':'vehicleType','f-owner':'owner','f-phone':'phone','f-address':'address','f-location':'location','f-contact':'contact','f-cphone':'contactPhone','f-locaddr':'locAddress','f-lat':'lat','f-lon':'lon','f-status':'status','f-notes':'notes' };
+  fields.forEach(function(id) {
+    var val = v(id);
+    if (val !== null) cur[keyMap[id]] = val;
+  });
+  cur.caseType = type;
+  renderEdit();
+}
+
+function newCase() {
+  cur = {
+    id: 'M' + Date.now(), date: new Date().toISOString().split('T')[0],
+    status: 'photographed', plate: '', vehicleType: '', owner: '', location: '',
+    badge: '📷 צולם וממתין להמשך טיפול', phone: '', contact: '', contactPhone: '',
+    address: '', locAddress: '', notes: '', lat: '', lon: '', inspector: '', photos: [],
+    caseType: 'abandoned'
+  };
+  photos = [];
+  renderEdit();
+  showScreen('edit');
+  // Try to auto-capture GPS in the background so the form shows the current
+  // location without requiring an extra tap. If permission was already given,
+  // this is silent. If not, the user will see a permission prompt.
+  setTimeout(function() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        function(pos) {
+          var lat = pos.coords.latitude.toFixed(6);
+          var lon = pos.coords.longitude.toFixed(6);
+          cur.lat = lat;
+          cur.lon = lon;
+          var latInp = document.getElementById('f-lat');
+          var lonInp = document.getElementById('f-lon');
+          if (latInp && !latInp.value) latInp.value = lat;
+          if (lonInp && !lonInp.value) lonInp.value = lon;
+        },
+        function() { /* silent failure - user can press the GPS button manually */ },
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
+      );
+    }
+  }, 400);
+}
+
+// ═══ Navigation helpers ═══
+// Build a destination string for Waze/Google Maps. Prefers GPS coordinates
+// when available (most accurate); otherwise falls back to a free-text
+// search using "address, town" so the user still gets close to the car.
+function _navDestination() {
+  var v = function(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  var lat = v('f-lat'), lon = v('f-lon');
+  if (lat && lon) {
+    return { type: 'coords', lat: lat, lon: lon };
+  }
+  var locAddr = v('f-locaddr'), location = v('f-location');
+  var query = [locAddr, location].filter(Boolean).join(', ');
+  if (query) {
+    return { type: 'query', q: query };
+  }
+  return null;
+}
+
+function openWaze() {
+  var dest = _navDestination();
+  if (!dest) {
+    alert('לא הוזן מיקום עדיין.\nהזן GPS או כתובת תחילה.');
+    return;
+  }
+  var url;
+  if (dest.type === 'coords') {
+    url = 'https://waze.com/ul?ll=' + dest.lat + ',' + dest.lon + '&navigate=yes';
+  } else {
+    url = 'https://waze.com/ul?q=' + encodeURIComponent(dest.q) + '&navigate=yes';
+  }
+  window.open(url, '_blank');
+}
+
+function openGoogleMaps() {
+  var dest = _navDestination();
+  if (!dest) {
+    alert('לא הוזן מיקום עדיין.\nהזן GPS או כתובת תחילה.');
+    return;
+  }
+  var url;
+  if (dest.type === 'coords') {
+    url = 'https://www.google.com/maps/search/?api=1&query=' + dest.lat + ',' + dest.lon;
+  } else {
+    url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(dest.q);
+  }
+  window.open(url, '_blank');
+}
+
+// ═══ GPS quick capture - the "shortcut location" ═══
+// One-tap capture of the user's current GPS coordinates. Fills the lat/lon
+// inputs in the case form and saves to the current case. This way the
+// inspector doesn't have to manually copy coordinates from another app.
+// ═══ v3.3: Also works in VIEW mode (no f-lat/f-lon inputs present): ═══
+// updates cur.lat/cur.lon, persists locally, pushes to Firebase, and
+// re-renders the view so the new coords appear immediately.
+function captureCurrentLocation() {
+  var btn = document.getElementById('gps-grab-btn');
+  if (!navigator.geolocation) {
+    alert('המכשיר אינו תומך ב-GPS');
+    return;
+  }
+  if (btn) {
+    btn.textContent = '⏳ מאתר מיקום...';
+    btn.disabled = true;
+    btn.style.opacity = '0.7';
+  }
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      var lat = pos.coords.latitude.toFixed(6);
+      var lon = pos.coords.longitude.toFixed(6);
+      var latInp = document.getElementById('f-lat');
+      var lonInp = document.getElementById('f-lon');
+      // Edit-mode inputs: fill them if present
+      if (latInp) latInp.value = lat;
+      if (lonInp) lonInp.value = lon;
+      // Always save into the current case object so it persists
+      if (cur) {
+        cur.lat = lat;
+        cur.lon = lon;
+      }
+      // ═══ v3.3: VIEW MODE — no inputs to fill, but we should persist  ═══
+      // ═══ the new coords to local storage + Firebase, and re-render   ═══
+      // ═══ the view so the user immediately sees the updated GPS.       ═══
+      var inViewMode = !latInp && !lonInp;
+      if (inViewMode && cur) {
+        // Make sure cur is in the cases array (it will be — viewCase set it)
+        var existing = cases.find(function(c) { return c.id === cur.id; });
+        if (existing) {
+          existing.lat = lat;
+          existing.lon = lon;
+        }
+        try { if (typeof saveDB === 'function') saveDB(); } catch(e){}
+        try { if (typeof pushCaseToFirebase === 'function') pushCaseToFirebase(cur); } catch(e){}
+        // Re-render the view so the new GPS row shows up
+        try { if (typeof renderView === 'function') renderView(); } catch(e){}
+      }
+      if (btn) {
+        btn.textContent = '✅ מיקום נקלט: ' + lat + ', ' + lon;
+        btn.style.background = 'linear-gradient(135deg,#28a745,#20c997)';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        // Restore button text after 3 seconds
+        setTimeout(function() {
+          var b = document.getElementById('gps-grab-btn');
+          if (b) {
+            b.textContent = '📍 קבל מיקום נוכחי (קיצור דרך)';
+            b.style.background = 'linear-gradient(135deg,#ff6b6b,#ee5a52)';
+          }
+        }, 3000);
+      }
+    },
+    function(err) {
+      var msg = 'לא הצלחתי לקבל מיקום';
+      if (err.code === 1) msg = 'אנא אפשר גישה למיקום בהגדרות הדפדפן';
+      else if (err.code === 2) msg = 'מיקום לא זמין כרגע';
+      else if (err.code === 3) msg = 'הקבלה ארכה יותר מדי - נסה שוב';
+      alert(msg);
+      if (btn) {
+        btn.textContent = '📍 קבל מיקום נוכחי (קיצור דרך)';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+      }
+    },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+  );
+}
+
+function startEdit() {
+  photos = cur.photos ? cur.photos.slice() : [];
+  renderEdit();
+  showScreen('edit');
+}
+
+function cancelEdit() {
+  if (cases.find(function(c) { return c.id === cur.id; })) {
+    renderView();
+    showScreen('view');
+  } else {
+    showScreen('home');
+  }
+}
+
+function renderEdit() {
+  var c = cur;
+  document.getElementById('e-title').textContent = c.plate ? 'תיק #' + c.plate : 'תיק חדש';
+  // Update type badge in header
+  var typeBadgeE = document.querySelector('#scr-edit .type-badge');
+  if (typeBadgeE) {
+    typeBadgeE.innerHTML = (c.caseType === 'scrap') ? '🔧 גרוטאת רכב' : '🚗 רכב נטוש';
+  }
+  renderCountdown('e-countdown', c);
+  renderPhotos('e-photos', true);
+
+  var h = '';
+
+  // ─── Case type selector (רכב נטוש / גרוטאת רכב) ───
+  var ctype = c.caseType || 'abandoned';
+  h += '<div class="card"><div class="card-title">📂 סוג תיק</div>';
+  h += '<div class="case-type-row">';
+  h += '<div class="case-type-btn ' + (ctype==='abandoned'?'active':'') + '" onclick="selectCaseType(\'abandoned\')">';
+  h += '<div class="case-type-icon">🚗</div>';
+  h += '<div class="case-type-label">רכב נטוש</div>';
+  h += '<div class="case-type-desc">רכב שהושאר ברשות הרבים</div>';
+  h += '</div>';
+  h += '<div class="case-type-btn ' + (ctype==='scrap'?'active':'') + '" onclick="selectCaseType(\'scrap\')">';
+  h += '<div class="case-type-icon">🔧</div>';
+  h += '<div class="case-type-label">גרוטאת רכב</div>';
+  h += '<div class="case-type-desc">שלדה / חלקים / אובדן גמור</div>';
+  h += '</div>';
+  h += '</div></div>';
+
+  h += '<div class="card"><div class="card-title">🚗 פרטי הרכב</div>';
+  h += F('לוחית רישוי', '<input class="field-input plate" id="f-plate" value="' + (c.plate||'') + '">');
+  h += F('סוג / דגם רכב', '<input class="field-input" id="f-vehicleType" value="' + (c.vehicleType||'') + '" placeholder="לדוגמה: טויוטה קורולה">');
+  h += F('בעל הרכב', '<input class="field-input" id="f-owner" value="' + (c.owner||'') + '">');
+  h += F('📱 נייד בעל הרכב', '<div class="phone-row"><input class="field-input" id="f-phone" type="tel" value="' + (c.phone||'') + '"><div class="call-btn">📞</div></div>');
+  h += F('🏠 כתובת בעל הרכב', '<input class="field-input" id="f-address" value="' + (c.address||'') + '">');
+  h += '</div>';
+
+  h += '<div class="card"><div class="card-title">📍 מיקום ואיש קשר</div>';
+  h += F('קיבוץ / יישוב', '<input class="field-input" id="f-location" value="' + (c.location||'') + '">');
+  h += F('איש קשר', '<input class="field-input" id="f-contact" value="' + (c.contact||'') + '">');
+  h += F('📱 נייד איש קשר', '<div class="phone-row"><input class="field-input" id="f-cphone" type="tel" value="' + (c.contactPhone||'') + '"><div class="call-btn">📞</div></div>');
+  h += F('כתובת', '<input class="field-input" id="f-locaddr" value="' + (c.locAddress||'') + '">');
+  h += F('קורדינטות GPS', '<div class="coord-row"><input class="field-input" id="f-lat" value="' + (c.lat||'') + '" placeholder="קו רוחב"><input class="field-input" id="f-lon" value="' + (c.lon||'') + '" placeholder="קו אורך"></div>');
+  // ═══ v3.3: GPS / Waze / Google Maps buttons MOVED to renderView (the ═══
+  // ═══ "old items" / case-detail screen). They make more sense there:   ═══
+  // ═══   • "Get current location" — to RE-CAPTURE the GPS for an old    ═══
+  // ═══     case if the inspector returns to the same vehicle later.     ═══
+  // ═══   • "Navigate with Waze" / "Open in Google Maps" — to navigate   ═══
+  // ═══     BACK to a vehicle the inspector has already photographed.    ═══
+  // ═══ For a brand-new case the inspector is already standing next to   ═══
+  // ═══ the vehicle, so these buttons are not useful here.                ═══
+  h += '</div>';
+
+  h += '<div class="card"><div class="card-title">⚡ מה נעשה</div>';
+  h += '<select class="field-input" id="f-status" style="background-color:#f8f9ff">';
+  h += '<option value="photographed"' + (c.status==='photographed'?' selected':'') + '>📷 צולם וממתין להמשך טיפול</option>';
+  h += '<option value="yellow"' + (c.status==='yellow'?' selected':'') + '>🟡 הודבקה מדבקה צהובה</option>';
+  h += '<option value="red"' + (c.status==='red'?' selected':'') + '>🔴 הודבקה מדבקה אדומה</option>';
+  h += '</select></div>';
+
+  h += '<div class="card"><div class="card-title">📝 הערות</div>';
+  h += '<textarea class="field-input" id="f-notes">' + (c.notes||'') + '</textarea></div>';
+
+  h += '<button class="save-btn" onclick="saveCase()">💾 שמור ושלח לתוכנת ניהול</button>';
+
+  document.getElementById('e-content').innerHTML = h;
+}
+
+function saveCase() {
+  var v = function(id) { var el = document.getElementById(id); return el ? el.value : ''; };
+  cur.plate = v('f-plate') || cur.plate;
+  cur.vehicleType = v('f-vehicleType') || cur.vehicleType;
+  cur.owner = v('f-owner') || cur.owner;
+  cur.phone = v('f-phone') || cur.phone;
+  cur.address = v('f-address') || cur.address;
+  cur.location = v('f-location') || cur.location;
+  cur.contact = v('f-contact') || cur.contact;
+  cur.contactPhone = v('f-cphone') || cur.contactPhone;
+  cur.locAddress = v('f-locaddr') || cur.locAddress;
+  cur.lat = v('f-lat') || cur.lat;
+  cur.lon = v('f-lon') || cur.lon;
+  cur.notes = v('f-notes') || cur.notes;
+  cur.photos = photos;
+
+  var st = v('f-status');
+  if (st) {
+    cur.status = st;
+    var badges = {
+      photographed:'📷 צולם וממתין להמשך טיפול',
+      yellow:'🟡 מדבקה צהובה',
+      red:'🔴 מדבקה אדומה'
+    };
+    cur.badge = badges[st] || cur.badge;
+  }
+
+  // Add or update
+  var idx = cases.findIndex(function(x) { return x.id === cur.id; });
+  if (idx === -1) cases.push(cur); else cases[idx] = cur;
+
+  saveDB(); // → localStorage
+
+  // Push to Firebase (cross-device sync to management software)
+  pushCaseToFirebase(cur).then(function(ok) {
+    // Mark as archived AFTER successful push (or even if push fails — user pressed save)
+    cur.archived = true;
+    var i2 = cases.findIndex(function(x) { return x.id === cur.id; });
+    if (i2 !== -1) cases[i2] = cur;
+    saveDB();
+
+    if (ok) toast('✅ נשלח לתוכנת הניהול והועבר ל"פריטים ישנים"');
+    else if (fbReady) toast('⚠️ נשמר במכשיר, סנכרון נכשל - יישלח שוב כשיתחבר');
+    else toast('💾 נשמר במכשיר');
+
+    renderHome();
+  });
+
+  renderView();
+  showScreen('home'); // back to home so user sees archive immediately
+  renderHome();
+}
+
+// ═══ HELPERS ═══
+function F(label, inner) {
+  return '<div class="field-row"><div class="field-label">' + label + '</div>' + inner + '</div>';
+}
+
+function renderCountdown(elId, c) {
+  var info = { yellow:{l:'🟡 מדבקה צהובה — עד מדבקה אדומה',d:30}, red:{l:'🔴 מדבקה אדומה — עד גרירה',d:14}, orange:{l:'🚛 באחסנה — עד מכירה',d:60}, green:{l:'✅ תיק סגור',d:1} };
+  var i = info[c.status] || info.yellow;
+  var elapsed = Math.floor((new Date() - new Date(c.date)) / 86400000);
+  var rem = Math.max(0, i.d - elapsed);
+  var pct = Math.min(100, Math.round(elapsed / i.d * 100));
+  var bg = c.status==='red' ? '239,83,80' : c.status==='orange' ? '255,167,38' : c.status==='green' ? '102,187,106' : '249,168,37';
+
+  document.getElementById(elId).innerHTML =
+    '<div style="background:rgba(' + bg + ',0.15);border-radius:10px;padding:8px 12px">' +
+    '<div class="countdown-row"><div class="countdown-label">' + i.l + '</div>' +
+    '<div class="countdown-days days-' + c.status + '">' + (c.status==='green' ? 'הושלם' : rem + ' ימים') + '</div></div>' +
+    '<div class="progress-bar-bg"><div class="progress-bar-fill fill-' + c.status + '" style="width:' + pct + '%"></div></div></div>';
+}
+
+function renderPhotos(elId, editable) {
+  var h = '';
+  photos.forEach(function(src) {
+    h += '<div class="photo-thumb"><img src="' + src + '"></div>';
+  });
+  if (editable) {
+    h += '<div class="add-photo" onclick="takePhoto()">➕<span>הוסף</span></div>';
+  } else if (!photos.length) {
+    h += '<div class="photo-thumb">🚗</div>';
+    h += '<div class="add-photo" onclick="startEdit()">➕<span>הוסף</span></div>';
+  }
+  document.getElementById(elId).innerHTML = h;
+}
+
+function takePhoto() { document.getElementById('cam').click(); }
+function onPhoto(inp) {
+  if (!inp.files || !inp.files[0]) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var cv = document.createElement('canvas');
+      var mx = 400, w = img.width, h = img.height;
+      if (w > h) { if (w > mx) { h *= mx/w; w = mx; } } else { if (h > mx) { w *= mx/h; h = mx; } }
+      cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      photos.push(cv.toDataURL('image/jpeg', 0.6));
+      renderPhotos('e-photos', true);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(inp.files[0]);
+  inp.value = '';
+}
+
+function toast(msg) {
+  var t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function() { t.remove(); }, 2600);
+}
+
+// ═══ NAVIGATION ═══
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('scr-' + name).classList.add('active');
+  if (name === 'home') renderHome();
+  if (name === 'list') renderList();
+}
+
+function goBackFromView() {
+  showScreen('home');
+}
+
+// ═══ INIT ═══
+(function init() {
+  // Apply saved theme/color/size first thing
+  try { applyTheme(); } catch(e){}
+
+  var insp = loadInspector();
+  if (insp) {
+    // Already identified - go straight to home
+    refreshHomeUser();
+    renderHome();
+  }
+  // Else: stay on the default home screen.
+  // The auth-overlay (with built-in name picker + email auto-fill) will
+  // appear on top if Firebase requires auth. After successful login the
+  // inspector identity is saved automatically and home refreshes with the
+  // user's name. We deliberately do NOT show scr-login here anymore — the
+  // auth-overlay handles both name selection AND password in one screen.
+  // (scr-login is kept as a manual change-user option from settings.)
+  // Init Firebase (waits for SDK to be loaded)
+  if (typeof firebase !== 'undefined') {
+    initFirebase();
+  } else {
+    // SDK still loading - retry
+    var tries = 0;
+    var retry = setInterval(function() {
+      tries++;
+      if (typeof firebase !== 'undefined') {
+        clearInterval(retry);
+        initFirebase();
+      } else if (tries > 50) {
+        clearInterval(retry);
+        setSyncChip('err', 'אין חיבור לאינטרנט?');
+      }
+    }, 100);
+  }
+})();
+</script>
+
+<!-- ═══════════ PWA INSTALL PROMPT (v3.3) ═══════════ -->
+<div id="pwa-install-banner" style="display:none;position:fixed;bottom:16px;right:16px;left:16px;background:#7c3aed;color:#fff;padding:14px 16px;border-radius:12px;box-shadow:0 8px 24px rgba(124,58,237,0.4);z-index:99998;font-family:inherit;direction:rtl;">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div style="font-size:28px;">📥</div>
+    <div style="flex:1;">
+      <div style="font-weight:700;font-size:14px;margin-bottom:2px;">התקן כאפליקציה</div>
+      <div style="font-size:11px;opacity:0.9;">קיצור דרך נוח על המסך הראשי</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:10px;">
+    <button id="pwa-install-btn" style="flex:1;padding:9px;background:#fff;color:#7c3aed;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;-webkit-appearance:none;">התקן</button>
+    <button id="pwa-dismiss-btn" style="padding:9px 14px;background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.4);border-radius:8px;font-size:13px;cursor:pointer;-webkit-appearance:none;">לא עכשיו</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('sw.js').catch(function(err) {
+        console.log('[PWA] SW registration failed:', err);
+      });
+    });
+  }
+
+  var deferredPrompt = null;
+  var banner = document.getElementById('pwa-install-banner');
+  var installBtn = document.getElementById('pwa-install-btn');
+  var dismissBtn = document.getElementById('pwa-dismiss-btn');
+  var DISMISS_KEY = 'galilElyon_pwaDismissedAt';
+
+  function recentlyDismissed() {
+    try {
+      var t = localStorage.getItem(DISMISS_KEY);
+      if (!t) return false;
+      var days = (Date.now() - parseInt(t, 10)) / (1000*60*60*24);
+      return days < 7;
+    } catch(e) { return false; }
+  }
+
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (banner && !recentlyDismissed()) {
+      setTimeout(function(){ banner.style.display = 'block'; }, 5000);
+    }
+  });
+
+  if (installBtn) {
+    installBtn.addEventListener('click', function() {
+      if (!deferredPrompt) return;
+      banner.style.display = 'none';
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function(){ deferredPrompt = null; });
+    });
+  }
+  if (dismissBtn) {
+    dismissBtn.addEventListener('click', function() {
+      banner.style.display = 'none';
+      try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch(e){}
+    });
+  }
+})();
+</script>
+</body>
+</html>
