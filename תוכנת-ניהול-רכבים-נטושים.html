@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&amp;family=Rubik:wght@400;500;600;700;800&amp;family=Assistant:wght@400;500;600;700;800&amp;family=Varela+Round&amp;family=Frank+Ruhl+Libre:wght@400;500;700;900&amp;family=Secular+One&amp;family=Suez+One&amp;display=swap" rel="stylesheet">
 <title>מערכת ניהול רכבים נטושים — הגליל העליון</title>
 
 <!-- ═══════════ PWA: Progressive Web App ═══════════ -->
@@ -2163,7 +2163,7 @@ body.inspector-mode {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.25 — edit arch</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.26 — clear UI + tow</div>
     </div>
   </div>
 
@@ -2235,9 +2235,8 @@ body.inspector-mode {
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <div class="tb-date" id="live-date">יום שבת, 2 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
-      <div class="tb-notif">🔔<div class="notif-dot"></div></div>
-      <button onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.25 ✓</span>
+      <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.26 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2587,6 +2586,26 @@ body.inspector-mode {
               <div class="edit-group"><div class="edit-label">תאריך גילוי</div><input class="edit-input" id="nf-found-date" type="date"></div>
             </div>
           </div>
+
+          <!-- ═══ v2.9.26: גרירה ואחסנה ═══ -->
+          <div class="edit-section">
+            <div class="edit-section-title">🚛 גרירה ואחסנה</div>
+            <div style="background:rgba(243,156,18,0.06);border:1px dashed rgba(243,156,18,0.35);border-radius:10px;padding:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:600;color:var(--text);">
+                <input type="checkbox" id="nf-is-towed" onchange="onTowedToggle()"
+                       style="width:20px;height:20px;cursor:pointer;accent-color:#f39c12;">
+                <span>הרכב נגרר למגרש אליפלט</span>
+              </label>
+              <div id="nf-tow-date-wrap" style="display:none;align-items:center;gap:10px;flex:1;min-width:240px;">
+                <label class="edit-label" style="margin:0;white-space:nowrap;">תאריך גרירה:</label>
+                <input class="edit-input" id="nf-tow-date" type="date" style="flex:1;max-width:200px;">
+              </div>
+            </div>
+            <div id="nf-towed-help" style="display:none;margin-top:8px;font-size:11px;color:var(--muted);line-height:1.5;">
+              💡 בעת שמירת התיק - הוא יתווסף אוטומטית למסך "גרירה ואחסנה" ולקופסת "נגררו - באחסנה" בלוח הבקרה.
+            </div>
+          </div>
+
           <!-- תמונות -->
           <div class="edit-section">
             <div class="edit-section-title">📷 תמונות מהשטח</div>
@@ -2818,7 +2837,8 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.25 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.26 ✓</span>
+      <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
     </div>
@@ -2876,9 +2896,9 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <div style="display:flex;gap:6px;align-items:center;">
-        <span class="map-legend-dot" style="background:#e53935;"></span><span class="map-legend-label">אדום (7)</span>
-        <span class="map-legend-dot" style="background:#fdd835;"></span><span class="map-legend-label">צהוב (9)</span>
-        <span class="map-legend-dot" style="background:#ff9800;"></span><span class="map-legend-label">באחסנה (5)</span>
+        <span class="map-legend-dot" style="background:#e53935;"></span><span class="map-legend-label">אדום (<span id="map-legend-red">0</span>)</span>
+        <span class="map-legend-dot" style="background:#fdd835;"></span><span class="map-legend-label">צהוב (<span id="map-legend-yellow">0</span>)</span>
+        <span class="map-legend-dot" style="background:#ff9800;"></span><span class="map-legend-label">באחסנה (<span id="map-legend-towed">0</span>)</span>
       </div>
     </div>
   </div>
@@ -3179,172 +3199,52 @@ body.inspector-mode {
   </div>
   <div class="content" style="padding:20px 28px;">
 
-    <!-- Presets -->
-    <div style="margin-bottom:24px;">
-      <div style="font-size:14px;font-weight:700;margin-bottom:10px;color:var(--text);">🎨 ערכות נושא מוכנות</div>
-      <div class="settings-preset-grid">
-        <button class="preset-btn" style="background:#f0f4f8;color:#1e293b;" onclick="applyPreset('default')">☀️ בהיר (ברירת מחדל)</button>
-        <button class="preset-btn" style="background:#1a1a2e;color:#e0e0e0;" onclick="applyPreset('dark')">🌙 כהה</button>
-        <button class="preset-btn" style="background:#0f172a;color:#38bdf8;" onclick="applyPreset('midnight')">🌌 חצות</button>
-        <button class="preset-btn" style="background:#fefce8;color:#713f12;" onclick="applyPreset('warm')">🌅 חם</button>
-        <button class="preset-btn" style="background:#ecfdf5;color:#065f46;" onclick="applyPreset('nature')">🌿 טבע</button>
-        <button class="preset-btn" style="background:#fdf2f8;color:#831843;" onclick="applyPreset('rose')">🌸 ורוד</button>
+    <!-- ═══════════ v2.9.26: SIMPLIFIED SETTINGS ═══════════ -->
+    <!-- Just two clear options: font size slider + 10-color background palette -->
+
+    <!-- ═══ FONT SIZE SLIDER ═══ -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;">
+      <div style="font-size:16px;font-weight:700;margin-bottom:6px;color:var(--text);">🔤 גודל הפונט</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:18px;">הזיזי את המחוון כדי להגדיל או להקטין את הטקסט בכל המערכת</div>
+
+      <div style="display:flex;align-items:center;gap:16px;">
+        <span style="font-size:13px;color:var(--muted);min-width:30px;">קטן</span>
+        <input type="range" id="font-size-slider" min="80" max="150" step="5" value="100"
+               style="flex:1;height:8px;accent-color:#7c3aed;cursor:pointer;"
+               oninput="applyFontSize(this.value)">
+        <span style="font-size:13px;color:var(--muted);min-width:30px;text-align:left;">גדול</span>
+        <span id="font-size-display" style="background:#7c3aed;color:#fff;padding:6px 14px;border-radius:8px;font-size:14px;font-weight:700;font-family:monospace;min-width:64px;text-align:center;">100%</span>
       </div>
+
+      <button onclick="resetFontSize()" style="margin-top:14px;background:transparent;border:1px solid var(--border);color:var(--muted);padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;">↩️ אפס לברירת מחדל</button>
     </div>
 
-    <div class="settings-grid">
-      <!-- Background Colors -->
-      <div class="settings-section">
-        <div class="settings-section-title">🖼️ צבעי רקע</div>
+    <!-- ═══ BACKGROUND PALETTE ═══ -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;">
+      <div style="font-size:16px;font-weight:700;margin-bottom:6px;color:var(--text);">🎨 צבע רקע</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:18px;">בחרי את הצבע המועדף עלייך לרקע המערכת</div>
 
-        <div class="setting-row">
-          <div>
-            <div class="setting-label">רקע כללי</div>
-            <div class="setting-label-sub">הרקע הראשי של כל העמודים</div>
-          </div>
-          <div class="setting-color-input">
-            <span class="color-hex" id="hex-bg">#f0f4f8</span>
-            <input type="color" id="setting-bg" value="#f0f4f8" onchange="updateColor('--bg', this.value, 'hex-bg'); applyDarkModeBold(isDarkBackground(this.value))">
-          </div>
-        </div>
-
-        <div class="setting-row">
-          <div>
-            <div class="setting-label">רקע כרטיסים</div>
-            <div class="setting-label-sub">רקע של פאנלים וכרטיסים</div>
-          </div>
-          <div class="setting-color-input">
-            <span class="color-hex" id="hex-card">#ffffff</span>
-            <input type="color" id="setting-card" value="#ffffff" onchange="updateColor('--card', this.value, 'hex-card')">
-          </div>
-        </div>
-
-        <div class="setting-row">
-          <div>
-            <div class="setting-label">רקע סיידבר</div>
-            <div class="setting-label-sub">הצבע של התפריט הצדדי</div>
-          </div>
-          <div class="setting-color-input">
-            <span class="color-hex" id="hex-navy">#1e3a5f</span>
-            <input type="color" id="setting-navy" value="#1e3a5f" onchange="updateSidebarColor(this.value)">
-          </div>
-        </div>
-
-        <div class="setting-row">
-          <div>
-            <div class="setting-label">צבע גבולות</div>
-            <div class="setting-label-sub">קווי הפרדה בין אלמנטים</div>
-          </div>
-          <div class="setting-color-input">
-            <span class="color-hex" id="hex-border">#e2e8f0</span>
-            <input type="color" id="setting-border" value="#e2e8f0" onchange="updateColor('--border', this.value, 'hex-border')">
-          </div>
-        </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;">
+        <!-- 10 background presets -->
+        <button class="bg-preset" data-preset="light"     onclick="applyBgPreset(this)" style="background:#f0f4f8;color:#1e293b;border:2px solid var(--border);border-radius:10px;padding:16px 8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">☀️ בהיר</button>
+        <button class="bg-preset" data-preset="dark"      onclick="applyBgPreset(this)" style="background:#1a1a2e;color:#e0e0e0;border:2px solid var(--border);border-radius:10px;padding:16px 8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">🌙 כהה</button>
+        <button class="bg-preset" data-preset="midnight"  onclick="applyBgPreset(this)" style="background:#0f172a;color:#38bdf8;border:2px solid var(--border);border-radius:10px;padding:16px 8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">🌌 חצות</button>
+        <button class="bg-preset" data-preset="warm"      onclick="applyBgPreset(this)" style="background:#fefce8;color:#713f12;border:2px solid var(--border);border-radius:10px;padding:16px 8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">🌅 חם</button>
+        <button class="bg-preset" data-preset="nature"    onclick="applyBgPreset(this)" style="background:#ecfdf5;color:#065f46;border:2px solid var(--border);border-radius:10px;padding:16px 8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">🌿 טבע</button>
+        <button class="bg-preset" data-preset="rose"      onclick="applyBgPreset(this)" style="background:#fdf2f8;color:#831843;border:2px solid var(--border);border-radius:10px;padding:16px 8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">🌸 ורוד</button>
+        <button class="bg-preset" data-preset="ocean"     onclick="applyBgPreset(this)" style="background:#e0f2fe;color:#0c4a6e;border:2px solid var(--border);border-radius:10px;padding:16px 8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">🌊 ים</button>
+        <button class="bg-preset" data-preset="lavender"  onclick="applyBgPreset(this)" style="background:#f3e8ff;color:#581c87;border:2px solid var(--border);border-radius:10px;padding:16px 8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">💜 לבנדר</button>
+        <button class="bg-preset" data-preset="mint"      onclick="applyBgPreset(this)" style="background:#d1fae5;color:#064e3b;border:2px solid var(--border);border-radius:10px;padding:16px 8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">🍃 מנטה</button>
+        <button class="bg-preset" data-preset="sand"      onclick="applyBgPreset(this)" style="background:#fef3c7;color:#78350f;border:2px solid var(--border);border-radius:10px;padding:16px 8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">🏖️ חול</button>
       </div>
 
-      <!-- Font Colors -->
-      <div class="settings-section">
-        <div class="settings-section-title">🔤 צבעי פונטים</div>
-
-        <div class="setting-row">
-          <div>
-            <div class="setting-label">טקסט ראשי</div>
-            <div class="setting-label-sub">כותרות וטקסט רגיל</div>
-          </div>
-          <div class="setting-color-input">
-            <span class="color-hex" id="hex-text">#1e293b</span>
-            <input type="color" id="setting-text" value="#1e293b" onchange="updateColor('--text', this.value, 'hex-text')">
-          </div>
-        </div>
-
-        <div class="setting-row">
-          <div>
-            <div class="setting-label">טקסט משני</div>
-            <div class="setting-label-sub">תיאורים, תוויות, תאריכים</div>
-          </div>
-          <div class="setting-color-input">
-            <span class="color-hex" id="hex-muted">#64748b</span>
-            <input type="color" id="setting-muted" value="#64748b" onchange="updateColor('--muted', this.value, 'hex-muted')">
-          </div>
-        </div>
-
-        <div class="setting-row">
-          <div>
-            <div class="setting-label">צבע הדגשה</div>
-            <div class="setting-label-sub">כפתורים, לינקים, אלמנטים פעילים</div>
-          </div>
-          <div class="setting-color-input">
-            <span class="color-hex" id="hex-accent">#2563eb</span>
-            <input type="color" id="setting-accent" value="#2563eb" onchange="updateColor('--accent', this.value, 'hex-accent')">
-          </div>
-        </div>
-
-        <div class="setting-row">
-          <div>
-            <div class="setting-label">צבע טקסט סיידבר</div>
-            <div class="setting-label-sub">טקסט בתפריט הצדדי</div>
-          </div>
-          <div class="setting-color-input">
-            <span class="color-hex" id="hex-sidebar-text">#dbeafe</span>
-            <input type="color" id="setting-sidebar-text" value="#dbeafe" onchange="updateSidebarTextColor(this.value)">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Reset -->
-    <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
-      <button class="settings-reset-btn" onclick="resetAllColors()">🔄 איפוס צבעים לברירת מחדל</button>
-      <button class="settings-reset-btn" onclick="resetSavedData()" style="background:rgba(229,57,53,0.08);border-color:rgba(229,57,53,0.25);color:#c62828;">🗑️ מחיקת נתונים שמורים (איפוס מערכת)</button>
-    </div>
-
-    <!-- ═══ FIREBASE SYNC CONFIG ═══ -->
-    <div style="margin-top:32px;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:12px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-        <div style="font-size:15px;font-weight:700;color:var(--text);">📱 סנכרון מאפליקציית הנייד (Firebase)</div>
-        <span id="fb-cfg-status" style="font-size: 12px; font-weight: 700; color: rgb(46, 125, 50);">✓ מסונכרן</span>
-      </div>
-      <!-- ═══ NEW: signed-in user badge + logout button ═══ -->
-      <div id="auth-status-row" style="display: flex; align-items: center; justify-content: space-between; background: rgba(46, 125, 50, 0.08); border: 1px solid rgba(46, 125, 50, 0.18); border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; font-size: 13px;">
-        <span>🔐 מחובר כ-<strong id="auth-status-email" style="font-family:monospace;">—</strong></span>
-        <button onclick="window.GalilSync &amp;&amp; window.GalilSync.logout()" style="background:transparent;border:1px solid rgba(46,125,50,0.3);color:#2e7d32;border-radius:6px;padding:4px 12px;font-size:12px;cursor:pointer;">התנתק</button>
-      </div>
-      <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px;">
-        הזן את פרטי פרויקט ה-Firebase שלך כדי לקבל אוטומטית תיקים שפקחים פותחים בשטח. כל פקח שמעלה תיק במכשיר הנייד שלו — התיק יופיע כאן ברגע, ברשימת התיקים.
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
-        <div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:600;">apiKey</div>
-          <input type="text" id="fb-cfg-apiKey" style="width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card2);color:var(--text);font-family:monospace;font-size:12px;direction:ltr;" placeholder="AIzaSy...">
-        </div>
-        <div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:600;">projectId</div>
-          <input type="text" id="fb-cfg-projectId" style="width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card2);color:var(--text);font-family:monospace;font-size:12px;direction:ltr;" placeholder="your-project-id">
-        </div>
-      </div>
-      <div style="margin-bottom:14px;">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:600;">databaseURL</div>
-        <input type="text" id="fb-cfg-dbUrl" style="width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card2);color:var(--text);font-family:monospace;font-size:12px;direction:ltr;" placeholder="https://your-project-default-rtdb.firebaseio.com">
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="settings-reset-btn" style="background:rgba(46,125,50,0.1);border-color:rgba(46,125,50,0.25);color:#2e7d32;" onclick="window.GalilSync &amp;&amp; window.GalilSync.saveConfigFromUI()">💾 שמור והתחבר</button>
-        <button class="settings-reset-btn" onclick="window.GalilSync &amp;&amp; window.GalilSync.testConnection()">🔌 בדוק חיבור</button>
-        <button class="settings-reset-btn" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()">🔄 רענון תיקים מהשטח</button>
-        <button class="settings-reset-btn" style="background:rgba(37,99,235,0.1);border-color:rgba(37,99,235,0.25);color:#2563eb;" onclick="syncAllLocalCasesToFirebase()">☁️ סנכרן את כל התיקים הקיימים לענן</button>
-      </div>
-      <div style="margin-top:14px;padding:10px 12px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:8px;font-size:11px;color:var(--muted);line-height:1.6;">
-        💡 <strong>איך משיגים את הפרטים?</strong> כניסה ל-<a href="https://console.firebase.google.com" target="_blank" style="color:var(--teal);">console.firebase.google.com</a> → פרויקט → ⚙️ Project Settings → Your apps → Web app → Config. ראה הוראות מפורטות בקובץ ההוראות שצורף.
-      </div>
-    </div>
-
-    <div style="margin-top:14px;padding:12px 14px;background:rgba(37,99,235,0.06);border:1px solid rgba(37,99,235,0.18);border-radius:8px;font-size:12px;color:var(--muted);line-height:1.6;">
-      💡 <strong>שמירה אוטומטית:</strong> כל השינויים שאתה עושה (מחיקות, עדכונים, צבעים) נשמרים אוטומטית בדפדפן. ניתן גם ללחוץ על כפתור השמירה הצף בפינת המסך לשמירה ידנית.<br>
-      <span id="last-save-info" style="display:inline-block;margin-top:6px;font-weight:600;">✓ שמירה אחרונה: 02/05/2026 12:37</span>
+      <button onclick="resetBgPreset()" style="margin-top:16px;background:transparent;border:1px solid var(--border);color:var(--muted);padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;">↩️ אפס לברירת מחדל</button>
     </div>
 
   </div>
 </div>
 </div>
+
 
 <!-- Document Preview Modal -->
 <div class="doc-preview-overlay" id="doc-preview-overlay" onclick="closeDocPreview(event)">
@@ -3600,6 +3500,71 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 </script>
+
+<!-- ═══════════ v2.9.27: TOWED VEHICLE EDIT MODAL ═══════════ -->
+<div id="tw-edit-modal-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center;" onclick="closeTowedEditModal()">
+  <div style="background:var(--card);border-radius:16px;padding:28px 32px;max-width:560px;width:92%;max-height:90vh;overflow-y:auto;direction:rtl;font-family:var(--font);border:1px solid var(--border);" onclick="event.stopPropagation()">
+    <div style="text-align:center;margin-bottom:18px;">
+      <div style="font-size:40px;margin-bottom:6px;">🚛</div>
+      <div style="font-size:18px;font-weight:800;color:var(--text);">עדכון רכב באחסנה</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px;">בחר את הסטטוס החדש של הרכב</div>
+    </div>
+
+    <!-- Vehicle info -->
+    <div style="background:rgba(57,73,171,0.06);border:1px solid rgba(57,73,171,0.18);border-radius:10px;padding:14px;margin-bottom:18px;">
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:8px 14px;font-size:13px;line-height:1.5;">
+        <div style="color:var(--muted);font-weight:600;">לוחית:</div>
+        <div id="tw-edit-plate" style="font-weight:700;color:var(--text);font-family:monospace;"></div>
+        <div style="color:var(--muted);font-weight:600;">בעל הרכב:</div>
+        <div id="tw-edit-owner" style="color:var(--text);"></div>
+        <div style="color:var(--muted);font-weight:600;">מיקום מקורי:</div>
+        <div id="tw-edit-location" style="color:var(--text);"></div>
+        <div style="color:var(--muted);font-weight:600;">תאריך גרירה:</div>
+        <div id="tw-edit-towdate" style="color:var(--text);"></div>
+        <div style="color:var(--muted);font-weight:600;">עלות אחסנה:</div>
+        <div id="tw-edit-cost" style="font-weight:700;color:#c62828;"></div>
+      </div>
+    </div>
+
+    <!-- Status selection -->
+    <div style="margin-bottom:14px;">
+      <label class="edit-label" style="display:block;margin-bottom:6px;">סטטוס הרכב:</label>
+      <select id="tw-edit-status" onchange="onTowEditStatusChange()" class="edit-input" style="width:100%;padding:11px;font-size:14px;font-weight:600;">
+        <option value="storage">🚛 עדיין באחסנה</option>
+        <option value="returned">✅ הוחזר לבעלים</option>
+        <option value="sold">💰 נמכר</option>
+      </select>
+    </div>
+
+    <div id="tw-edit-hint" style="background:rgba(243,156,18,0.06);border:1px dashed rgba(243,156,18,0.3);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text);margin-bottom:14px;line-height:1.5;">
+      ℹ️ הרכב עדיין במגרש. סגור את החלון ללא שמירה כדי לחזור.
+    </div>
+
+    <!-- Result date -->
+    <div style="margin-bottom:14px;">
+      <label class="edit-label" style="display:block;margin-bottom:6px;">תאריך הפעולה:</label>
+      <input type="date" id="tw-edit-result-date" class="edit-input" style="width:100%;padding:10px;font-size:13px;">
+    </div>
+
+    <!-- Amount (shown when sold/returned) -->
+    <div id="tw-edit-amount-wrap" style="margin-bottom:14px;display:none;">
+      <label class="edit-label" style="display:block;margin-bottom:6px;">סכום שנגבה (₪):</label>
+      <input type="number" id="tw-edit-amount" class="edit-input" placeholder="0" style="width:100%;padding:10px;font-size:13px;font-family:monospace;">
+    </div>
+
+    <!-- Notes -->
+    <div style="margin-bottom:18px;">
+      <label class="edit-label" style="display:block;margin-bottom:6px;">הערות (אופציונלי):</label>
+      <textarea id="tw-edit-notes" class="edit-input" rows="2" placeholder="פרטים נוספים על הפעולה..." style="width:100%;padding:10px;font-size:13px;resize:vertical;"></textarea>
+    </div>
+
+    <!-- Action buttons -->
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="closeTowedEditModal()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text);">ביטול</button>
+      <button onclick="saveTowedEdit()" style="background:#3949ab;border:none;border-radius:8px;padding:10px 28px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#fff;">💾 שמור ועדכן</button>
+    </div>
+  </div>
+</div>
 
 <!-- ====== STAFF MODAL ====== -->
 <div id="staff-modal-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center;" onclick="closeStaffModal()">
@@ -4898,6 +4863,41 @@ function saveBarcodeToDoc() {
   }
 }
 
+/* ═══ v2.9.26: tow toggle in edit form ═══ */
+function onTowedToggle() {
+  var cb = document.getElementById('nf-is-towed');
+  var wrap = document.getElementById('nf-tow-date-wrap');
+  var help = document.getElementById('nf-towed-help');
+  var dateEl = document.getElementById('nf-tow-date');
+  if (!cb || !wrap) return;
+  if (cb.checked) {
+    wrap.style.display = 'flex';
+    if (help) help.style.display = 'block';
+    // Default the date to today if empty
+    if (dateEl && !dateEl.value) {
+      dateEl.value = new Date().toISOString().split('T')[0];
+    }
+  } else {
+    wrap.style.display = 'none';
+    if (help) help.style.display = 'none';
+  }
+}
+window.onTowedToggle = onTowedToggle;
+
+/* ═══ v2.9.26: when opening an existing case, populate the tow checkbox ═══ */
+function _populateTowFields(caseData) {
+  var cb = document.getElementById('nf-is-towed');
+  var dateEl = document.getElementById('nf-tow-date');
+  if (!cb) return;
+  var isTowed = (caseData && (caseData.status === 'towed' || caseData.status === 'orange'));
+  cb.checked = !!isTowed;
+  if (dateEl) {
+    dateEl.value = (caseData && caseData.towDate) ? caseData.towDate : '';
+  }
+  if (typeof onTowedToggle === 'function') onTowedToggle();
+}
+window._populateTowFields = _populateTowFields;
+
 function addToTowedPanel(caseData, deadline) {
   var towDate = caseData.towDate || new Date().toISOString().split('T')[0];
   var towDays = Math.max(0, Math.floor((new Date() - new Date(towDate)) / 86400000));
@@ -4928,6 +4928,8 @@ function addToTowedPanel(caseData, deadline) {
   var twTbody = document.getElementById('tw-towed-tbody');
   if (twTbody) {
     var tr2 = document.createElement('tr');
+    tr2.setAttribute('data-plate', caseData.plate || '');
+    tr2.setAttribute('data-tow-date', towDate);
     tr2.innerHTML =
       '<td style="text-align:center;" onclick="event.stopPropagation()"><input type="checkbox" class="ms-cb" onchange="msUpdateCount(\'tw-towed-tbody\',\'ms-bar-towed\',\'ms-count-towed\',\'ms-all-towed\')"></td>' +
       '<td><span class="plate-badge">' + (caseData.plate || '—') + '</span></td>' +
@@ -4937,7 +4939,10 @@ function addToTowedPanel(caseData, deadline) {
       '<td><div class="countdown-cell"><div class="cd-days warn">' + towDays + ' ימים</div><div class="cd-track"><div class="cd-fill warn" style="width:' + pct + '%"></div></div></div></td>' +
       '<td style="font-weight:700;color:var(--red);">' + cost.toLocaleString('he-IL') + ' ₪</td>' +
       '<td style="font-size:12px;">' + fmtDate(deadline) + '</td>' +
-      '<td style="white-space:nowrap;"><button class="row-action" style="background:#e8f5e9;color:#2e7d32;font-size:11px;padding:4px 10px;">✅ הוחזר</button><button class="row-action" style="background:#fff3e0;color:#e65100;font-size:11px;padding:4px 10px;">💰 מכירה</button> <button class="row-action" onclick="deleteTowedVehicle(this,event)" style="background:#ffebee;color:#c62828;border:1px solid #ffcdd2;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;">🗑️ מחיקה</button></td>';
+      '<td style="white-space:nowrap;">' +
+        '<button class="row-action" onclick="openTowedEditModal(this,event)" style="background:#e3f2fd;color:#1565c0;font-size:11px;padding:4px 10px;border:1px solid #90caf9;border-radius:6px;cursor:pointer;margin-left:4px;">✏️ ערוך</button>' +
+        '<button class="row-action" onclick="deleteTowedVehicle(this,event)" style="background:#ffebee;color:#c62828;border:1px solid #ffcdd2;font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;">🗑️ מחיקה</button>' +
+      '</td>';
     twTbody.insertBefore(tr2, twTbody.firstChild);
     var twBadge = document.getElementById('tw-count-badge');
     if (twBadge) twBadge.textContent = twTbody.querySelectorAll('tr').length;
@@ -4949,6 +4954,183 @@ function addToTowedPanel(caseData, deadline) {
   var statEl = document.getElementById('dash-stat-orange');
   if (statEl) statEl.textContent = parseInt(statEl.textContent) + 1;
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   v2.9.27: TOWED VEHICLE EDIT MODAL
+   For each car in the towed-vehicles table, the user can open this
+   modal to update the status: returned to owner, sold, or still in
+   storage. Once a final status (returned/sold) is set, the row moves
+   from the active table to the history table, and the case is closed.
+   ═══════════════════════════════════════════════════════════════════ */
+window._towedEditTarget = null;
+
+function openTowedEditModal(btn, evt) {
+  if (evt) evt.stopPropagation();
+
+  // Block viewers
+  if (typeof isViewerOnly === 'function' && isViewerOnly()) {
+    alert('👁️ מצב צפייה בלבד - לא ניתן לערוך.');
+    return;
+  }
+
+  var tr = btn.closest('tr');
+  if (!tr) return;
+  var plate = tr.getAttribute('data-plate') || '';
+  var towDate = tr.getAttribute('data-tow-date') || '';
+  var cells = tr.querySelectorAll('td');
+  var ownerName = cells[2] ? (cells[2].querySelector('.owner-name') || {}).textContent || '' : '';
+  var location = cells[3] ? cells[3].textContent.replace('📍', '').trim() : '';
+  var costText = cells[6] ? cells[6].textContent : '';
+
+  window._towedEditTarget = { row: tr, plate: plate, towDate: towDate, ownerName: ownerName, location: location, cost: costText };
+
+  // Populate modal fields
+  var setT = function(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+  var setV = function(id, v) { var el = document.getElementById(id); if (el) el.value = v; };
+  setT('tw-edit-plate', plate);
+  setT('tw-edit-owner', ownerName);
+  setT('tw-edit-location', location);
+  setT('tw-edit-towdate', towDate ? fmtDate(towDate) : '—');
+  setT('tw-edit-cost', costText.trim());
+
+  // Reset form
+  var statusEl = document.getElementById('tw-edit-status');
+  if (statusEl) statusEl.value = 'storage';
+  setV('tw-edit-result-date', new Date().toISOString().split('T')[0]);
+  setV('tw-edit-amount', '');
+  setV('tw-edit-notes', '');
+
+  // Show/hide amount field based on initial status
+  if (typeof onTowEditStatusChange === 'function') onTowEditStatusChange();
+
+  // Open
+  var ov = document.getElementById('tw-edit-modal-overlay');
+  if (ov) ov.style.display = 'flex';
+}
+window.openTowedEditModal = openTowedEditModal;
+
+function closeTowedEditModal() {
+  var ov = document.getElementById('tw-edit-modal-overlay');
+  if (ov) ov.style.display = 'none';
+  window._towedEditTarget = null;
+}
+window.closeTowedEditModal = closeTowedEditModal;
+
+function onTowEditStatusChange() {
+  var status = (document.getElementById('tw-edit-status') || {}).value;
+  var amountWrap = document.getElementById('tw-edit-amount-wrap');
+  var hint = document.getElementById('tw-edit-hint');
+  if (!amountWrap) return;
+
+  if (status === 'sold') {
+    amountWrap.style.display = 'block';
+    if (hint) hint.textContent = '💰 הזן את הסכום שנגבה במכירה. בעת אישור - התיק יסגר ויעבור להיסטוריה.';
+  } else if (status === 'returned') {
+    amountWrap.style.display = 'block';
+    if (hint) hint.textContent = '✅ הלקוח לקח את הרכב. אם נגבה תשלום - הזן אותו. בעת אישור - התיק יסגר ויעבור להיסטוריה.';
+  } else {
+    amountWrap.style.display = 'none';
+    if (hint) hint.textContent = 'ℹ️ הרכב עדיין במגרש. סגור את החלון ללא שמירה כדי לחזור.';
+  }
+}
+window.onTowEditStatusChange = onTowEditStatusChange;
+
+function saveTowedEdit() {
+  var target = window._towedEditTarget;
+  if (!target) return;
+
+  var status = (document.getElementById('tw-edit-status') || {}).value;
+  var resultDate = (document.getElementById('tw-edit-result-date') || {}).value;
+  var amount = (document.getElementById('tw-edit-amount') || {}).value;
+  var notes = (document.getElementById('tw-edit-notes') || {}).value;
+
+  if (status === 'storage') {
+    closeTowedEditModal();
+    return;
+  }
+
+  if (!resultDate) {
+    alert('יש למלא את תאריך הפעולה');
+    return;
+  }
+
+  // Move row from active table to history
+  var hist = document.getElementById('tw-history-tbody');
+  if (hist) {
+    var resultLabel = (status === 'returned') ? '✅ הוחזר לבעלים' : '💰 נמכר';
+    var resultColor = (status === 'returned') ? '#2e7d32' : '#e65100';
+    var amountStr = amount ? (parseInt(amount, 10) || 0).toLocaleString('he-IL') + ' ₪' : '—';
+
+    var newRow = document.createElement('tr');
+    newRow.innerHTML =
+      '<td style="text-align:center;" onclick="event.stopPropagation()"><input type="checkbox" class="ms-cb" onchange="msUpdateCount(\'tw-history-tbody\',\'ms-bar-history\',\'ms-count-history\',\'ms-all-history\')"></td>' +
+      '<td><span class="plate-badge">' + target.plate + '</span></td>' +
+      '<td><div class="owner-name">' + target.ownerName + '</div></td>' +
+      '<td style="font-size:12px;">' + (target.towDate ? fmtDate(target.towDate) : '—') + '</td>' +
+      '<td style="font-size:12px;font-weight:700;color:' + resultColor + ';">' + resultLabel + '<br><span style="font-size:10px;color:var(--muted);font-weight:400;">' + fmtDate(resultDate) + '</span>' + (notes ? '<br><span style="font-size:10px;color:var(--muted);font-weight:400;">📝 ' + notes + '</span>' : '') + '</td>' +
+      '<td style="font-weight:700;">' + amountStr + '</td>';
+    hist.insertBefore(newRow, hist.firstChild);
+  }
+
+  // Remove from active table
+  if (target.row && target.row.parentNode) {
+    target.row.parentNode.removeChild(target.row);
+  }
+  // Also remove from dashboard towed-tbody
+  var dashTbody = document.getElementById('towed-tbody');
+  if (dashTbody) {
+    dashTbody.querySelectorAll('tr').forEach(function(r) {
+      var pb = r.querySelector('.plate-badge');
+      if (pb && pb.textContent.trim() === target.plate) r.remove();
+    });
+  }
+
+  // ═══ Close the case (status='green' = closed) ═══
+  // Update the case in cases table + Firebase
+  try {
+    var casesTbody = document.getElementById('cases-tbody');
+    if (casesTbody) {
+      casesTbody.querySelectorAll('tr').forEach(function(r) {
+        var pb = r.querySelector('.plate-badge');
+        if (pb && pb.textContent.trim() === target.plate) {
+          r.dataset.status = 'green';
+          // Update status pill if present
+          var st = r.querySelector('.status-cell, [data-status-pill]');
+          if (st) st.textContent = '✅ סגור';
+        }
+      });
+    }
+    // Push to Firebase: status='green' + closure metadata
+    var db = (typeof fbDb !== 'undefined' && fbDb) || window.fbDb;
+    if (db && window.GalilSync && window.GalilSync._findIdByPlate) {
+      var caseId = window.GalilSync._findIdByPlate(target.plate);
+      if (caseId) {
+        db.ref('cases/' + caseId).update({
+          status: 'green',
+          towStatus: status, // 'returned' or 'sold'
+          towResultDate: resultDate,
+          towAmount: amount ? (parseInt(amount, 10) || 0) : 0,
+          towNotes: notes || '',
+          updatedAt: Date.now()
+        }).then(function() {
+          console.log('[towedEdit] ✓ closed case in Firebase:', target.plate);
+        }).catch(function(err) {
+          console.warn('[towedEdit] FB update failed:', err);
+        });
+      }
+    }
+  } catch(e) { console.warn('[towedEdit] case close failed:', e); }
+
+  // Refresh counters
+  if (typeof updateAllCounters === 'function') updateAllCounters();
+  if (typeof saveState === 'function') saveState();
+
+  closeTowedEditModal();
+  if (typeof showToast === 'function') {
+    showToast(status === 'returned' ? '✅ הרכב הוחזר לבעלים — התיק סגור!' : '💰 הרכב נמכר — התיק סגור!');
+  }
+}
+window.saveTowedEdit = saveTowedEdit;
 
 /* ====== MULTI-SELECT DELETE SYSTEM ====== */
 function msToggleAll(tbodyId, barId, countId, allCb) {
@@ -6181,6 +6363,11 @@ function openEditFullForm(tr) {
   if (typeof loadCaseDocuments === 'function' && CASE.plate) {
     console.log('[openEditFullForm] loading archive for', CASE.plate);
     loadCaseDocuments(CASE.plate);
+  }
+
+  // ═══ v2.9.26: Populate tow status checkbox + tow date ═══
+  if (typeof _populateTowFields === 'function') {
+    _populateTowFields(CASE);
   }
 }
 
@@ -7880,6 +8067,30 @@ function saveNewCase() {
       _removeMobilePromotedRow();
       showToast('✅ תיק חדש נפתח בהצלחה!');
     }
+
+    // ═══ v2.9.26: If marked as towed, also add to the towed-vehicles tables ═══
+    // This puts the case into the "🚛 רכבים נגררים — באחסנה" panel on the
+    // dashboard AND in the dedicated "גרירה ואחסנה" view, with the proper
+    // tow date the user entered.
+    try {
+      if (CASE.status === 'towed' && typeof addToTowedPanel === 'function') {
+        var towDate = CASE.towDate || new Date().toISOString().split('T')[0];
+        var deadline = new Date(new Date(towDate).getTime() + 60 * 86400000)
+                        .toISOString().split('T')[0];
+        // Avoid adding a duplicate row if this plate is already in the table
+        var existing = document.querySelectorAll('#tw-towed-tbody tr .plate-badge');
+        var alreadyThere = false;
+        for (var ii = 0; ii < existing.length; ii++) {
+          if (existing[ii].textContent.trim() === String(CASE.plate).trim()) {
+            alreadyThere = true; break;
+          }
+        }
+        if (!alreadyThere) {
+          addToTowedPanel(CASE, deadline);
+          console.log('[saveNewCase] ✓ added to towed panel:', CASE.plate, 'towDate:', towDate);
+        }
+      }
+    } catch(e) { console.warn('[saveNewCase] tow panel update failed:', e); }
   }, 500);
 }
 
@@ -7928,11 +8139,24 @@ function _newCaseReadFields() {
   CASE.ownerPhone = document.getElementById('nf-owner-phone').value.trim();
   CASE.location = street ? city + ', ' + street : city;
   CASE.notes = document.getElementById('nf-notes').value.trim();
+
+  // ═══ v2.9.26: Read tow status + tow date from the new "גרירה ואחסנה" section ═══
+  var towedCb = document.getElementById('nf-is-towed');
+  var towDateEl = document.getElementById('nf-tow-date');
+  if (towedCb && towedCb.checked) {
+    CASE.status = 'towed';
+    CASE.towDate = (towDateEl && towDateEl.value) ? towDateEl.value : new Date().toISOString().split('T')[0];
+  } else if (towedCb && !towedCb.checked && CASE.status === 'towed') {
+    // user unchecked → restore previous status
+    CASE.status = 'yellow';
+    CASE.towDate = '';
+  }
+
   // ═══ v2.9.11: only set status='yellow' for genuinely NEW cases.        ═══
   // ═══ When editing an existing case (e.g. status='photographed' from   ═══
   // ═══ the mobile app), do NOT overwrite the status — preserve whatever  ═══
   // ═══ the manager (or mobile app) already set.                          ═══
-  if (!window._editingExistingRow) {
+  if (!window._editingExistingRow && CASE.status !== 'towed') {
     CASE.status = 'yellow';
   }
   // else: keep existing CASE.status as it was loaded from data-case
@@ -8109,7 +8333,10 @@ var defaultColors = {
 
 function updateColor(varName, value, hexSpanId) {
   document.documentElement.style.setProperty(varName, value);
-  if (hexSpanId) document.getElementById(hexSpanId).textContent = value;
+  if (hexSpanId) {
+    var spanEl = document.getElementById(hexSpanId);
+    if (spanEl) spanEl.textContent = value;
+  }
   if (typeof markDirty === 'function') markDirty();
 }
 
@@ -8119,7 +8346,8 @@ function updateSidebarColor(value) {
   var r = parseInt(value.slice(1,3),16), g = parseInt(value.slice(3,5),16), b = parseInt(value.slice(5,7),16);
   var lighter = '#' + Math.min(255,r+20).toString(16).padStart(2,'0') + Math.min(255,g+20).toString(16).padStart(2,'0') + Math.min(255,b+20).toString(16).padStart(2,'0');
   document.documentElement.style.setProperty('--navy2', lighter);
-  document.getElementById('hex-navy').textContent = value;
+  var hex = document.getElementById('hex-navy');
+  if (hex) hex.textContent = value;
   if (typeof markDirty === 'function') markDirty();
 }
 
@@ -8132,45 +8360,111 @@ function updateSidebarTextColor(value) {
   document.querySelectorAll('.si-icon').forEach(function(el) {
     el.style.opacity = '1';
   });
-  document.getElementById('hex-sidebar-text').textContent = value;
+  var hex = document.getElementById('hex-sidebar-text');
+  if (hex) hex.textContent = value;
   if (typeof markDirty === 'function') markDirty();
 }
 
 function applyPreset(name) {
+  // ═══ v2.9.26: simplified — no more individual color picker inputs ═══
   var presets = {
-    'default': { bg:'#f0f4f8', card:'#ffffff', text:'#1e293b', muted:'#64748b', border:'#e2e8f0', accent:'#2563eb', navy:'#1e3a5f', navyText:'#dbeafe', dark:false },
-    'dark': { bg:'#1a1a2e', card:'#16213e', text:'#ffffff', muted:'#d1d5db', border:'#374151', accent:'#60a5fa', navy:'#0f0f23', navyText:'#ffffff', dark:true },
-    'midnight': { bg:'#0f172a', card:'#1e293b', text:'#ffffff', muted:'#cbd5e1', border:'#334155', accent:'#38bdf8', navy:'#020617', navyText:'#ffffff', dark:true },
-    'warm': { bg:'#fefce8', card:'#fffbeb', text:'#713f12', muted:'#a16207', border:'#fde68a', accent:'#d97706', navy:'#78350f', navyText:'#fef3c7', dark:false },
-    'nature': { bg:'#ecfdf5', card:'#f0fdf4', text:'#065f46', muted:'#047857', border:'#a7f3d0', accent:'#059669', navy:'#064e3b', navyText:'#a7f3d0', dark:false },
-    'rose': { bg:'#fdf2f8', card:'#fff1f2', text:'#831843', muted:'#9d174d', border:'#fce7f3', accent:'#db2777', navy:'#500724', navyText:'#fce7f3', dark:false }
+    'default':   { bg:'#f0f4f8', card:'#ffffff', text:'#1e293b', muted:'#64748b', border:'#e2e8f0', accent:'#2563eb', navy:'#1e3a5f', navyText:'#dbeafe', dark:false },
+    'light':     { bg:'#f0f4f8', card:'#ffffff', text:'#1e293b', muted:'#64748b', border:'#e2e8f0', accent:'#2563eb', navy:'#1e3a5f', navyText:'#dbeafe', dark:false },
+    'dark':      { bg:'#1a1a2e', card:'#16213e', text:'#ffffff', muted:'#d1d5db', border:'#374151', accent:'#60a5fa', navy:'#0f0f23', navyText:'#ffffff', dark:true  },
+    'midnight':  { bg:'#0f172a', card:'#1e293b', text:'#ffffff', muted:'#cbd5e1', border:'#334155', accent:'#38bdf8', navy:'#020617', navyText:'#ffffff', dark:true  },
+    'warm':      { bg:'#fefce8', card:'#fffbeb', text:'#713f12', muted:'#a16207', border:'#fde68a', accent:'#d97706', navy:'#78350f', navyText:'#fef3c7', dark:false },
+    'nature':    { bg:'#ecfdf5', card:'#f0fdf4', text:'#065f46', muted:'#047857', border:'#a7f3d0', accent:'#059669', navy:'#064e3b', navyText:'#a7f3d0', dark:false },
+    'rose':      { bg:'#fdf2f8', card:'#fff1f2', text:'#831843', muted:'#9d174d', border:'#fce7f3', accent:'#db2777', navy:'#500724', navyText:'#fce7f3', dark:false },
+    'ocean':     { bg:'#e0f2fe', card:'#f0f9ff', text:'#0c4a6e', muted:'#0369a1', border:'#bae6fd', accent:'#0284c7', navy:'#082f49', navyText:'#bae6fd', dark:false },
+    'lavender':  { bg:'#f3e8ff', card:'#faf5ff', text:'#581c87', muted:'#7e22ce', border:'#e9d5ff', accent:'#9333ea', navy:'#3b0764', navyText:'#e9d5ff', dark:false },
+    'mint':      { bg:'#d1fae5', card:'#f0fdf4', text:'#064e3b', muted:'#047857', border:'#a7f3d0', accent:'#059669', navy:'#022c22', navyText:'#a7f3d0', dark:false },
+    'sand':      { bg:'#fef3c7', card:'#fffbeb', text:'#78350f', muted:'#a16207', border:'#fde68a', accent:'#ca8a04', navy:'#451a03', navyText:'#fde68a', dark:false }
   };
   var p = presets[name];
   if (!p) return;
 
-  updateColor('--bg', p.bg, 'hex-bg');
-  updateColor('--card', p.card, 'hex-card');
+  updateColor('--bg', p.bg, null);
+  updateColor('--card', p.card, null);
   updateColor('--card2', p.card, null);
-  updateColor('--text', p.text, 'hex-text');
-  updateColor('--muted', p.muted, 'hex-muted');
-  updateColor('--border', p.border, 'hex-border');
-  updateColor('--accent', p.accent, 'hex-accent');
-  updateSidebarColor(p.navy);
-  updateSidebarTextColor(p.navyText);
+  updateColor('--text', p.text, null);
+  updateColor('--muted', p.muted, null);
+  updateColor('--border', p.border, null);
+  updateColor('--accent', p.accent, null);
+  if (typeof updateSidebarColor === 'function') updateSidebarColor(p.navy);
+  if (typeof updateSidebarTextColor === 'function') updateSidebarTextColor(p.navyText);
 
-  // Apply dark mode bold text
   applyDarkModeBold(p.dark);
 
-  // Update color picker inputs
-  document.getElementById('setting-bg').value = p.bg;
-  document.getElementById('setting-card').value = p.card;
-  document.getElementById('setting-text').value = p.text;
-  document.getElementById('setting-muted').value = p.muted;
-  document.getElementById('setting-border').value = p.border;
-  document.getElementById('setting-accent').value = p.accent;
-  document.getElementById('setting-navy').value = p.navy;
-  document.getElementById('setting-sidebar-text').value = p.navyText;
+  // Save preset choice for persistence
+  try { localStorage.setItem('galilElyon_bgPreset', name); } catch(e){}
 }
+
+// ═══ v2.9.26: Background preset picker ═══
+function applyBgPreset(btn) {
+  var preset = btn.getAttribute('data-preset');
+  if (!preset) return;
+  applyPreset(preset);
+  // Highlight the selected button
+  document.querySelectorAll('.bg-preset').forEach(function(b) {
+    b.style.outline = '';
+    b.style.boxShadow = '';
+  });
+  btn.style.outline = '3px solid #7c3aed';
+  btn.style.boxShadow = '0 4px 12px rgba(124,58,237,0.3)';
+}
+
+function resetBgPreset() {
+  applyPreset('default');
+  document.querySelectorAll('.bg-preset').forEach(function(b) {
+    b.style.outline = '';
+    b.style.boxShadow = '';
+  });
+  try { localStorage.removeItem('galilElyon_bgPreset'); } catch(e){}
+}
+
+// ═══ v2.9.26: Font size slider ═══
+function applyFontSize(percent) {
+  var p = parseInt(percent, 10) || 100;
+  // Clamp to safe range
+  if (p < 80) p = 80;
+  if (p > 150) p = 150;
+  document.documentElement.style.fontSize = p + '%';
+  var disp = document.getElementById('font-size-display');
+  if (disp) disp.textContent = p + '%';
+  var slider = document.getElementById('font-size-slider');
+  if (slider && slider.value != p) slider.value = p;
+  try { localStorage.setItem('galilElyon_fontSize', String(p)); } catch(e){}
+}
+
+function resetFontSize() {
+  applyFontSize(100);
+}
+
+// ═══ v2.9.26: load saved settings on startup ═══
+(function loadSavedAppearance() {
+  function init() {
+    try {
+      var savedSize = parseInt(localStorage.getItem('galilElyon_fontSize') || '100', 10);
+      if (savedSize && savedSize !== 100) applyFontSize(savedSize);
+
+      var savedPreset = localStorage.getItem('galilElyon_bgPreset');
+      if (savedPreset && savedPreset !== 'default') {
+        applyPreset(savedPreset);
+        // Highlight the matching button
+        var btn = document.querySelector('.bg-preset[data-preset="' + savedPreset + '"]');
+        if (btn) {
+          btn.style.outline = '3px solid #7c3aed';
+          btn.style.boxShadow = '0 4px 12px rgba(124,58,237,0.3)';
+        }
+      }
+    } catch(e) { console.warn('[appearance] load failed:', e); }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
 
 function isDarkBackground(hexColor) {
   var r = parseInt(hexColor.slice(1,3),16);
@@ -8430,6 +8724,37 @@ function updateAllCounters() {
 
   // Map subtitle
   el = document.getElementById('map-subtitle'); if (el) el.textContent = MAP_CASES.length + ' תיקים פתוחים';
+
+  // ═══ v2.9.26: Map legend dots — were hard-coded "(7)/(9)/(5)" before ═══
+  el = document.getElementById('map-legend-red');    if (el) el.textContent = red;
+  el = document.getElementById('map-legend-yellow'); if (el) el.textContent = yellow;
+  el = document.getElementById('map-legend-towed');  if (el) el.textContent = orange;
+
+  // ═══ v2.9.26: Towed view stats — were also stale ═══
+  var twTbody = document.getElementById('tw-towed-tbody');
+  var towedCount = twTbody ? twTbody.querySelectorAll('tr').length : 0;
+  el = document.getElementById('tw-stat-total'); if (el) el.textContent = towedCount;
+  el = document.getElementById('tw-count-badge'); if (el) el.textContent = towedCount;
+  el = document.getElementById('towed-count-badge'); if (el) el.textContent = towedCount;
+  el = document.getElementById('sb-badge-towed'); if (el) el.textContent = towedCount;
+
+  // Calculate "expiring soon" (7 days from 60-day deadline)
+  var expiring = 0, today = Date.now();
+  if (twTbody) {
+    twTbody.querySelectorAll('tr').forEach(function(tr) {
+      var cells = tr.querySelectorAll('td');
+      if (cells.length < 6) return;
+      // 6th cell shows "X ימים" — if X >= 53, it's expiring (7 days left out of 60)
+      var daysText = cells[5] && cells[5].textContent.match(/(\d+)/);
+      if (daysText && parseInt(daysText[1], 10) >= 53) expiring++;
+    });
+  }
+  el = document.getElementById('tw-stat-expiring'); if (el) el.textContent = expiring;
+
+  // Returned count comes from history table
+  var histTbody = document.getElementById('tw-history-tbody');
+  var returnedCount = histTbody ? histTbody.querySelectorAll('tr').length : 0;
+  el = document.getElementById('tw-stat-returned'); if (el) el.textContent = returnedCount;
 }
 
 function confirmDeleteCase() {
