@@ -2163,7 +2163,7 @@ body.inspector-mode {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.18 — barcode</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.19 — auto-update</div>
     </div>
   </div>
 
@@ -2237,7 +2237,7 @@ body.inspector-mode {
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <div class="tb-notif">🔔<div class="notif-dot"></div></div>
       <button onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.18 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.19 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2818,7 +2818,7 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.18 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.19 ✓</span>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
     </div>
@@ -11592,12 +11592,60 @@ if (document.readyState === 'loading') {
 
 <script>
 (function() {
-  // Service Worker registration — required for PWA
+  // ═══════════════════════════════════════════════════════════════════
+  // 🔄 v2.9.19: Auto-update strategy
+  // Always pull the latest version from GitHub Pages on app launch.
+  // If a new SW is found, install it and reload the page automatically.
+  // ═══════════════════════════════════════════════════════════════════
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
       navigator.serviceWorker.register('sw.js')
-        .then(function(reg) { console.log('[PWA] SW registered:', reg.scope); })
+        .then(function(reg) {
+          console.log('[PWA] SW registered:', reg.scope);
+
+          // ═══ Check for updates immediately and every 30 minutes ═══
+          // Forces the browser to ask the server "is there a new sw.js?"
+          function checkForUpdates() {
+            reg.update().catch(function(){});
+          }
+          checkForUpdates();
+          setInterval(checkForUpdates, 30 * 60 * 1000); // 30 min
+
+          // ═══ When a new SW is found, force activate and reload ═══
+          reg.addEventListener('updatefound', function() {
+            var newSW = reg.installing;
+            if (!newSW) return;
+            console.log('[PWA] New version downloading...');
+            newSW.addEventListener('statechange', function() {
+              if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('[PWA] New version ready — activating...');
+                // Tell the new SW to skip waiting (activate immediately)
+                newSW.postMessage({ type: 'SKIP_WAITING' });
+              }
+            });
+          });
+
+          // ═══ When the new SW takes control, reload the page ═══
+          // Only reload once per page-lifetime to avoid loops
+          var hasReloaded = false;
+          navigator.serviceWorker.addEventListener('controllerchange', function() {
+            if (hasReloaded) return;
+            hasReloaded = true;
+            console.log('[PWA] Reloading to use new version...');
+            // Small delay so any in-flight UI events finish
+            setTimeout(function() { window.location.reload(); }, 300);
+          });
+        })
         .catch(function(err) { console.log('[PWA] SW failed:', err); });
+
+      // ═══ Also check for updates when the user comes back to the tab ═══
+      document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible' && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.getRegistration().then(function(reg) {
+            if (reg) reg.update().catch(function(){});
+          });
+        }
+      });
     });
   }
 
