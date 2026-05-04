@@ -2,16 +2,21 @@
   "name": "ניהול רכבים נטושים - גליל עליון",
   "short_name": "ניהול רכבים",
   "description": "מערכת ניהול רכבים נטושים - מועצה אזורית הגליל העליון",
-  "start_url": "./תוכנת-ניהול-רכבים-נטושים.html",
-  "scope": ".",
+  "start_url": "./%D7%AA%D7%95%D7%9B%D7%A0%D7%AA-%D7%A0%D7%99%D7%94%D7%95%D7%9C-%D7%A8%D7%9B%D7%91%D7%99%D7%9D-%D7%A0%D7%98%D7%95%D7%A9%D7%99%D7%9D.html",
+  "scope": "./",
+  "id": "/galil-vehicles-admin",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "orientation": "any",
   "background_color": "#7c3aed",
   "theme_color": "#7c3aed",
   "lang": "he",
   "dir": "rtl",
+  "categories": ["productivity", "government"],
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

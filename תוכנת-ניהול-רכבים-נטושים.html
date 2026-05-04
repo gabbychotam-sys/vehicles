@@ -2051,7 +2051,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.14 — PWA install</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.15 — PWA fixed</div>
     </div>
   </div>
 
@@ -2125,7 +2125,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <div class="tb-notif">🔔<div class="notif-dot"></div></div>
       <button onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.14 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.15 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2706,7 +2706,7 @@ body.dark-mode .save-fab-menu-divider { background: rgba(255,255,255,0.06); }
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.14 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.15 ✓</span>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
     </div>
@@ -11080,7 +11080,7 @@ if (document.readyState === 'loading') {
 </script>
 
 
-<!-- ═══════════ PWA INSTALL PROMPT (v2.9.14) ═══════════ -->
+<!-- ═══════════ PWA INSTALL PROMPT (v2.9.15) ═══════════ -->
 <div id="pwa-install-banner" style="display:none;position:fixed;bottom:20px;right:20px;background:#7c3aed;color:#fff;padding:14px 20px;border-radius:12px;box-shadow:0 8px 24px rgba(124,58,237,0.4);z-index:99998;font-family:Heebo,sans-serif;direction:rtl;max-width:340px;">
   <div style="display:flex;align-items:center;gap:12px;">
     <div style="font-size:32px;">📥</div>
@@ -11095,13 +11095,31 @@ if (document.readyState === 'loading') {
   </div>
 </div>
 
+<!-- Fallback button: always visible in the corner so users can install at any time -->
+<button id="pwa-install-fab" type="button" title="התקן כאפליקציה על שולחן העבודה" style="display:none;position:fixed;bottom:20px;right:20px;background:#7c3aed;color:#fff;width:56px;height:56px;border-radius:28px;border:none;box-shadow:0 4px 16px rgba(124,58,237,0.4);font-size:24px;cursor:pointer;z-index:99997;font-family:Heebo,sans-serif;">📥</button>
+
+<!-- Manual install instructions modal (shown when browser doesn't fire beforeinstallprompt) -->
+<div id="pwa-manual-overlay" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;font-family:Heebo,sans-serif;">
+  <div style="background:#fff;border-radius:16px;padding:28px;width:480px;max-width:92vw;direction:rtl;color:#1a1a2e;">
+    <div style="text-align:center;margin-bottom:18px;">
+      <div style="font-size:48px;">📥</div>
+      <h2 style="margin:8px 0 0;color:#7c3aed;">התקנת האפליקציה</h2>
+    </div>
+    <div id="pwa-manual-content" style="font-size:14px;line-height:1.7;color:#444;"></div>
+    <div style="margin-top:18px;text-align:center;">
+      <button id="pwa-manual-close" type="button" style="padding:10px 30px;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">הבנתי</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function() {
+  // Service Worker registration — required for PWA
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
-      navigator.serviceWorker.register('sw.js').catch(function(err) {
-        console.log('[PWA] SW registration failed:', err);
-      });
+      navigator.serviceWorker.register('sw.js')
+        .then(function(reg) { console.log('[PWA] SW registered:', reg.scope); })
+        .catch(function(err) { console.log('[PWA] SW failed:', err); });
     });
   }
 
@@ -11109,7 +11127,12 @@ if (document.readyState === 'loading') {
   var banner = document.getElementById('pwa-install-banner');
   var installBtn = document.getElementById('pwa-install-btn');
   var dismissBtn = document.getElementById('pwa-dismiss-btn');
+  var fab = document.getElementById('pwa-install-fab');
+  var manualOverlay = document.getElementById('pwa-manual-overlay');
+  var manualContent = document.getElementById('pwa-manual-content');
+  var manualClose = document.getElementById('pwa-manual-close');
   var DISMISS_KEY = 'galilElyon_pwaDismissedAt';
+  var INSTALLED_KEY = 'galilElyon_pwaInstalled';
 
   function recentlyDismissed() {
     try {
@@ -11120,23 +11143,113 @@ if (document.readyState === 'loading') {
     } catch(e) { return false; }
   }
 
+  function isStandalone() {
+    return (window.matchMedia('(display-mode: standalone)').matches ||
+            window.navigator.standalone === true);
+  }
+
+  function detectBrowser() {
+    var ua = navigator.userAgent.toLowerCase();
+    if (ua.indexOf('edg') !== -1) return 'edge';
+    if (ua.indexOf('chrome') !== -1) return 'chrome';
+    if (ua.indexOf('firefox') !== -1) return 'firefox';
+    if (ua.indexOf('safari') !== -1) return 'safari';
+    return 'other';
+  }
+
+  function showManualInstructions() {
+    var b = detectBrowser();
+    var instructions = '';
+    if (b === 'chrome' || b === 'edge') {
+      instructions =
+        '<p>הדפדפן שלך תומך בהתקנה, אבל לא הציע אותה אוטומטית. בצע את הצעדים הבאים:</p>' +
+        '<ol style="padding-right:20px;margin:12px 0;">' +
+        '<li>לחץ על <strong>3 הנקודות</strong> בפינה הימנית-עליונה של הדפדפן (⋮)</li>' +
+        '<li>חפש <strong>"שמור והעלה" → "התקן את האפליקציה"</strong>' +
+        ' (או "Cast, save, share" → "Install page as app")</li>' +
+        '<li>בחלון שייפתח, לחץ <strong>"התקן"</strong></li>' +
+        '<li>האייקון הסגול יופיע על שולחן העבודה ובתפריט "התחל"</li>' +
+        '</ol>' +
+        '<p style="background:#f0f4ff;padding:10px;border-radius:8px;font-size:13px;">' +
+        '<strong>💡 טיפ:</strong> אם אינך מוצא "התקן את האפליקציה", ייתכן שאתה כבר התקנת. בדוק בתפריט "התחל" של Windows.' +
+        '</p>';
+    } else if (b === 'safari') {
+      instructions =
+        '<p>בדפדפן Safari (Mac/iPhone):</p>' +
+        '<ol style="padding-right:20px;margin:12px 0;">' +
+        '<li>לחץ על כפתור <strong>השיתוף</strong> (ריבוע עם חץ למעלה)</li>' +
+        '<li>גלול ובחר <strong>"הוסף למסך הבית"</strong></li>' +
+        '<li>בחר שם ולחץ <strong>"הוסף"</strong></li>' +
+        '</ol>';
+    } else if (b === 'firefox') {
+      instructions =
+        '<p>Firefox לא תומך בהתקנת PWA במחשב. ' +
+        'מומלץ להשתמש ב-<strong>Chrome</strong> או <strong>Edge</strong> במקום.</p>' +
+        '<p style="background:#f0f4ff;padding:10px;border-radius:8px;font-size:13px;">' +
+        '<strong>חלופה:</strong> תוכל להוסיף את הדף לסימניות (Ctrl+D) או ליצור קיצור דרך מהסייר של Windows.' +
+        '</p>';
+    } else {
+      instructions =
+        '<p>הדפדפן הנוכחי לא תומך בהתקנת PWA. ' +
+        'מומלץ להשתמש ב-<strong>Chrome</strong> או <strong>Edge</strong>.</p>';
+    }
+    if (manualContent) manualContent.innerHTML = instructions;
+    if (manualOverlay) manualOverlay.style.display = 'flex';
+  }
+
+  // Listen for the install prompt event
   window.addEventListener('beforeinstallprompt', function(e) {
+    console.log('[PWA] beforeinstallprompt fired');
     e.preventDefault();
     deferredPrompt = e;
-    if (banner && !recentlyDismissed()) {
+    if (banner && !recentlyDismissed() && !isStandalone()) {
       setTimeout(function(){ banner.style.display = 'block'; }, 4000);
     }
+    // Always show the FAB
+    if (fab && !isStandalone()) fab.style.display = 'flex';
   });
+
+  // FAB always visible (after a delay) so users can manually trigger
+  if (fab && !isStandalone()) {
+    setTimeout(function() {
+      // Show even if beforeinstallprompt didn't fire — we'll handle clicks gracefully
+      fab.style.display = 'flex';
+    }, 6000);
+
+    fab.addEventListener('click', function() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function(result) {
+          console.log('[PWA] User choice (FAB):', result.outcome);
+          if (result.outcome === 'accepted') {
+            try { localStorage.setItem(INSTALLED_KEY, '1'); } catch(e){}
+            fab.style.display = 'none';
+          }
+          deferredPrompt = null;
+        });
+      } else {
+        // No prompt available — show manual instructions
+        showManualInstructions();
+      }
+    });
+  }
 
   if (installBtn) {
     installBtn.addEventListener('click', function() {
-      if (!deferredPrompt) return;
       banner.style.display = 'none';
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then(function(result) {
-        console.log('[PWA] User choice:', result.outcome);
-        deferredPrompt = null;
-      });
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function(result) {
+          console.log('[PWA] User choice:', result.outcome);
+          if (result.outcome === 'accepted') {
+            try { localStorage.setItem(INSTALLED_KEY, '1'); } catch(e){}
+            if (fab) fab.style.display = 'none';
+          }
+          deferredPrompt = null;
+        });
+      } else {
+        showManualInstructions();
+      }
     });
   }
   if (dismissBtn) {
@@ -11145,11 +11258,23 @@ if (document.readyState === 'loading') {
       try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch(e){}
     });
   }
+  if (manualClose) {
+    manualClose.addEventListener('click', function() {
+      manualOverlay.style.display = 'none';
+    });
+  }
 
   window.addEventListener('appinstalled', function() {
     console.log('[PWA] App installed!');
+    try { localStorage.setItem(INSTALLED_KEY, '1'); } catch(e){}
     if (banner) banner.style.display = 'none';
+    if (fab) fab.style.display = 'none';
   });
+
+  // Hide FAB if already running as installed app
+  if (isStandalone() && fab) {
+    fab.style.display = 'none';
+  }
 })();
 </script>
 

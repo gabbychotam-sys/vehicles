@@ -2,16 +2,20 @@
   "name": "פיקוח רכבים נטושים - גליל עליון",
   "short_name": "פיקוח רכבים",
   "description": "אפליקציית פיקוח רכבים נטושים - מועצה אזורית הגליל העליון",
-  "start_url": "./אפליקציית-פיקוח-נייד.html",
-  "scope": ".",
+  "start_url": "./%D7%90%D7%A4%D7%9C%D7%99%D7%A7%D7%A6%D7%99%D7%99%D7%AA-%D7%A4%D7%99%D7%A7%D7%95%D7%97-%D7%A0%D7%99%D7%99%D7%93.html",
+  "scope": "./",
+  "id": "/galil-vehicles-mobile",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#7c3aed",
   "theme_color": "#7c3aed",
   "lang": "he",
   "dir": "rtl",
+  "categories": ["productivity", "government"],
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
