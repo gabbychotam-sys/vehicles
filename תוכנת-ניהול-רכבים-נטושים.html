@@ -2163,7 +2163,7 @@ body.inspector-mode {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.17 — inspector mode</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.18 — barcode</div>
     </div>
   </div>
 
@@ -2237,7 +2237,7 @@ body.inspector-mode {
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <div class="tb-notif">🔔<div class="notif-dot"></div></div>
       <button onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.17 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.18 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2818,7 +2818,7 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.17 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.18 ✓</span>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
     </div>
@@ -3553,6 +3553,53 @@ body.inspector-mode {
     </div>
   </div>
 </div>
+
+<!-- ═══════════ v2.9.18: BARCODE MODAL (registered mail tracking) ═══════════ -->
+<div id="barcode-modal-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center;" onclick="closeBarcodeModal()">
+  <div style="background:var(--card);border-radius:16px;padding:28px 32px;max-width:480px;width:92%;direction:rtl;font-family:var(--font);border:1px solid var(--border);" onclick="event.stopPropagation()">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:40px;margin-bottom:8px;">📮</div>
+      <div style="font-size:18px;font-weight:800;color:var(--text);">ברקוד דואר רשום</div>
+      <div id="barcode-doc-label" style="font-size:13px;color:var(--muted);margin-top:4px;"></div>
+    </div>
+
+    <div style="background:rgba(102,51,153,0.06);border:1px dashed rgba(102,51,153,0.3);border-radius:10px;padding:14px;margin-bottom:16px;font-size:12px;line-height:1.7;color:#3d1768;">
+      <div style="font-weight:700;margin-bottom:4px;">💡 איך זה עובד?</div>
+      <div>1. לחץ פעם אחת על שדה הברקוד שמתחת</div>
+      <div>2. סרוק את הברקוד מקבלת הדואר הרשום עם הסורק הידני</div>
+      <div>3. הברקוד יופיע אוטומטית בשדה</div>
+      <div>4. לחץ "שמור"</div>
+      <div style="margin-top:6px;color:#666;">או הקלד ידנית את מספר הברקוד</div>
+    </div>
+
+    <label style="display:block;font-size:13px;color:var(--text);margin-bottom:6px;font-weight:600;">מספר ברקוד:</label>
+    <input id="barcode-input" type="text" autocomplete="off"
+           style="width:100%;padding:13px 14px;border:2px solid #6633cc;border-radius:10px;font-size:18px;font-family:monospace;direction:ltr;text-align:left;box-sizing:border-box;letter-spacing:1px;"
+           placeholder="סרוק או הקלד ברקוד...">
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+      <button onclick="closeBarcodeModal()" style="background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text);">ביטול</button>
+      <button id="barcode-save-btn" onclick="saveBarcodeToDoc()" style="background:#6633cc;border:none;border-radius:8px;padding:10px 28px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#fff;">💾 שמור</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══ v2.9.18: barcode modal — Enter key submits the form ═══
+document.addEventListener('DOMContentLoaded', function() {
+  var bcInput = document.getElementById('barcode-input');
+  if (bcInput) {
+    bcInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (typeof saveBarcodeToDoc === 'function') saveBarcodeToDoc();
+      } else if (e.key === 'Escape') {
+        if (typeof closeBarcodeModal === 'function') closeBarcodeModal();
+      }
+    });
+  }
+});
+</script>
 
 <!-- ====== STAFF MODAL ====== -->
 <div id="staff-modal-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center;" onclick="closeStaffModal()">
@@ -4436,35 +4483,46 @@ function loadCaseDocuments(plate) {
   // Show loading state
   listEl.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">⏳ טוען מסמכים...</div>';
 
-  db.ref('archives/' + safe).once('value')
-    .then(function(snap) {
-      var data = snap.val() || {};
-      var items = [];
-      Object.keys(data).forEach(function(k) {
-        var doc = data[k];
-        if (doc) items.push({ key: k, doc: doc });
-      });
-      // ═══ Merge with local fallback items (in case Firebase save failed earlier) ═══
-      var localItems = _getLocalItems();
-      var existingKeys = {};
-      items.forEach(function(it) { existingKeys[it.key] = true; });
-      localItems.forEach(function(it) {
-        if (!existingKeys[it.key]) items.push(it);
-      });
-      // Sort newest first
-      items.sort(function(a, b) {
-        return (b.doc.savedAt || 0) - (a.doc.savedAt || 0);
-      });
-      window._archiveCache[safe] = items;
-      renderArchive(plate, items);
-    })
-    .catch(function(err) {
-      console.warn('[archive] load failed:', err);
-      listEl.innerHTML =
-        '<div style="text-align:center;padding:20px;color:#c62828;font-size:13px;">' +
-        '⚠️ שגיאה בטעינת ארכיון. ייתכן שאין הרשאה. בדוק חיבור Firebase.' +
-        '</div>';
+  // ═══ v2.9.18: switch from once() to on() for REAL-TIME archive sync ═══
+  // When someone else adds a barcode or new document, all viewers see it
+  // immediately without having to refresh.
+  // We detach any previous listener for a different plate first.
+  if (window._archiveListenerRef) {
+    try { window._archiveListenerRef.off('value', window._archiveListenerCb); } catch(e){}
+    window._archiveListenerRef = null;
+    window._archiveListenerCb = null;
+  }
+
+  var ref = db.ref('archives/' + safe);
+  var cb = function(snap) {
+    var data = snap.val() || {};
+    var items = [];
+    Object.keys(data).forEach(function(k) {
+      var doc = data[k];
+      if (doc) items.push({ key: k, doc: doc });
     });
+    // ═══ Merge with local fallback items (in case Firebase save failed earlier) ═══
+    var localItems = _getLocalItems();
+    var existingKeys = {};
+    items.forEach(function(it) { existingKeys[it.key] = true; });
+    localItems.forEach(function(it) {
+      if (!existingKeys[it.key]) items.push(it);
+    });
+    // Sort newest first
+    items.sort(function(a, b) {
+      return (b.doc.savedAt || 0) - (a.doc.savedAt || 0);
+    });
+    window._archiveCache[safe] = items;
+    renderArchive(plate, items);
+  };
+  ref.on('value', cb, function(err) {
+    console.warn('[archive] listen failed:', err);
+    listEl.innerHTML =
+      '<div style="text-align:center;padding:20px;color:#c62828;">' +
+      '⚠️ שגיאה בטעינת הארכיון: ' + (err.message || err) + '</div>';
+  });
+  window._archiveListenerRef = ref;
+  window._archiveListenerCb = cb;
 }
 
 function renderArchive(plate, items) {
@@ -4539,12 +4597,20 @@ function renderArchive(plate, items) {
           '</div>' +
         '</div>' +
         (d.regnum ? '<div style="font-size:11px;color:var(--muted);font-family:monospace;direction:ltr;text-align:right;">דואר רשום: ' + d.regnum + '</div>' : '') +
+        // ═══ v2.9.18: barcode display (registered mail tracking) ═══
+        (d.barcode
+          ? '<div style="background:rgba(102,51,153,0.08);border:1px dashed rgba(102,51,153,0.3);border-radius:8px;padding:8px 10px;margin-top:4px;">' +
+            '<div style="font-size:10px;color:#6633cc;font-weight:700;margin-bottom:2px;">📮 ברקוד דואר רשום</div>' +
+            '<div style="font-size:13px;font-weight:700;font-family:monospace;direction:ltr;text-align:left;color:#3d1768;">' + d.barcode + '</div>' +
+            '</div>'
+          : '') +
         inspectorLine +
         '<div style="font-size:10px;color:#999;">נשמר: ' + savedDate + '</div>' +
         '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">' +
           '<button class="row-action" style="flex:1;min-width:60px;background:#e3f2fd;color:#1565c0;font-size:11px;padding:6px;border:none;border-radius:6px;cursor:pointer;" onclick="viewArchivedDoc(\'' + safe + '\',\'' + it.key + '\')">👁️ צפה</button>' +
           '<button class="row-action" style="flex:1;min-width:60px;background:#e8f5e9;color:#2e7d32;font-size:11px;padding:6px;border:none;border-radius:6px;cursor:pointer;" onclick="printArchivedDoc(\'' + safe + '\',\'' + it.key + '\')">🖨️ הדפס</button>' +
           '<button class="row-action" style="flex:1;min-width:60px;background:#fff3e0;color:#e65100;font-size:11px;padding:6px;border:none;border-radius:6px;cursor:pointer;" onclick="downloadArchivedDoc(\'' + safe + '\',\'' + it.key + '\')">⬇️ הורד</button>' +
+          '<button class="row-action" style="flex:1;min-width:60px;background:#f3e5f5;color:#6633cc;font-size:11px;padding:6px;border:1px solid rgba(102,51,153,0.3);border-radius:6px;cursor:pointer;" onclick="openBarcodeModal(\'' + safe + '\',\'' + it.key + '\')">' + (d.barcode ? '✏️ ערוך ברקוד' : '📮 הוסף ברקוד') + '</button>' +
           '<button class="row-action" style="flex:1;min-width:60px;background:#ffebee;color:#c62828;font-size:11px;padding:6px;border:1px solid #ffcdd2;border-radius:6px;cursor:pointer;" onclick="deleteArchivedDoc(\'' + safe + '\',\'' + it.key + '\')">🗑️ מחק</button>' +
         '</div>' +
       '</div>';
@@ -4682,6 +4748,124 @@ function deleteArchivedDoc(safePlate, key) {
       setTimeout(function() { loadCaseDocuments(CASE.plate); }, 200);
     }
   });
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   📮 v2.9.18: BARCODE TRACKING for registered mail (דואר רשום)
+   Each archived document can have a barcode attached (scanned via
+   handheld barcode scanner, or typed manually). This is critical
+   for tracking the registered mail receipts.
+   ═══════════════════════════════════════════════════════════════════ */
+window._currentBarcodeTarget = null;
+
+function openBarcodeModal(safePlate, key) {
+  var doc = _getArchivedDoc(safePlate, key);
+  if (!doc) { alert('לא נמצא המסמך'); return; }
+
+  // Block viewers and inspectors who don't own the case
+  if (typeof isViewerOnly === 'function' && isViewerOnly()) {
+    alert('👁️ מצב צפייה בלבד - לא ניתן להוסיף ברקוד.');
+    return;
+  }
+
+  // Save target for the save handler
+  window._currentBarcodeTarget = { safePlate: safePlate, key: key };
+
+  var typeLabelMap = {
+    letter1: 'מכתב ראשון', letter2: 'מכתב שני', letter4: 'הודעת גרירה',
+    nispach_a: 'נספח א׳ — מכתב ראשון', nispach_b: 'מדבקה צהובה',
+    nispach_d: 'נספח ד׳ — מכתב שני', nispach_e: 'מדבקה אדומה',
+    pinuy_letter: 'מכתב פינוי גרוטאה', vitor: 'הצהרת ויתור',
+    case_snapshot: 'תיעוד פרטי תיק'
+  };
+  var typeLbl = typeLabelMap[doc.type] || doc.title || 'מסמך';
+
+  // Show modal
+  var modal = document.getElementById('barcode-modal-overlay');
+  if (modal) {
+    document.getElementById('barcode-doc-label').textContent = typeLbl;
+    var input = document.getElementById('barcode-input');
+    if (input) {
+      input.value = doc.barcode || '';
+      modal.style.display = 'flex';
+      // Focus the input so the barcode scanner can type directly
+      setTimeout(function(){ input.focus(); input.select(); }, 100);
+    }
+  }
+}
+
+function closeBarcodeModal() {
+  var modal = document.getElementById('barcode-modal-overlay');
+  if (modal) modal.style.display = 'none';
+  window._currentBarcodeTarget = null;
+}
+
+function saveBarcodeToDoc() {
+  var target = window._currentBarcodeTarget;
+  if (!target) return;
+
+  var input = document.getElementById('barcode-input');
+  var barcode = input ? (input.value || '').trim() : '';
+
+  if (!barcode) {
+    if (!confirm('השדה ריק. האם להסיר את הברקוד מהמסמך?')) return;
+  }
+
+  var btn = document.getElementById('barcode-save-btn');
+  if (btn) { btn.textContent = '⏳ שומר...'; btn.disabled = true; }
+
+  var db = (typeof fbDb !== 'undefined' && fbDb) || window.fbDb;
+  var savedByEmail = '';
+  try {
+    var u = (typeof currentUser !== 'undefined' && currentUser) || window.currentUser;
+    savedByEmail = (u && u.email) || '';
+  } catch(e) {}
+
+  var updates = {
+    barcode: barcode,
+    barcodeAddedAt: Date.now(),
+    barcodeAddedBy: savedByEmail
+  };
+
+  function done() {
+    if (btn) { btn.textContent = '💾 שמור'; btn.disabled = false; }
+    closeBarcodeModal();
+    showToast(barcode ? '📮 ברקוד נשמר בהצלחה' : '🗑️ ברקוד הוסר');
+    setTimeout(function(){ if (CASE && CASE.plate) loadCaseDocuments(CASE.plate); }, 300);
+  }
+
+  if (db) {
+    db.ref('archives/' + target.safePlate + '/' + target.key).update(updates)
+      .then(function(){
+        console.log('[barcode] ✓ saved to Firebase:', target.safePlate, target.key, barcode);
+        done();
+      })
+      .catch(function(err){
+        console.error('[barcode] Firebase save failed:', err);
+        // Fallback to localStorage
+        try {
+          var lsKey = 'galilArchive_' + target.safePlate;
+          var existing = JSON.parse(localStorage.getItem(lsKey) || '{}');
+          if (existing[target.key]) {
+            Object.assign(existing[target.key], updates);
+            localStorage.setItem(lsKey, JSON.stringify(existing));
+          }
+        } catch(e) {}
+        alert('⚠️ הברקוד נשמר מקומית בלבד - ייתכן שיש בעיית חיבור.\nכאשר יתחבר שוב - הוא יסונכרן.');
+        done();
+      });
+  } else {
+    // No Firebase — local only
+    try {
+      var lsKey = 'galilArchive_' + target.safePlate;
+      var existing = JSON.parse(localStorage.getItem(lsKey) || '{}');
+      if (existing[target.key]) {
+        Object.assign(existing[target.key], updates);
+        localStorage.setItem(lsKey, JSON.stringify(existing));
+      }
+    } catch(e) {}
+    done();
+  }
 }
 
 function addToTowedPanel(caseData, deadline) {
