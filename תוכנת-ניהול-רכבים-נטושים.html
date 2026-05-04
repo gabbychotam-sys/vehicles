@@ -2163,7 +2163,7 @@ body.inspector-mode {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.20 — sync fix</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.21 — del sync</div>
     </div>
   </div>
 
@@ -2237,7 +2237,7 @@ body.inspector-mode {
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <div class="tb-notif">🔔<div class="notif-dot"></div></div>
       <button onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.20 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.21 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2818,7 +2818,7 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.20 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.21 ✓</span>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
     </div>
@@ -8438,14 +8438,23 @@ function executeDeleteCase() {
 
     // ═══ NEW: Remove from Firebase (so it doesn't come back on reload) ═══
     if (window.GalilSync && window.GalilSync.isReady && window.GalilSync.isReady()) {
-      // ═══ v2.9.20: Mark as _deleted in Firebase so OTHER users also see deletion ═══
-      // The local localStorage tombstone only protects the current device.
-      // Setting _deleted: true in Firebase is what the listener filters on for everyone.
+      // ═══ v2.9.21: ONLY mark as _deleted in Firebase. Don't remove() ═══
+      // Previously we did update({_deleted:true}) followed by remove(), which
+      // caused a race condition: remove() would win, deleting the record before
+      // other users' listeners could read the _deleted flag. Result: case
+      // disappeared on this device but reappeared on others (because listener
+      // saw it and re-rendered without the flag).
+      // Now we ONLY set _deleted. The listener on every device filters those
+      // out, so the case disappears for everyone. Storage is fine — these
+      // tombstones are tiny.
       var idToFlag = mobileIdToDelete;
       if (!idToFlag && window.GalilSync._findIdByPlate) {
         idToFlag = window.GalilSync._findIdByPlate(deletingPlate);
       }
       if (idToFlag && fbDb) {
+        // Mark the local tombstone too (immediate effect on this device)
+        if (window.GalilSync._markDeleted) window.GalilSync._markDeleted(idToFlag);
+
         var flagPath = 'cases/' + idToFlag;
         fbDb.ref(flagPath).update({
           _deleted: true,
@@ -8455,22 +8464,9 @@ function executeDeleteCase() {
           console.log('[deleteCase] ✓ flagged _deleted in Firebase for', idToFlag);
         }).catch(function(err) {
           console.warn('[deleteCase] failed to flag _deleted:', err);
+          // Fallback: try the old remove() path
+          if (window.GalilSync._deleteCase) window.GalilSync._deleteCase(idToFlag);
         });
-      }
-
-      // If we have a mobile-id from the row, use it directly
-      if (mobileIdToDelete && window.GalilSync._deleteCase) {
-        // ═══ TOMBSTONE: mark deleted so it never comes back ═══
-        if (window.GalilSync._markDeleted) window.GalilSync._markDeleted(mobileIdToDelete);
-        window.GalilSync._deleteCase(mobileIdToDelete);
-      } else if (window.GalilSync._findIdByPlate && window.GalilSync._deleteCase) {
-        // Otherwise try to find by plate
-        var idByPlate = window.GalilSync._findIdByPlate(deletingPlate);
-        if (idByPlate) {
-          // ═══ TOMBSTONE: mark deleted so it never comes back ═══
-          if (window.GalilSync._markDeleted) window.GalilSync._markDeleted(idByPlate);
-          window.GalilSync._deleteCase(idByPlate);
-        }
       }
     }
 
@@ -10907,6 +10903,44 @@ if (document.readyState === 'loading') {
     listenerRef.on('child_changed', function(snap) {
       var c = snap.val();
       if (!c) return;
+      // ═══ v2.9.21: if a case was just marked _deleted by another user,
+      // remove its row from the UI on this device too. ═══
+      if (c._deleted === true) {
+        var id = snap.key;
+        console.log('[Firebase] child_changed (now _deleted):', id, c.plate || '');
+        delete mobileCasesCache[id];
+        // Mark as deleted locally so future events skip it
+        try {
+          if (window.GalilSync && window.GalilSync._markDeleted) {
+            window.GalilSync._markDeleted(id);
+          }
+        } catch(e){}
+        // Remove the matching row(s) from the cases tables
+        ['cases-tbody', 'dash-urgent-tbody', 'tw-towed-tbody', 'towed-tbody', 'mobile-cases-tbody'].forEach(function(tbId) {
+          var tbody = document.getElementById(tbId);
+          if (!tbody) return;
+          var row = tbody.querySelector('tr[data-mobile-id="' + cssEscape(id) + '"]');
+          if (row) row.remove();
+          // Also try by plate (for manual rows)
+          if (c.plate) {
+            tbody.querySelectorAll('tr').forEach(function(r) {
+              var pb = r.querySelector('.plate-badge');
+              if (pb && pb.textContent.trim() === String(c.plate).trim()) r.remove();
+            });
+          }
+        });
+        // Remove from map
+        if (typeof MAP_CASES !== 'undefined' && Array.isArray(MAP_CASES) && c.plate) {
+          for (var m = MAP_CASES.length - 1; m >= 0; m--) {
+            if (MAP_CASES[m].plate === c.plate) MAP_CASES.splice(m, 1);
+          }
+        }
+        // Refresh counters
+        if (typeof syncDashboardWithCases === 'function') try { syncDashboardWithCases(); } catch(e){}
+        if (typeof updateAllCounters === 'function') try { updateAllCounters(); } catch(e){}
+        if (typeof refreshDashboardPanels === 'function') try { refreshDashboardPanels(); } catch(e){}
+        return;
+      }
       if (_isStaleCase(c, snap.key)) return;
       if (c.source === 'mobile') {
         mobileCasesCache[c.id] = c;
