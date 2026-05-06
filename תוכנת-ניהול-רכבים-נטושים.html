@@ -2173,7 +2173,7 @@ body.inspector-mode {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.50 — viewer perms אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.51 — dashboard search אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2249,9 +2249,9 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="✓ מסונכרן" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(46, 125, 50); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <div class="tb-date" id="live-date">יום שבת, 2 מאי 2026</div>
-      <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
+      <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב (Enter להצגה מלאה)" oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.50 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.51 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2875,7 +2875,7 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.50 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.51 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -8668,15 +8668,63 @@ function applyCasesFilter() {
   });
 }
 
-// Dashboard search - filter urgent table
+// Dashboard search — filters the dashboard's "תיקים דחופים" table AND, if the
+// user pressed Enter or types something the dashboard doesn't have, jumps to
+// "כל התיקים" with the same search applied.
+// v2.9.51: also expand the search to ALL cases (not just urgent ones), and
+// when the user presses Enter, navigate to the cases-list view to show the
+// full results.
 function filterDashboardTable() {
-  var search = (document.getElementById('dash-search')?.value || '').trim().toLowerCase();
+  var input = document.getElementById('dash-search');
+  if (!input) return;
+  var search = (input.value || '').trim().toLowerCase();
+
+  // Filter the small "urgent cases" table inline (instant feedback)
   var rows = document.querySelectorAll('#view-dashboard .tbl tbody tr');
   rows.forEach(function(row) {
     var text = row.textContent.toLowerCase();
     row.style.display = (!search || text.indexOf(search) !== -1) ? '' : 'none';
   });
+
+  // ═══ v2.9.51: ALSO drive the main cases list filter ═══
+  // Copy the search term over to #cases-search and apply, so when the user
+  // jumps to "כל התיקים" they see the same filter already applied.
+  var casesSearch = document.getElementById('cases-search');
+  if (casesSearch) {
+    casesSearch.value = input.value;
+    if (typeof applyCasesFilter === 'function') {
+      try { applyCasesFilter(); } catch(e){}
+    }
+  }
 }
+
+// ═══ v2.9.51: Pressing Enter in the dashboard search jumps to "כל התיקים" ═══
+// This handles the case where the search term doesn't match any URGENT case
+// (so the inline dashboard filter shows nothing) but DOES match a regular
+// case in the main list.
+document.addEventListener('DOMContentLoaded', function() {
+  var dashSearch = document.getElementById('dash-search');
+  if (!dashSearch) return;
+  dashSearch.addEventListener('keydown', function(ev) {
+    if (ev.key === 'Enter') {
+      ev.preventDefault();
+      var val = (dashSearch.value || '').trim();
+      if (!val) return;
+      // Mirror the value into cases-search and switch view
+      var casesSearch = document.getElementById('cases-search');
+      if (casesSearch) casesSearch.value = val;
+      if (typeof showView === 'function') showView('cases-list');
+      // Apply the filter on the now-visible cases list
+      setTimeout(function() {
+        if (typeof applyCasesFilter === 'function') {
+          try { applyCasesFilter(); } catch(e){}
+        }
+        // Focus the cases-list search so the user can refine
+        if (casesSearch) casesSearch.focus();
+      }, 50);
+    }
+  });
+});
 
 // ═══════════════ SETTINGS PAGE ═══════════════
 var defaultColors = {
@@ -10811,7 +10859,7 @@ document.addEventListener('keydown', function(e) {
 // ═══════════════════════════════════════════════════════════════════
 function _getCurrentVersion() {
   // Read from the visible version label in the sidebar
-  // <div ...>v2.9.50 — viewer perms ...</div>
+  // <div ...>v2.9.51 — dashboard search ...</div>
   try {
     var nodes = document.querySelectorAll('div');
     for (var i = 0; i < nodes.length; i++) {
