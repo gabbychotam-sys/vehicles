@@ -2163,7 +2163,7 @@ body.inspector-mode {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.31 — visible UI</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.32 — single edit</div>
     </div>
   </div>
 
@@ -2236,7 +2236,7 @@ body.inspector-mode {
       <div class="tb-date" id="live-date">יום שבת, 2 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.31 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.32 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2860,7 +2860,7 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.31 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.32 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -3290,7 +3290,9 @@ body.inspector-mode {
 </div>
 
 
-<div class="modal-overlay" id="edit-modal-overlay" onclick="closeEditModal(event)">
+<!-- ═══ v2.9.32: Old edit modal — kept hidden for legacy compatibility ═══ -->
+<!-- All edit operations now go through the openEditFullForm screen -->
+<div class="modal-overlay" id="edit-modal-overlay" style="display:none !important;" onclick="closeEditModal(event)">
   <div class="edit-modal" onclick="event.stopPropagation()">
     <div class="modal-header">
       <div class="modal-title">✏️ עריכת פרטי תיק — <span id="edit-plate-title">98-765-43</span></div>
@@ -5575,6 +5577,34 @@ function deleteTowedVehicle(btn, ev) {
 let currentStatus = 'red';
 
 function openEditModal() {
+  // ═══ v2.9.32: redirect old "edit modal" to the new full-form edit screen ═══
+  // The old modal had a different UI without status chips, manual city, tow checkbox.
+  // Now there's only one edit experience.
+  // We synthesize a fake row with the current CASE data and pass it to openEditFullForm.
+  if (typeof openEditFullForm === 'function') {
+    var fakeTr = document.createElement('tr');
+    fakeTr.setAttribute('data-case', JSON.stringify(CASE));
+    // Try to find the real row by plate so save will update the right record
+    var realRow = null;
+    if (CASE.plate) {
+      document.querySelectorAll('#cases-tbody tr, #dash-urgent-tbody tr').forEach(function(r) {
+        var pb = r.querySelector('.plate-badge');
+        if (pb && pb.textContent.trim() === String(CASE.plate).trim()) {
+          if (!realRow) realRow = r;
+        }
+      });
+    }
+    if (realRow) {
+      // Use the real row so saveNewCase knows it's an edit
+      openEditFullForm(realRow);
+    } else {
+      // No row found (rare) — use the fake one
+      openEditFullForm(fakeTr);
+    }
+    return;
+  }
+
+  // ═══ Legacy fallback (should not be reached) ═══
   document.getElementById('e-plate').value         = CASE.plate;
   document.getElementById('e-vehicle-type').value  = CASE.vehicleType;
   document.getElementById('e-owner-name').value    = CASE.ownerName;
@@ -11026,6 +11056,15 @@ if (document.readyState === 'loading') {
 
     // Populate the name dropdown from staffList (sorted by Hebrew name)
     if (nameSelect && typeof staffList !== 'undefined' && staffList.length) {
+      // ═══ v2.9.32: clear all existing options EXCEPT the placeholder ═══
+      // Otherwise the JS adds duplicates on top of the static HTML options.
+      var existingOptions = nameSelect.querySelectorAll('option');
+      for (var ei = existingOptions.length - 1; ei >= 0; ei--) {
+        if (existingOptions[ei].value !== '') {
+          existingOptions[ei].remove();
+        }
+      }
+
       var sorted = staffList.slice().sort(function(a, b) {
         return a.name.localeCompare(b.name, 'he');
       });
