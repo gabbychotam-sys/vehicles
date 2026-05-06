@@ -1489,7 +1489,7 @@ select.edit-input { cursor:pointer; }
 .flowchart-arrow { font-size: 16px; color: var(--muted); margin-top: -14px; }
 
 /* ═══════════════ VIEW TOGGLE ═══════════════ */
-.view-dashboard, .view-case, .view-cases-list, .view-map, .view-documents, .view-towed, .view-staff, .view-towns, .view-settings {
+.view-dashboard, .view-case, .view-cases-list, .view-map, .view-documents, .view-towed, .view-staff, .view-towns, .view-settings, .view-history {
   display: none;
   flex: 1;
   min-width: 0;
@@ -1529,6 +1529,10 @@ select.edit-input { cursor:pointer; }
   flex-direction: column;
 }
 .view-settings.active-view {
+  display: flex;
+  flex-direction: column;
+}
+.view-history.active-view {
   display: flex;
   flex-direction: column;
 }
@@ -2163,7 +2167,7 @@ body.inspector-mode {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.42 — auto-fix אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.43 — map+towns+history אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2192,6 +2196,11 @@ body.inspector-mode {
       <div class="si-icon">🚛</div>
       <span class="si-label">גרירה ואחסנה</span>
       <span class="sb-badge orange" id="sb-badge-towed" style="display: none;">3</span>
+    </div>
+    <div class="sb-item">
+      <div class="si-icon">📚</div>
+      <span class="si-label">היסטוריה</span>
+      <span class="sb-badge" id="sb-badge-history" style="display: none; background: #757575;">0</span>
     </div>
 
     <div class="sb-section-label">ניהול</div>
@@ -2236,7 +2245,7 @@ body.inspector-mode {
       <div class="tb-date" id="live-date">יום שבת, 2 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.42 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.43 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2860,7 +2869,7 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.42 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.43 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -3205,6 +3214,59 @@ body.inspector-mode {
         <div style="font-size:40px;margin-bottom:12px;">🏘️</div>
         <div style="font-size:15px;font-weight:600;margin-bottom:6px;">בחר יישוב מהרשימה למעלה</div>
         <div style="font-size:13px;">לחץ על כרטיס יישוב כדי לראות את כל התיקים שלו</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════ HISTORY VIEW (closed cases) ═══════════════ -->
+<div class="view-history" id="view-history">
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="tb-title">📚 היסטוריה — תיקים סגורים</div>
+      <div class="tb-sub" style="color:rgba(255,255,255,0.7);font-size:12px;margin-top:2px;">
+        <span id="history-subtitle">תיקים שטופלו ונסגרו</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
+      <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
+      <input class="tb-search" id="history-search" type="text" placeholder="🔍  חיפוש לוחית / שם / יישוב..." oninput="filterHistoryRows()">
+    </div>
+  </div>
+  <div class="content" style="padding:20px 28px;">
+    <div class="panel" style="border-radius:16px;">
+      <div class="panel-header" style="padding:14px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <div class="panel-title" id="history-panel-title">📋 כל התיקים הסגורים (0)</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="row-action" id="history-filter-all" onclick="setHistoryFilter('all')" style="background:var(--accent);color:#fff;">הכל</button>
+          <button class="row-action" id="history-filter-closed" onclick="setHistoryFilter('closed')">✅ סגור</button>
+          <button class="row-action" id="history-filter-scrapped" onclick="setHistoryFilter('scrapped')">♻️ פינוי גרוטאה</button>
+          <button class="row-action" id="history-filter-waiver" onclick="setHistoryFilter('waiver')">✍️ הצהרת ויתור</button>
+        </div>
+      </div>
+      <table class="tbl" id="history-table">
+        <thead>
+          <tr>
+            <th style="width:50px;">#</th>
+            <th>תאריך פתיחה</th>
+            <th>תאריך סגירה</th>
+            <th>לוחית</th>
+            <th>בעל הרכב</th>
+            <th>יישוב</th>
+            <th>סטטוס סופי</th>
+            <th>פקח</th>
+            <th>פעולה</th>
+          </tr>
+        </thead>
+        <tbody id="history-tbody"></tbody>
+      </table>
+      <div id="history-empty-state" style="text-align:center;padding:48px 20px;color:var(--muted);">
+        <div style="font-size:40px;margin-bottom:12px;">📭</div>
+        <div style="font-size:15px;font-weight:600;margin-bottom:6px;">אין תיקים סגורים עדיין</div>
+        <div style="font-size:13px;">תיקים יופיעו כאן לאחר שיסומנו כ"סגור", "פינוי גרוטאה" או "הצהרת ויתור"</div>
       </div>
     </div>
   </div>
@@ -7166,7 +7228,7 @@ setInterval(setDate, 60000);
 
 // Navigation between views
 function showView(viewName) {
-  document.querySelectorAll('.view-dashboard, .view-case, .view-cases-list, .view-map, .view-documents, .view-towed, .view-staff, .view-towns, .view-settings').forEach(el => {
+  document.querySelectorAll('.view-dashboard, .view-case, .view-cases-list, .view-map, .view-documents, .view-towed, .view-staff, .view-towns, .view-settings, .view-history').forEach(el => {
     el.classList.remove('active-view');
   });
 
@@ -7178,6 +7240,9 @@ function showView(viewName) {
 
   // Render towns page when switching to towns
   if (viewName === 'towns') renderTownsPage();
+
+  // ═══ v2.9.43: Render history page when switching to history ═══
+  if (viewName === 'history' && typeof renderHistoryPage === 'function') renderHistoryPage();
 
   // Render dashboard towns panel
   if (viewName === 'dashboard') renderDashTowns();
@@ -7196,6 +7261,7 @@ function showView(viewName) {
     if (viewName === 'map' && text === 'מפה') el.classList.add('active');
     if (viewName === 'documents' && text === 'מסמכים') el.classList.add('active');
     if (viewName === 'towed' && text === 'גרירה ואחסנה') el.classList.add('active');
+    if (viewName === 'history' && text === 'היסטוריה') el.classList.add('active');
     if (viewName === 'staff' && text === 'עובדים') el.classList.add('active');
     if (viewName === 'towns' && text === 'יישובים') el.classList.add('active');
     if (viewName === 'settings' && text === 'הגדרות') el.classList.add('active');
@@ -7219,6 +7285,8 @@ document.querySelectorAll('.sb-item').forEach(item => {
       showView('documents');
     } else if (text === 'גרירה ואחסנה') {
       showView('towed');
+    } else if (text === 'היסטוריה') {
+      showView('history');
     } else if (text === 'עובדים') {
       showView('staff');
     } else if (text === 'יישובים') {
@@ -8159,6 +8227,32 @@ function saveNewCase() {
           console.warn('[v2.9.42 EDIT] immediate saveState failed:', e);
         }
 
+        // ═══ v2.9.43: refresh the map markers if user might be viewing them ═══
+        // The map reads location/status from the table cells; without re-render,
+        // an edit (e.g. changing the city from "אמיר" to "עמיר") would not move
+        // the pin until the user navigates away and back to the map.
+        try {
+          if (typeof renderMapMarkers === 'function') {
+            renderMapMarkers();
+            console.log('[v2.9.43 EDIT] ✓ map markers re-rendered');
+          }
+        } catch(e) {
+          console.warn('[v2.9.43 EDIT] map re-render failed:', e);
+        }
+
+        // ═══ v2.9.43: refresh history page (badge + table if visible) ═══
+        try {
+          if (typeof renderHistoryPage === 'function') renderHistoryPage();
+        } catch(e){}
+
+        // ═══ v2.9.43: refresh towns page (counts) ═══
+        try {
+          if (typeof renderTownsPage === 'function') {
+            var townsView = document.getElementById('view-towns');
+            if (townsView && townsView.classList.contains('active-view')) renderTownsPage();
+          }
+        } catch(e){}
+
         // Push to Firebase if we have an id
         var dbForUpdate = (typeof fbDb !== 'undefined' && fbDb) || window.fbDb;
         if (dbForUpdate && existingId) {
@@ -8344,6 +8438,16 @@ function _newCaseReadFields() {
   var dateEl = document.getElementById('nf-found-date');
   if (dateEl && dateEl.value) {
     CASE.date = dateEl.value;
+  }
+
+  // ═══ v2.9.43: Record closure timestamp for History page ═══
+  // When status moves to closed/green/scrapped/waiver, stamp the close date so
+  // the history table can show "תאריך סגירה". Don't overwrite if already set.
+  if (window._nfSelectedStatus &&
+      ['green', 'closed', 'scrapped', 'waiver'].indexOf(window._nfSelectedStatus) !== -1) {
+    if (!CASE.closedAt) {
+      CASE.closedAt = new Date().toISOString();
+    }
   }
 
   // ═══ v2.9.28: Apply status from chips (if user selected one) ═══
@@ -8779,18 +8883,27 @@ var currentTownFilter = null;
 function getTownDataFromCases() {
   var rows = document.querySelectorAll('#cases-tbody tr');
   var towns = {};
+  // ═══ v2.9.43: Statuses that mean "case is closed" — go to History, not Towns ═══
+  var CLOSED_STATUSES = ['green', 'closed', 'scrapped', 'waiver'];
   rows.forEach(function(row) {
+    var st = row.dataset.status;
+    if (CLOSED_STATUSES.indexOf(st) !== -1) return;
+
     var locEl = row.querySelector('.owner-loc');
     if (!locEl) return;
-    var loc = locEl.textContent.replace('📍', '').trim();
-    if (!loc) return;
+    var fullLoc = locEl.textContent.replace('📍', '').trim();
+    if (!fullLoc) return;
+    // ═══ v2.9.43: take ONLY the city part (before the first comma) ═══
+    // Without this, "עמיר, רחוב 5" and "עמיר, רחוב 7" become two different
+    // "towns" — but they're both in עמיר.
+    var loc = fullLoc.split(',')[0].trim();
+    if (!loc || loc === '—') return;
+
     if (!towns[loc]) towns[loc] = { total: 0, red: 0, yellow: 0, orange: 0, green: 0, rows: [] };
     towns[loc].total++;
-    var st = row.dataset.status;
     if (st === 'red') towns[loc].red++;
     else if (st === 'yellow') towns[loc].yellow++;
-    else if (st === 'orange') towns[loc].orange++;
-    else if (st === 'green') towns[loc].green++;
+    else if (st === 'orange' || st === 'towed') towns[loc].orange++;
     towns[loc].rows.push(row);
   });
   return towns;
@@ -8923,6 +9036,178 @@ function filterTownCards() {
     card.style.display = (!search || name.indexOf(search) !== -1) ? '' : 'none';
   });
 }
+
+// ═══════════════ HISTORY PAGE (closed cases) ═══════════════
+// v2.9.43: A "פח היסטוריה" containing every case that has been closed,
+// scrapped, or resolved by waiver. The MAIN cases list excludes these
+// (so it only shows active work), but they remain searchable here.
+var currentHistoryFilter = 'all';
+
+// Statuses that count as "closed" for history purposes
+var HISTORY_STATUSES = ['green', 'closed', 'scrapped', 'waiver'];
+
+function isHistoryStatus(st) {
+  return HISTORY_STATUSES.indexOf(st) !== -1;
+}
+
+function getHistoryStatusInfo(st) {
+  if (st === 'scrapped') return { label: '♻️ פינוי גרוטאה', cls: 'sb-brown' };
+  if (st === 'waiver')   return { label: '✍️ הצהרת ויתור', cls: 'sb-purple' };
+  return { label: '✅ סגור', cls: 'sb-green' };  // 'green' or 'closed'
+}
+
+function getHistoryRowsFromCases() {
+  var rows = document.querySelectorAll('#cases-tbody tr');
+  var historyRows = [];
+  rows.forEach(function(row) {
+    if (isHistoryStatus(row.dataset.status)) historyRows.push(row);
+  });
+  return historyRows;
+}
+
+function setHistoryFilter(filterName) {
+  currentHistoryFilter = filterName;
+  // Update button highlights
+  ['all', 'closed', 'scrapped', 'waiver'].forEach(function(f) {
+    var btn = document.getElementById('history-filter-' + f);
+    if (btn) {
+      if (f === filterName) {
+        btn.style.background = 'var(--accent)';
+        btn.style.color = '#fff';
+      } else {
+        btn.style.background = '';
+        btn.style.color = '';
+      }
+    }
+  });
+  renderHistoryPage();
+}
+
+function renderHistoryPage() {
+  var tbody = document.getElementById('history-tbody');
+  var emptyState = document.getElementById('history-empty-state');
+  var panelTitle = document.getElementById('history-panel-title');
+  var table = document.getElementById('history-table');
+  if (!tbody) return;
+
+  var allHistoryRows = getHistoryRowsFromCases();
+
+  // Apply filter
+  var filteredRows = allHistoryRows;
+  if (currentHistoryFilter === 'closed') {
+    filteredRows = allHistoryRows.filter(function(r) {
+      return r.dataset.status === 'green' || r.dataset.status === 'closed';
+    });
+  } else if (currentHistoryFilter === 'scrapped') {
+    filteredRows = allHistoryRows.filter(function(r) { return r.dataset.status === 'scrapped'; });
+  } else if (currentHistoryFilter === 'waiver') {
+    filteredRows = allHistoryRows.filter(function(r) { return r.dataset.status === 'waiver'; });
+  }
+
+  // Apply search filter
+  var searchEl = document.getElementById('history-search');
+  var search = (searchEl && searchEl.value) ? searchEl.value.trim() : '';
+  if (search) {
+    filteredRows = filteredRows.filter(function(r) {
+      return r.textContent.indexOf(search) !== -1;
+    });
+  }
+
+  // Update title
+  panelTitle.textContent = '📋 תיקים סגורים (' + filteredRows.length + ')';
+
+  // Update sidebar badge
+  var badge = document.getElementById('sb-badge-history');
+  if (badge) {
+    if (allHistoryRows.length > 0) {
+      badge.style.display = '';
+      badge.textContent = allHistoryRows.length;
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  if (filteredRows.length === 0) {
+    tbody.innerHTML = '';
+    emptyState.style.display = '';
+    table.querySelector('thead').style.display = 'none';
+    if (search) {
+      emptyState.innerHTML = '<div style="font-size:40px;margin-bottom:12px;">🔍</div>'
+        + '<div style="font-size:15px;font-weight:600;margin-bottom:6px;">לא נמצאו תוצאות</div>'
+        + '<div style="font-size:13px;">לא נמצא תיק התואם ל"' + search.replace(/[<>&"]/g, '') + '"</div>';
+    } else {
+      emptyState.innerHTML = '<div style="font-size:40px;margin-bottom:12px;">📭</div>'
+        + '<div style="font-size:15px;font-weight:600;margin-bottom:6px;">אין תיקים בקטגוריה זו</div>'
+        + '<div style="font-size:13px;">סגור תיק במסך הראשי כדי שיופיע כאן</div>';
+    }
+    return;
+  }
+
+  emptyState.style.display = 'none';
+  table.querySelector('thead').style.display = '';
+
+  var html = '';
+  filteredRows.forEach(function(row, idx) {
+    var caseDataStr = row.getAttribute('data-case');
+    var caseData = {};
+    try { caseData = caseDataStr ? JSON.parse(caseDataStr) : {}; } catch(e){}
+
+    var st = row.dataset.status;
+    var stInfo = getHistoryStatusInfo(st);
+
+    var plate = (row.querySelector('.plate-badge')?.textContent || '').trim();
+    var owner = (row.querySelector('.owner-name')?.textContent || '').trim();
+    var loc = (row.querySelector('.owner-loc')?.textContent || '').replace('📍', '').trim();
+    var inspector = caseData.inspector || '';
+    var openDate = caseData.date || '';
+    var closeDate = caseData.closedAt || caseData.statusChangedAt || '';
+
+    var fmtDate = function(d) {
+      if (!d) return '—';
+      try {
+        var dt = new Date(d);
+        if (isNaN(dt.getTime())) return d;
+        return dt.toLocaleDateString('he-IL', {day:'2-digit',month:'2-digit',year:'numeric'});
+      } catch(e) { return d; }
+    };
+
+    html += '<tr style="cursor:pointer;" onclick="openHistoryCase(\'' + plate.replace(/'/g, "\\'") + '\')">';
+    html += '<td style="color:var(--muted);font-size:11px;">' + (idx + 1) + '</td>';
+    html += '<td style="font-size:12px;color:var(--muted);">' + fmtDate(openDate) + '</td>';
+    html += '<td style="font-size:12px;color:var(--muted);">' + fmtDate(closeDate) + '</td>';
+    html += '<td><span class="plate-badge">' + plate + '</span></td>';
+    html += '<td>' + owner + '</td>';
+    html += '<td style="font-size:12px;">📍 ' + loc + '</td>';
+    html += '<td><span class="status-badge ' + stInfo.cls + '">' + stInfo.label + '</span></td>';
+    html += '<td style="color:var(--muted);font-size:12px">' + inspector + '</td>';
+    html += '<td style="white-space:nowrap;">'
+         + '<button class="row-action" onclick="event.stopPropagation();openHistoryCase(\'' + plate.replace(/'/g, "\\'") + '\')">📋 פרטים</button>'
+         + '</td>';
+    html += '</tr>';
+  });
+
+  tbody.innerHTML = html;
+}
+
+function openHistoryCase(plate) {
+  var rows = document.querySelectorAll('#cases-tbody tr');
+  for (var i = 0; i < rows.length; i++) {
+    var pb = rows[i].querySelector('.plate-badge');
+    if (pb && pb.textContent.trim() === plate) {
+      if (typeof openEditFullForm === 'function') openEditFullForm(rows[i]);
+      else if (typeof openCaseFromRow === 'function') openCaseFromRow(rows[i]);
+      return;
+    }
+  }
+}
+
+function filterHistoryRows() { renderHistoryPage(); }
+
+// Make functions accessible
+window.renderHistoryPage = renderHistoryPage;
+window.setHistoryFilter = setHistoryFilter;
+window.filterHistoryRows = filterHistoryRows;
+window.openHistoryCase = openHistoryCase;
 
 // ═══════════════ DELETE CASE ═══════════════
 var deletingPlate = '';
@@ -9212,27 +9497,52 @@ function getTownCoords(townName) {
 // Reference coordinates for known towns in the council area (lat, lon).
 // Used as a fallback for cases that don't have GPS but only a town name.
 var TOWN_LATLON = {
+  // ═══ ערים סמוכות ═══
   'מטולה':         [33.2790, 35.5781],
   'קרית שמונה':    [33.2073, 35.5707],
   'קריית שמונה':   [33.2073, 35.5707],
-  'כפר גלעדי':     [33.2422, 35.5719],
-  'מחניים':        [33.0344, 35.5737],
   'חצור הגלילית':  [32.9831, 35.5410],
   'ראש פינה':      [32.9683, 35.5419],
   'יסוד המעלה':    [33.0247, 35.5917],
-  'הגושרים':       [33.2244, 35.6200],
+  'צפת':           [32.9646, 35.4961],
+  // ═══ קיבוצי מועצה אזורית הגליל העליון (כולם) ═══
+  'איילת השחר':    [33.0250, 35.5736],
+  'אילת השחר':     [33.0250, 35.5736],
+  'אמיר':          [33.1989, 35.6172],
+  'עמיר':          [33.1989, 35.6172],
+  'בית הלל':       [33.2150, 35.6311],
+  'ברעם':          [33.0492, 35.4136],
+  'גדות':          [33.0411, 35.6347],
+  'גונן':          [33.1322, 35.6261],
+  'דן':            [33.2350, 35.6533],
   'דפנה':          [33.2356, 35.6483],
-  'שניר':          [33.2369, 35.6311],
-  'כפר בלום':      [33.1853, 35.6111],
-  'קיבוץ מנרה':    [33.2392, 35.5253],
-  'יראון':         [33.0689, 35.4506],
-  'סאסא':          [33.0247, 35.3919],
-  'דלתון':         [32.9847, 35.4781],
+  'הגושרים':       [33.2244, 35.6200],
+  'חולתא':         [33.0942, 35.6128],
   'יפתח':          [33.1042, 35.5478],
+  'יראון':         [33.0689, 35.4506],
+  'כפר בלום':      [33.1853, 35.6111],
+  'כפר גלעדי':     [33.2422, 35.5719],
+  'כפר הנשיא':     [33.0058, 35.5664],
+  'כפר סולד':      [33.2244, 35.6486],
+  'להבות הבשן':    [33.1944, 35.6256],
+  'מחניים':        [33.0344, 35.5737],
+  'מלכיה':         [33.1086, 35.5106],
+  'מנרה':          [33.2392, 35.5253],
+  'קיבוץ מנרה':    [33.2392, 35.5253],
+  'משגב עם':       [33.2467, 35.5489],
+  'מעיין ברוך':    [33.2417, 35.6178],
+  'נאות מרדכי':    [33.1839, 35.6092],
+  'סאסא':          [33.0247, 35.3919],
+  'שדה אליעזר':    [33.0364, 35.5681],
+  'שדה נחמיה':     [33.1944, 35.6058],
+  'שמיר':          [33.1761, 35.6353],
+  'תל חי':         [33.2353, 35.5800],
+  // ═══ ישובים נוספים באזור ═══
+  'שניר':          [33.2369, 35.6311],
+  'דלתון':         [32.9847, 35.4781],
   'אבירים':        [33.0386, 35.4583],
   'נווה אטיב':     [33.2581, 35.7561],
   'נווה אטי״ב':    [33.2581, 35.7561],
-  'שדה אליעזר':    [33.0364, 35.5681],
   'עמוקה':         [32.9786, 35.4836],
   'פקיעין':        [32.9856, 35.3306],
   'עין אל-אסד':    [32.9750, 35.3839],
