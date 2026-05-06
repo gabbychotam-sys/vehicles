@@ -2163,7 +2163,7 @@ body.inspector-mode {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.39 — strip Arabic display</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.41 — free city input</div>
     </div>
   </div>
 
@@ -2236,7 +2236,7 @@ body.inspector-mode {
       <div class="tb-date" id="live-date">יום שבת, 2 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.39 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.41 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2558,52 +2558,10 @@ body.inspector-mode {
             <div class="edit-section-title">📍 מיקום הרכב</div>
             <div class="edit-grid">
               <div class="edit-group"><div class="edit-label">יישוב</div>
-                <select class="edit-input" id="nf-location-city" onchange="onCitySelectChange()" size="1">
-                  <option value="">— בחר יישוב —</option>
-                  <optgroup label="קיבוצי מועצה אזורית הגליל העליון">
-                  <option>איילת השחר</option>
-                  <option>אמיר</option>
-                  <option>ברעם</option>
-                  <option>בית הלל</option>
-                  <option>גדות</option>
-                  <option>גונן</option>
-                  <option>דן</option>
-                  <option>דפנה</option>
-                  <option>הגושרים</option>
-                  <option>חולתא</option>
-                  <option>יפתח</option>
-                  <option>יראון</option>
-                  <option>כפר בלום</option>
-                  <option>כפר גלעדי</option>
-                  <option>כפר הנשיא</option>
-                  <option>כפר סולד</option>
-                  <option>להבות הבשן</option>
-                  <option>מחניים</option>
-                  <option>מלכיה</option>
-                  <option>מנרה</option>
-                  <option>משגב עם</option>
-                  <option>מעיין ברוך</option>
-                  <option>נאות מרדכי</option>
-                  <option>סאסא</option>
-                  <option>שדה אליעזר</option>
-                  <option>שדה נחמיה</option>
-                  <option>שמיר</option>
-                  <option>תל חי</option>
-                  <option>עמיר</option>
-                  </optgroup>
-                  <optgroup label="ערים סמוכות">
-                  <option>קריית שמונה</option>
-                  <option>מטולה</option>
-                  <option>חצור הגלילית</option>
-                  <option>ראש פינה</option>
-                  <option>יסוד המעלה</option>
-                  <option>צפת</option>
-                  </optgroup>
-                  <option value="other">✏️ אחר (הזן ידנית)</option>
-                </select>
-                <div id="nf-city-manual-wrap" style="display:none;margin-top:8px;">
-                  <input type="text" id="nf-location-city-other" placeholder="הזן שם יישוב ידנית..." style="width:100%;padding:10px 12px;border:2px solid #fb923c;border-radius:10px;font-size:14px;font-family:inherit;direction:rtl;background:#fff7ed;box-sizing:border-box;">
-                  <button type="button" onclick="cancelManualCity()" style="margin-top:6px;background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;">↩ חזור לרשימה</button>
+                <input type="text" class="edit-input" id="nf-location-city" placeholder="הזן שם יישוב..." style="width:100%;direction:rtl;" autocomplete="off">
+                <!-- v2.9.41: hidden compatibility wrap (kept for legacy code that references it) -->
+                <div id="nf-city-manual-wrap" style="display:none;">
+                  <input type="text" id="nf-location-city-other" style="display:none;">
                 </div>
               </div>
               <div class="edit-group"><div class="edit-label">ניווט למיקום הרכב</div>
@@ -2902,7 +2860,7 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.39 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.41 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -4158,7 +4116,6 @@ function archivePrintedDocument(docType, title, html, extraMeta) {
         return;
       }
       var safePlate = safePlateKey(CASE.plate);
-      var docKey = (docType || 'doc') + '_' + Date.now();
       var savedByEmail = '';
       try {
         var u = (typeof currentUser !== 'undefined' && currentUser) || window.currentUser;
@@ -4169,42 +4126,69 @@ function archivePrintedDocument(docType, title, html, extraMeta) {
         }
       } catch(e) {}
 
+      var actionType = (extraMeta && extraMeta.action) || 'printed';
       var payload = Object.assign({
         type: docType || 'doc',
         title: title || '',
         html: html || '',
-        action: 'printed',
+        action: actionType,
         savedAt: Date.now(),
         savedBy: savedByEmail,
         inspector: (typeof getCurrentInspectorName === 'function' ? getCurrentInspectorName() : '') || ''
       }, extraMeta || {});
 
-      console.log('[archive] saving to archives/' + safePlate + '/' + docKey, payload.action, payload.type);
-
-      db.ref('archives/' + safePlate + '/' + docKey).set(payload)
-        .then(function() {
-          console.log('[archive] ✓ saved ' + payload.action + ':', safePlate, docKey);
-          // Refresh archive panel
-          if (typeof loadCaseDocuments === 'function') {
-            setTimeout(function() { loadCaseDocuments(CASE.plate); }, 300);
-          }
-          resolve(docKey);
-        })
-        .catch(function(err) {
-          console.error('[archive] ✗ Firebase save failed:', err);
-          // Try local fallback
-          try {
-            var key = 'galilArchive_' + safePlate;
-            var existing = JSON.parse(localStorage.getItem(key) || '{}');
-            existing[docKey] = payload;
-            localStorage.setItem(key, JSON.stringify(existing));
-            console.log('[archive] ⚠ saved to localStorage fallback');
-            // Still reject with the Firebase error so user knows it didn't sync
-            reject(new Error('שגיאת Firebase: ' + (err.message || err.code || 'נכשל') + ' (נשמר מקומית כגיבוי)'));
-          } catch(localErr) {
-            reject(new Error('שמירה נכשלה: ' + (err.message || err.code || 'שגיאה לא ידועה')));
+      // ═══ v2.9.40: NO DUPLICATES — overwrite existing document of same type ═══
+      // Before saving, scan archive for existing entries of same docType.
+      // If found, REUSE the same key (overwrite). Else create new key.
+      db.ref('archives/' + safePlate).once('value').then(function(snapshot) {
+        var existingDocs = snapshot.val() || {};
+        var existingKey = null;
+        Object.keys(existingDocs).forEach(function(k) {
+          var d = existingDocs[k];
+          // Match: same type AND same action category
+          // For status_change actions, match same type+action
+          // For printed/sent actions, match same type only (different prints of same letter)
+          if (d && d.type === docType) {
+            if (actionType === 'status_change' && d.action === 'status_change') {
+              existingKey = k;
+            } else if (actionType !== 'status_change' && d.action !== 'status_change') {
+              existingKey = k;
+            }
           }
         });
+
+        var docKey = existingKey || ((docType || 'doc') + '_' + Date.now());
+        console.log('[archive]', existingKey ? '↻ overwriting' : '+ creating', 'key:', docKey, 'type:', payload.type, 'action:', payload.action);
+
+        db.ref('archives/' + safePlate + '/' + docKey).set(payload)
+          .then(function() {
+            console.log('[archive] ✓ saved ' + payload.action + ':', safePlate, docKey);
+            if (typeof loadCaseDocuments === 'function') {
+              setTimeout(function() { loadCaseDocuments(CASE.plate); }, 300);
+            }
+            resolve(docKey);
+          })
+          .catch(function(err) {
+            console.error('[archive] ✗ Firebase save failed:', err);
+            try {
+              var key = 'galilArchive_' + safePlate;
+              var existing = JSON.parse(localStorage.getItem(key) || '{}');
+              existing[docKey] = payload;
+              localStorage.setItem(key, JSON.stringify(existing));
+              console.log('[archive] ⚠ saved to localStorage fallback');
+              reject(new Error('שגיאת Firebase: ' + (err.message || err.code || 'נכשל') + ' (נשמר מקומית כגיבוי)'));
+            } catch(localErr) {
+              reject(new Error('שמירה נכשלה: ' + (err.message || err.code || 'שגיאה לא ידועה')));
+            }
+          });
+      }).catch(function(scanErr) {
+        // Scan failed - fall back to old behavior (might create duplicate but at least save)
+        console.warn('[archive] scan for duplicates failed, creating new key:', scanErr);
+        var docKey = (docType || 'doc') + '_' + Date.now();
+        db.ref('archives/' + safePlate + '/' + docKey).set(payload)
+          .then(function() { resolve(docKey); })
+          .catch(function(err) { reject(new Error('שמירה נכשלה: ' + (err.message || 'שגיאה'))); });
+      });
     } catch(e) {
       console.error('[archive] error:', e);
       reject(e);
@@ -4487,9 +4471,40 @@ function loadCaseDocuments(plate) {
     items.sort(function(a, b) {
       return (b.doc.savedAt || 0) - (a.doc.savedAt || 0);
     });
-    console.log('[archive] rendering ' + items.length + ' items');
-    window._archiveCache[safe] = items;
-    renderArchive(plate, items);
+
+    // ═══ v2.9.40: DEDUP — keep only the newest doc per (type+action_category) ═══
+    // For status_change actions, the bucket is type+'_status'.
+    // For printed/sent actions, the bucket is just type (different prints overwrite each other).
+    var seenBuckets = {};
+    var dedupedItems = [];
+    var duplicateKeys = []; // track duplicates to clean up from Firebase
+    items.forEach(function(it) {
+      var d = it.doc;
+      var bucket = (d.action === 'status_change')
+        ? (d.type + '_status_change')
+        : (d.type + '_doc');
+      if (seenBuckets[bucket]) {
+        // already have a newer version - this is a duplicate
+        duplicateKeys.push(it.key);
+      } else {
+        seenBuckets[bucket] = true;
+        dedupedItems.push(it);
+      }
+    });
+    if (duplicateKeys.length > 0) {
+      console.log('[archive] dedup: removing', duplicateKeys.length, 'duplicate(s):', duplicateKeys);
+      // Clean up Firebase too — but only if Firebase items (not local)
+      duplicateKeys.forEach(function(dupKey) {
+        if (data[dupKey]) {
+          db.ref('archives/' + safe + '/' + dupKey).remove()
+            .catch(function(e) { console.warn('[archive] failed to remove dup:', dupKey, e); });
+        }
+      });
+    }
+
+    console.log('[archive] rendering ' + dedupedItems.length + ' items (after dedup from ' + items.length + ')');
+    window._archiveCache[safe] = dedupedItems;
+    renderArchive(plate, dedupedItems);
   };
   ref.on('value', cb, function(err) {
     console.error('[archive] listen failed:', err);
@@ -4908,48 +4923,19 @@ window.nfPopulateStatus = nfPopulateStatus;
    - When user types manually and saves → that's the value
    - "↩ חזור לרשימה" button → reset back to dropdown view
 */
-function onCitySelectChange() {
-  var sel = document.getElementById('nf-location-city');
-  var wrap = document.getElementById('nf-city-manual-wrap');
-  var inp = document.getElementById('nf-location-city-other');
-  if (!sel || !wrap || !inp) {
-    console.warn('[onCitySelectChange] missing elements:', { sel: !!sel, wrap: !!wrap, inp: !!inp });
-    return;
-  }
-  var v = sel.value;
-  console.log('[onCitySelectChange] selected value:', v);
-  if (v === 'other' || v === 'אחר') {
-    // Show manual input — use setProperty with !important to override any CSS
-    wrap.style.setProperty('display', 'block', 'important');
-    sel.style.setProperty('display', 'none', 'important');
-    inp.removeAttribute('disabled');
-    inp.removeAttribute('readonly');
-    inp.style.setProperty('pointer-events', 'auto', 'important');
-    inp.style.setProperty('background', '#fff7ed', 'important');
-    setTimeout(function(){
-      inp.focus();
-      console.log('[onCitySelectChange] manual input focused, visible:', wrap.style.display);
-    }, 50);
-  } else {
-    wrap.style.setProperty('display', 'none', 'important');
-    sel.style.removeProperty('display');
-    inp.value = '';
-  }
+/* ═══ v2.9.41: simple text input — read its value ═══ */
+function _nfReadCity() {
+  var inp = document.getElementById('nf-location-city');
+  if (!inp) return '';
+  return (inp.value || '').trim();
 }
+window._nfReadCity = _nfReadCity;
+
+/* Stub functions kept for backward compatibility */
+function onCitySelectChange() { /* no-op — no dropdown */ }
 window.onCitySelectChange = onCitySelectChange;
 
-/* ↩ Return from manual input back to the dropdown */
-function cancelManualCity() {
-  var sel = document.getElementById('nf-location-city');
-  var wrap = document.getElementById('nf-city-manual-wrap');
-  var inp = document.getElementById('nf-location-city-other');
-  if (sel) {
-    sel.style.removeProperty('display');
-    sel.value = '';
-  }
-  if (wrap) wrap.style.setProperty('display', 'none', 'important');
-  if (inp) inp.value = '';
-}
+function cancelManualCity() { /* no-op */ }
 window.cancelManualCity = cancelManualCity;
 
 /* ═══ v2.9.31: explicit "edit manually" button — opens the free-text input
@@ -4977,23 +4963,6 @@ function toggleCityManualEdit() {
   }
 }
 window.toggleCityManualEdit = toggleCityManualEdit;
-
-/* Read effective city: from manual input if it's visible, else from the dropdown */
-function _nfReadCity() {
-  var sel = document.getElementById('nf-location-city');
-  var wrap = document.getElementById('nf-city-manual-wrap');
-  var inp = document.getElementById('nf-location-city-other');
-  // If manual wrap is visible, use the input value
-  if (wrap && wrap.style.display === 'block' && inp && inp.value && inp.value.trim()) {
-    return inp.value.trim();
-  }
-  if (!sel) return '';
-  var v = sel.value;
-  // Don't return marker values
-  if (v === 'other' || v === 'אחר' || v === '') return '';
-  return v;
-}
-window._nfReadCity = _nfReadCity;
 
 /* ═══ v2.9.39: strip Arabic characters from location strings ═══
    Used to clean up location values for display & save.
@@ -6336,82 +6305,25 @@ function openEditFullForm(tr) {
     var d = String(CASE.date).split('T')[0];
     setVal('nf-found-date', d);
   }
-  // Location — split into city + street if possible
+  // ═══ v2.9.41: location is now a simple text input ═══
+  // Strip Arabic from existing value, split city/street
   if (CASE.location) {
-    var parts = String(CASE.location).split(',').map(function(s){return s.trim();});
-    var citySel = document.getElementById('nf-location-city');
-    var cityWrap = document.getElementById('nf-city-manual-wrap');
-    var cityOther = document.getElementById('nf-location-city-other');
-
-    // ═══ v2.9.38: STEP 1 — clean dropdown FIRST (after openNewCase reset) ═══
-    // Remove any Arabic options that survived from old localStorage data
-    if (citySel) {
-      var toRemoveArabic = [];
-      for (var k = 0; k < citySel.options.length; k++) {
-        var txt = citySel.options[k].textContent || '';
-        if (/[\u0600-\u06FF]/.test(txt)) {
-          toRemoveArabic.push(citySel.options[k]);
-        }
-      }
-      toRemoveArabic.forEach(function(o) { o.remove(); });
-      if (toRemoveArabic.length) {
-        console.log('[v2.9.38] removed', toRemoveArabic.length, 'Arabic option(s)');
-      }
-      // Also dedupe "other" — keep only the FIRST "other" (the original from HTML)
-      var seenOther = false;
-      var toRemoveOther = [];
-      for (var m = 0; m < citySel.options.length; m++) {
-        if (citySel.options[m].value === 'other') {
-          if (!seenOther) { seenOther = true; }
-          else { toRemoveOther.push(citySel.options[m]); }
-        }
-      }
-      toRemoveOther.forEach(function(o) { o.remove(); });
-    }
-
-    // ═══ STEP 2 — populate city based on existing case data ═══
-    if (citySel && parts[0]) {
-      var cityValue = parts[0];
-      var isArabic = /[\u0600-\u06FF]/.test(cityValue);
-
-      // Try to find the city in the cleaned dropdown (skip "other" option)
-      var found = false;
-      for (var i = 0; i < citySel.options.length; i++) {
-        if (citySel.options[i].value === 'other') continue;
-        if (citySel.options[i].text === cityValue) {
-          citySel.selectedIndex = i;
-          found = true;
-          break;
-        }
-      }
-
-      if (found) {
-        // City IS in the list — show dropdown, hide manual input
-        citySel.style.removeProperty('display');
-        if (cityWrap) cityWrap.style.setProperty('display', 'none', 'important');
-        if (cityOther) cityOther.value = '';
-      } else {
-        // City NOT in list (or Arabic) — switch to manual input mode
-        citySel.style.setProperty('display', 'none', 'important');
-        if (cityWrap) cityWrap.style.setProperty('display', 'block', 'important');
-        if (cityOther) {
-          // If the value is Arabic, leave input empty so user types Hebrew
-          // If it's any other valid Hebrew value not in the list, show it
-          cityOther.value = isArabic ? '' : cityValue;
-          cityOther.removeAttribute('disabled');
-          cityOther.removeAttribute('readonly');
-          cityOther.style.setProperty('pointer-events', 'auto', 'important');
-        }
-      }
-    } else if (citySel) {
-      // No location at all — reset to default state (dropdown visible, manual hidden)
-      citySel.style.removeProperty('display');
-      citySel.value = '';
-      if (cityWrap) cityWrap.style.setProperty('display', 'none', 'important');
-      if (cityOther) cityOther.value = '';
+    var rawLoc = String(CASE.location).trim();
+    // Filter out Arabic parts
+    var cleanLoc = (typeof stripArabicFromLocation === 'function')
+      ? stripArabicFromLocation(rawLoc)
+      : rawLoc;
+    var parts = cleanLoc.split(',').map(function(s){return s.trim();}).filter(function(s){return s;});
+    var cityInput = document.getElementById('nf-location-city');
+    if (cityInput) {
+      cityInput.value = parts[0] || '';
     }
     var streetEl = document.getElementById('nf-location-street');
     if (streetEl) streetEl.value = parts.slice(1).join(', ') || '';
+  } else {
+    // No location — clear the input
+    var cityInputEmpty = document.getElementById('nf-location-city');
+    if (cityInputEmpty) cityInputEmpty.value = '';
   }
   // Inspector dropdown
   if (CASE.inspector) {
@@ -7979,19 +7891,12 @@ function openNewCase() {
   nfIds.forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
   var nfDate = document.getElementById('nf-found-date'); if (nfDate) nfDate.value = '';
 
-  // ═══ v2.9.38: reset city dropdown state — visible, no selection, manual hidden ═══
-  var nfCitySelect = document.getElementById('nf-location-city');
-  var nfCityWrap = document.getElementById('nf-city-manual-wrap');
-  var nfCityOther = document.getElementById('nf-location-city-other');
-  if (nfCitySelect) {
-    nfCitySelect.style.removeProperty('display');
-    nfCitySelect.value = '';
-  }
-  if (nfCityWrap) nfCityWrap.style.setProperty('display', 'none', 'important');
-  if (nfCityOther) {
-    nfCityOther.value = '';
-    nfCityOther.removeAttribute('disabled');
-    nfCityOther.removeAttribute('readonly');
+  // ═══ v2.9.41: city is now a simple text input — just clear it ═══
+  var nfCityInput = document.getElementById('nf-location-city');
+  if (nfCityInput) {
+    nfCityInput.value = '';
+    nfCityInput.removeAttribute('disabled');
+    nfCityInput.removeAttribute('readonly');
   }
   // Hide the GPS nav buttons by default — only mobile-created cases should show them.
   // Show the placeholder "no GPS" box instead.
@@ -10636,10 +10541,7 @@ if (document.readyState === 'loading') {
   function applyGeocodeResult(result, streetEl, citySel) {
     if (!result) return;
 
-    // ═══ v2.9.37: filter out Arabic-only results ═══
-    // Nominatim sometimes returns Arabic names even with accept-language=he.
-    // If the city/street looks Arabic, leave the field empty so the user can
-    // type the correct Hebrew name manually.
+    // ═══ v2.9.41: filter out Arabic-only results ═══
     var isArabic = function(s) {
       return /[\u0600-\u06FF]/.test(String(s || ''));
     };
@@ -10652,49 +10554,17 @@ if (document.readyState === 'loading') {
       result.street = '';
     }
 
-    // Street
+    // Street — only fill if empty
     var sEl = streetEl || document.getElementById('nf-location-street');
     if (sEl && result.street && !(sEl.value || '').trim()) {
       sEl.value = result.street;
       try { sEl.dispatchEvent(new Event('input', { bubbles: true })); } catch(e){}
     }
-    // City — match against the dropdown using Hebrew normalization
+    // City — simple text input now. Only fill if empty.
     var cEl = citySel || document.getElementById('nf-location-city');
-    if (cEl && result.city && (!cEl.value || cEl.value === cEl.options[0].value)) {
-      var city = String(result.city).trim();
-      var norm = function(s) {
-        return String(s || '').trim()
-          .replace(/\s+/g, ' ')
-          .replace(/יי/g, 'י')
-          .replace(/[״"׳']/g, '');
-      };
-      var cityN = norm(city);
-      var matched = false;
-      for (var i = 0; i < cEl.options.length; i++) {
-        if (norm(cEl.options[i].text) === cityN) {
-          cEl.value = cEl.options[i].value;
-          matched = true;
-          break;
-        }
-      }
-      // ═══ v2.9.37: NO LONGER add new options to the dropdown ═══
-      // Previously, geocoded city names that weren't in the list were
-      // automatically added as new options. This caused Arabic city names
-      // (like "الجيزة") to appear in the dropdown forever. Now: if the city
-      // isn't in the list, switch to manual input mode instead.
-      if (!matched) {
-        // Switch to manual input mode (hide dropdown, show free-text input)
-        var wrap = document.getElementById('nf-city-manual-wrap');
-        var inp = document.getElementById('nf-location-city-other');
-        if (wrap && inp) {
-          cEl.style.display = 'none';
-          wrap.style.display = 'block';
-          // Pre-fill the manual input with the geocoded value (already filtered for Arabic above)
-          inp.value = city;
-        }
-      } else {
-        try { cEl.dispatchEvent(new Event('change', { bubbles: true })); } catch(e){}
-      }
+    if (cEl && result.city && !(cEl.value || '').trim()) {
+      cEl.value = String(result.city).trim();
+      try { cEl.dispatchEvent(new Event('input', { bubbles: true })); } catch(e){}
     }
   }
 
