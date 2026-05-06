@@ -2163,11 +2163,7 @@ body.inspector-mode {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-<<<<<<< HEAD
       <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.28 — status+city</div>
-=======
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.27 — sidebar font</div>
->>>>>>> 5fa37f5bec80a30f4d395df24e99a72c73f7ffd2
     </div>
   </div>
 
@@ -2240,11 +2236,7 @@ body.inspector-mode {
       <div class="tb-date" id="live-date">יום שבת, 2 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-<<<<<<< HEAD
       <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.28 ✓</span>
-=======
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.27 ✓</span>
->>>>>>> 5fa37f5bec80a30f4d395df24e99a72c73f7ffd2
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2596,7 +2588,6 @@ body.inspector-mode {
             </div>
           </div>
 
-<<<<<<< HEAD
           <!-- ═══ v2.9.28: סטטוס תיק (מדבקות וכו') ═══ -->
           <div class="edit-section">
             <div class="edit-section-title">🏷️ סטטוס התיק</div>
@@ -2613,8 +2604,6 @@ body.inspector-mode {
             </div>
           </div>
 
-=======
->>>>>>> 5fa37f5bec80a30f4d395df24e99a72c73f7ffd2
           <!-- ═══ v2.9.26: גרירה ואחסנה ═══ -->
           <div class="edit-section">
             <div class="edit-section-title">🚛 גרירה ואחסנה</div>
@@ -2865,11 +2854,7 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-<<<<<<< HEAD
       <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.28 ✓</span>
-=======
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.27 ✓</span>
->>>>>>> 5fa37f5bec80a30f4d395df24e99a72c73f7ffd2
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -4917,7 +4902,6 @@ function onTowedToggle() {
 window.onTowedToggle = onTowedToggle;
 
 /* ═══ v2.9.26: when opening an existing case, populate the tow checkbox ═══ */
-<<<<<<< HEAD
 /* ═══ v2.9.28: status chips selector for the new/edit case form ═══ */
 window._nfSelectedStatus = '';
 
@@ -4979,8 +4963,6 @@ function _nfReadCity() {
 }
 window._nfReadCity = _nfReadCity;
 
-=======
->>>>>>> 5fa37f5bec80a30f4d395df24e99a72c73f7ffd2
 function _populateTowFields(caseData) {
   var cb = document.getElementById('nf-is-towed');
   var dateEl = document.getElementById('nf-tow-date');
@@ -6465,14 +6447,11 @@ function openEditFullForm(tr) {
   if (typeof _populateTowFields === 'function') {
     _populateTowFields(CASE);
   }
-<<<<<<< HEAD
 
   // ═══ v2.9.28: Populate status chips ═══
   if (typeof nfPopulateStatus === 'function') {
     nfPopulateStatus(CASE);
   }
-=======
->>>>>>> 5fa37f5bec80a30f4d395df24e99a72c73f7ffd2
 }
 
 /* Show / hide the "Open in Google Maps" button on the case detail card,
@@ -8195,7 +8174,6 @@ function saveNewCase() {
         }
       }
     } catch(e) { console.warn('[saveNewCase] tow panel update failed:', e); }
-<<<<<<< HEAD
 
     // ═══ v2.9.28: Archive the status change as a document ═══
     // When the user marks "מדבקה צהובה" / "מדבקה אדומה" / "פינוי גרוטאה" etc.
@@ -8234,8 +8212,6 @@ function saveNewCase() {
         window._nfSelectedStatus = '';
       }
     } catch(e) { console.warn('[status-archive] failed:', e); }
-=======
->>>>>>> 5fa37f5bec80a30f4d395df24e99a72c73f7ffd2
   }, 500);
 }
 
@@ -8286,14 +8262,11 @@ function _newCaseReadFields() {
   CASE.location = street ? city + ', ' + street : city;
   CASE.notes = document.getElementById('nf-notes').value.trim();
 
-<<<<<<< HEAD
   // ═══ v2.9.28: Apply status from chips (if user selected one) ═══
   if (window._nfSelectedStatus) {
     CASE.status = window._nfSelectedStatus;
   }
 
-=======
->>>>>>> 5fa37f5bec80a30f4d395df24e99a72c73f7ffd2
   // ═══ v2.9.26: Read tow status + tow date from the new "גרירה ואחסנה" section ═══
   var towedCb = document.getElementById('nf-is-towed');
   var towDateEl = document.getElementById('nf-tow-date');
@@ -8310,11 +8283,7 @@ function _newCaseReadFields() {
   // ═══ When editing an existing case (e.g. status='photographed' from   ═══
   // ═══ the mobile app), do NOT overwrite the status — preserve whatever  ═══
   // ═══ the manager (or mobile app) already set.                          ═══
-<<<<<<< HEAD
   if (!window._editingExistingRow && CASE.status !== 'towed' && !window._nfSelectedStatus) {
-=======
-  if (!window._editingExistingRow && CASE.status !== 'towed') {
->>>>>>> 5fa37f5bec80a30f4d395df24e99a72c73f7ffd2
     CASE.status = 'yellow';
   }
   // else: keep existing CASE.status as it was loaded from data-case
