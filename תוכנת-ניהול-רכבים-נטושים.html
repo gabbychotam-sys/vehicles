@@ -2163,7 +2163,7 @@ body.inspector-mode {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.34 — city dropdown</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.35 — single field</div>
     </div>
   </div>
 
@@ -2236,7 +2236,7 @@ body.inspector-mode {
       <div class="tb-date" id="live-date">יום שבת, 2 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.34 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.35 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2586,9 +2586,15 @@ body.inspector-mode {
                   <option>שדה נחמיה</option>
                   <option>שמיר</option>
                   <option>תל חי</option>
+                  <option>עמיר</option>
+                  <option>שאר ישוב</option>
+                  <option>להבות הבשן</option>
                   <option value="other">✏️ אחר (הזן ידנית)</option>
                 </select>
-                <input type="text" id="nf-location-city-other" placeholder="הזן שם יישוב ידנית..." style="display:none;width:100%;margin-top:8px;padding:10px 12px;border:2px solid #fb923c;border-radius:10px;font-size:14px;font-family:inherit;direction:rtl;background:#fff7ed;">
+                <div id="nf-city-manual-wrap" style="display:none;margin-top:8px;">
+                  <input type="text" id="nf-location-city-other" placeholder="הזן שם יישוב ידנית..." style="width:100%;padding:10px 12px;border:2px solid #fb923c;border-radius:10px;font-size:14px;font-family:inherit;direction:rtl;background:#fff7ed;box-sizing:border-box;">
+                  <button type="button" onclick="cancelManualCity()" style="margin-top:6px;background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;">↩ חזור לרשימה</button>
+                </div>
               </div>
               <div class="edit-group"><div class="edit-label">ניווט למיקום הרכב</div>
                 <input type="hidden" id="nf-location-street" value="נחל עורבים">
@@ -2886,7 +2892,7 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.34 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.35 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -4802,22 +4808,44 @@ function nfPopulateStatus(caseData) {
 }
 window.nfPopulateStatus = nfPopulateStatus;
 
-/* ═══ v2.9.28: when user picks "אחר" in city dropdown, show free-text input ═══ */
+/* ═══ v2.9.35: city dropdown with manual override ═══
+   Logic:
+   - When "אחר/other" is selected → hide dropdown, show manual input
+   - When user types manually and saves → that's the value
+   - "↩ חזור לרשימה" button → reset back to dropdown view
+*/
 function onCitySelectChange() {
   var sel = document.getElementById('nf-location-city');
+  var wrap = document.getElementById('nf-city-manual-wrap');
   var inp = document.getElementById('nf-location-city-other');
-  if (!sel || !inp) return;
+  if (!sel || !wrap || !inp) return;
   var v = sel.value;
-  // Trigger manual input for both "other" (new value) and "אחר" (legacy text)
   if (v === 'other' || v === 'אחר') {
-    inp.style.display = 'block';
+    // Show manual input, hide dropdown
+    wrap.style.display = 'block';
+    sel.style.display = 'none';
     setTimeout(function(){ inp.focus(); }, 50);
   } else {
-    inp.style.display = 'none';
+    wrap.style.display = 'none';
+    sel.style.display = '';
     inp.value = '';
   }
 }
 window.onCitySelectChange = onCitySelectChange;
+
+/* ↩ Return from manual input back to the dropdown */
+function cancelManualCity() {
+  var sel = document.getElementById('nf-location-city');
+  var wrap = document.getElementById('nf-city-manual-wrap');
+  var inp = document.getElementById('nf-location-city-other');
+  if (sel) {
+    sel.style.display = '';
+    sel.value = '';
+  }
+  if (wrap) wrap.style.display = 'none';
+  if (inp) inp.value = '';
+}
+window.cancelManualCity = cancelManualCity;
 
 /* ═══ v2.9.31: explicit "edit manually" button — opens the free-text input
    regardless of which city is currently selected. Use case: the dropdown
@@ -4845,17 +4873,18 @@ function toggleCityManualEdit() {
 }
 window.toggleCityManualEdit = toggleCityManualEdit;
 
-/* Read effective city: from "other" input if "אחר/other" is selected, else from the dropdown */
+/* Read effective city: from manual input if it's visible, else from the dropdown */
 function _nfReadCity() {
   var sel = document.getElementById('nf-location-city');
+  var wrap = document.getElementById('nf-city-manual-wrap');
   var inp = document.getElementById('nf-location-city-other');
-  if (!sel) return '';
-  // If manual input is visible AND has a value, prefer it
-  if (inp && inp.style.display !== 'none' && inp.value && inp.value.trim()) {
+  // If manual wrap is visible, use the input value
+  if (wrap && wrap.style.display === 'block' && inp && inp.value && inp.value.trim()) {
     return inp.value.trim();
   }
+  if (!sel) return '';
   var v = sel.value;
-  // Don't return the marker values themselves
+  // Don't return marker values
   if (v === 'other' || v === 'אחר' || v === '') return '';
   return v;
 }
@@ -6183,6 +6212,7 @@ function openEditFullForm(tr) {
   if (CASE.location) {
     var parts = String(CASE.location).split(',').map(function(s){return s.trim();});
     var citySel = document.getElementById('nf-location-city');
+    var cityWrap = document.getElementById('nf-city-manual-wrap');
     var cityOther = document.getElementById('nf-location-city-other');
     if (citySel && parts[0]) {
       var found = false;
@@ -6192,21 +6222,20 @@ function openEditFullForm(tr) {
           found = true; break;
         }
       }
-      // ═══ v2.9.34: if city not in list (e.g. "עמיר", "الجيزة"), show in manual input ═══
+      // ═══ v2.9.35: if city not in list, switch to manual input mode ═══
       if (!found) {
-        // Skip Arabic — leave the manual input empty so the user types Hebrew
         var isArabic = /[\u0600-\u06FF]/.test(parts[0]);
-        // Pick the "other" option in the dropdown
-        var otherOpt = citySel.querySelector('option[value="other"]') || citySel.querySelector('option[value="אחר"]');
-        if (otherOpt) citySel.value = otherOpt.value;
-        // Show the manual input pre-filled with the existing Hebrew value
+        // Switch to manual input mode (hide dropdown, show input)
+        citySel.style.display = 'none';
+        if (cityWrap) cityWrap.style.display = 'block';
         if (cityOther) {
-          cityOther.style.display = 'block';
           cityOther.value = isArabic ? '' : parts[0];
         }
-      } else if (cityOther) {
-        cityOther.style.display = 'none';
-        cityOther.value = '';
+      } else {
+        // Found in list - make sure dropdown visible, manual hidden
+        citySel.style.display = '';
+        if (cityWrap) cityWrap.style.display = 'none';
+        if (cityOther) cityOther.value = '';
       }
     }
     var streetEl = document.getElementById('nf-location-street');
