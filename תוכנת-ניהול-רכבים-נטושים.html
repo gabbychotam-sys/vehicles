@@ -2167,7 +2167,7 @@ body.inspector-mode {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.43 — map+towns+history אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.45 — towns filter אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2245,7 +2245,7 @@ body.inspector-mode {
       <div class="tb-date" id="live-date">יום שבת, 2 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.43 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.45 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2869,7 +2869,7 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.43 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.45 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -6080,6 +6080,9 @@ function upsertCaseRow(oldPlate, c, fullData) {
   var tbody = document.getElementById('cases-tbody');
   if (!tbody) return;
 
+  // ═══ v2.9.43: ensure click delegation is installed (idempotent) ═══
+  try { if (typeof _reattachCaseRowClicks === 'function') _reattachCaseRowClicks(); } catch(e){}
+
   // Status info
   var statusInfo = {
     yellow:        { cls: 'sb-yellow', label: '🟡 מדבקה צהובה',    days: 30, cd: 'ok' },
@@ -6161,7 +6164,10 @@ function upsertCaseRow(oldPlate, c, fullData) {
       try { existing.setAttribute('data-case', JSON.stringify(fullData)); } catch(e){}
     }
     existing.style.cursor = 'pointer';
-    existing.onclick = function() { openEditFullForm(this); };
+    // ═══ v2.9.43: removed tr.onclick — handled by delegation in _reattachCaseRowClicks. ═══
+    // The delegated listener on #cases-tbody catches clicks on any row, including those
+    // restored from localStorage. This avoids the double-fire that happens when both
+    // tr.onclick AND delegation run, AND it makes restored rows clickable too.
     tr = existing;
     // Brief flash to indicate update
     tr.style.background = 'rgba(46,125,50,0.18)';
@@ -6177,7 +6183,7 @@ function upsertCaseRow(oldPlate, c, fullData) {
       try { tr.setAttribute('data-case', JSON.stringify(fullData)); } catch(e){}
     }
     tr.style.cursor = 'pointer';
-    tr.onclick = function() { openEditFullForm(this); };
+    // ═══ v2.9.43: tr.onclick removed — see comment above. ═══
     tbody.insertBefore(tr, tbody.firstChild);
     // Brief highlight on insert
     tr.style.background = 'rgba(46,125,50,0.18)';
@@ -8889,15 +8895,31 @@ function getTownDataFromCases() {
     var st = row.dataset.status;
     if (CLOSED_STATUSES.indexOf(st) !== -1) return;
 
-    var locEl = row.querySelector('.owner-loc');
-    if (!locEl) return;
-    var fullLoc = locEl.textContent.replace('📍', '').trim();
-    if (!fullLoc) return;
-    // ═══ v2.9.43: take ONLY the city part (before the first comma) ═══
-    // Without this, "עמיר, רחוב 5" and "עמיר, רחוב 7" become two different
-    // "towns" — but they're both in עמיר.
-    var loc = fullLoc.split(',')[0].trim();
-    if (!loc || loc === '—') return;
+    // ═══ v2.9.45: Read location from data-case (the source of truth) ═══
+    // NOT from .owner-loc — for mobile cases, .owner-loc shows "📱 מהשטח"
+    // which is a UI label, not the actual location. The location field in
+    // the case data has the real city name.
+    var loc = '';
+    var caseDataStr = row.getAttribute('data-case');
+    if (caseDataStr) {
+      try {
+        var cd = JSON.parse(caseDataStr);
+        loc = (cd.location || cd.locationCity || '').trim();
+      } catch(e){}
+    }
+    // Fallback: read from the dedicated location cell (cells[5] in upsertCaseRow's layout)
+    if (!loc) {
+      var cells = row.querySelectorAll('td');
+      if (cells.length >= 6) {
+        loc = (cells[5].textContent || '').replace('📍', '').trim();
+      }
+    }
+    if (!loc) return;
+
+    // Take ONLY the city part (before the first comma).
+    // Without this, "עמיר, רחוב 5" and "עמיר, רחוב 7" become two separate towns.
+    loc = loc.split(',')[0].trim();
+    if (!loc || loc === '—' || loc === 'מהשטח') return;
 
     if (!towns[loc]) towns[loc] = { total: 0, red: 0, yellow: 0, orange: 0, green: 0, rows: [] };
     towns[loc].total++;
@@ -8977,26 +8999,36 @@ function renderTownsCasesTable() {
 
   if (!tbody) return;
 
-  var matchingRows = [];
+  // ═══ v2.9.45: Only show cases when a specific town is selected ═══
+  // Default state (no town selected) = empty state asking the user to pick a town.
+  // This matches the "סינון תיקים לפי יישוב" page subtitle — it's a filter view,
+  // not a "show everything" view.
   if (currentTownFilter === null) {
-    // Show all cases
-    var allRows = document.querySelectorAll('#cases-tbody tr');
-    allRows.forEach(function(r) { matchingRows.push(r); });
-    panelTitle.textContent = '📋 כל התיקים (' + matchingRows.length + ')';
+    tbody.innerHTML = '';
+    panelTitle.textContent = '📋 בחר יישוב לצפייה בתיקים';
     clearBtn.style.display = 'none';
-  } else {
-    if (towns[currentTownFilter]) {
-      matchingRows = towns[currentTownFilter].rows;
-    }
-    panelTitle.textContent = '📋 תיקים ב' + currentTownFilter + ' (' + matchingRows.length + ')';
-    clearBtn.style.display = '';
+    emptyState.style.display = '';
+    table.querySelector('thead').style.display = 'none';
+    emptyState.innerHTML = '<div style="font-size:40px;margin-bottom:12px;">🏘️</div>'
+      + '<div style="font-size:15px;font-weight:600;margin-bottom:6px;">בחר יישוב מהרשימה למעלה</div>'
+      + '<div style="font-size:13px;">לחץ על כרטיס יישוב כדי לראות את כל התיקים שלו</div>';
+    return;
   }
 
-  if (matchingRows.length === 0 && currentTownFilter !== null) {
+  var matchingRows = [];
+  if (towns[currentTownFilter]) {
+    matchingRows = towns[currentTownFilter].rows;
+  }
+  panelTitle.textContent = '📋 תיקים ב' + currentTownFilter + ' (' + matchingRows.length + ')';
+  clearBtn.style.display = '';
+
+  if (matchingRows.length === 0) {
     tbody.innerHTML = '';
     emptyState.style.display = '';
     table.querySelector('thead').style.display = 'none';
-    emptyState.innerHTML = '<div style="font-size:40px;margin-bottom:12px;">📭</div><div style="font-size:15px;font-weight:600;margin-bottom:6px;">אין תיקים ב' + currentTownFilter + '</div>';
+    emptyState.innerHTML = '<div style="font-size:40px;margin-bottom:12px;">📭</div>'
+      + '<div style="font-size:15px;font-weight:600;margin-bottom:6px;">אין תיקים פתוחים ב' + currentTownFilter + '</div>'
+      + '<div style="font-size:13px;">תיקים סגורים מופיעים בלשונית "היסטוריה"</div>';
     return;
   }
 
@@ -9006,27 +9038,44 @@ function renderTownsCasesTable() {
   var html = '';
   matchingRows.forEach(function(row, idx) {
     var cells = row.querySelectorAll('td');
-    html += '<tr style="cursor:pointer;" onclick="showView(\'cases-list\')">';
+    var plate = (row.querySelector('.plate-badge')?.textContent || '').trim();
+    html += '<tr style="cursor:pointer;" onclick="openCaseFromTown(\'' + plate.replace(/'/g, "\\'") + '\')">';
     html += '<td style="color:var(--muted);font-size:11px;">' + (idx + 1) + '</td>';
     // date
-    html += '<td style="font-size:12px;color:var(--muted);">' + (cells[1] ? cells[1].innerHTML : '') + '</td>';
+    html += '<td style="font-size:12px;color:var(--muted);">' + (cells[2] ? cells[2].innerHTML : '') + '</td>';
     // plate
-    html += '<td>' + (cells[2] ? cells[2].innerHTML : '') + '</td>';
-    // owner
     html += '<td>' + (cells[3] ? cells[3].innerHTML : '') + '</td>';
+    // owner
+    html += '<td>' + (cells[4] ? cells[4].innerHTML : '') + '</td>';
     // location
-    html += '<td style="font-size:12px;color:var(--muted);">' + (cells[4] ? cells[4].innerHTML : '') + '</td>';
+    html += '<td style="font-size:12px;color:var(--muted);">' + (cells[5] ? cells[5].innerHTML : '') + '</td>';
     // status
-    html += '<td>' + (cells[5] ? cells[5].innerHTML : '') + '</td>';
-    // days remaining
     html += '<td>' + (cells[6] ? cells[6].innerHTML : '') + '</td>';
+    // days remaining
+    html += '<td>' + (cells[7] ? cells[7].innerHTML : '') + '</td>';
     // inspector
-    html += '<td style="color:var(--muted);font-size:12px">' + (cells[7] ? cells[7].innerHTML : '') + '</td>';
+    html += '<td style="color:var(--muted);font-size:12px">' + (cells[8] ? cells[8].innerHTML : '') + '</td>';
     html += '</tr>';
   });
 
   tbody.innerHTML = html;
 }
+
+// ═══ v2.9.45: Open the actual case from a town-page row click ═══
+// The town page rebuilds rows from the main #cases-tbody, so we need to find
+// the original row by plate and open it.
+function openCaseFromTown(plate) {
+  var rows = document.querySelectorAll('#cases-tbody tr');
+  for (var i = 0; i < rows.length; i++) {
+    var pb = rows[i].querySelector('.plate-badge');
+    if (pb && pb.textContent.trim() === plate) {
+      if (typeof openEditFullForm === 'function') openEditFullForm(rows[i]);
+      else if (typeof openCaseFromRow === 'function') openCaseFromRow(rows[i]);
+      return;
+    }
+  }
+}
+window.openCaseFromTown = openCaseFromTown;
 
 function filterTownCards() {
   var search = (document.getElementById('towns-search')?.value || '').trim();
@@ -9998,6 +10047,48 @@ document.addEventListener('visibilitychange', function() {
   }
 });
 
+// ═══════════════════════════════════════════════════════════════════
+// v2.9.43: Re-attach onclick handlers to all rows in #cases-tbody.
+// Called after loadState restores tbody.innerHTML (which strips JS
+// event listeners but keeps HTML attributes & data-*).
+// Also installs a one-time DELEGATED listener on the tbody so any rows
+// added/replaced later (e.g. from Firebase, or via tbody.innerHTML in
+// other code paths) automatically respond to clicks too.
+// ═══════════════════════════════════════════════════════════════════
+var _caseClickDelegationInstalled = false;
+function _reattachCaseRowClicks() {
+  var tbody = document.getElementById('cases-tbody');
+  if (!tbody) return;
+
+  // 1) Install ONE delegated listener on the tbody (idempotent).
+  //    This catches clicks on any current OR future row.
+  if (!_caseClickDelegationInstalled) {
+    tbody.addEventListener('click', function(ev) {
+      // Don't trigger when the user clicked an inner button/checkbox
+      // (those have event.stopPropagation already, but belt-and-braces).
+      var t = ev.target;
+      if (!t) return;
+      if (t.tagName === 'BUTTON' || t.tagName === 'INPUT' ||
+          t.closest('button') || t.closest('input')) return;
+      var tr = t.closest('tr');
+      if (!tr || !tbody.contains(tr)) return;
+      if (typeof openEditFullForm === 'function') {
+        openEditFullForm(tr);
+      } else if (typeof openCaseFromRow === 'function') {
+        openCaseFromRow(tr);
+      }
+    });
+    _caseClickDelegationInstalled = true;
+    console.log('[v2.9.43] ✓ click delegation installed on #cases-tbody');
+  }
+
+  // 2) Make sure all existing rows have cursor:pointer (was lost in innerHTML restore)
+  Array.prototype.forEach.call(tbody.querySelectorAll('tr'), function(tr) {
+    tr.style.cursor = 'pointer';
+  });
+}
+window._reattachCaseRowClicks = _reattachCaseRowClicks;
+
 function buildStateSnapshot() {
   var tables = {};
   SAVED_TBODY_IDS.forEach(function(id) {
@@ -10055,6 +10146,16 @@ function loadState() {
           tb.innerHTML = snap.tables[id];
         }
       });
+    }
+
+    // ═══ v2.9.43: re-attach click handlers to restored rows ═══
+    // tb.innerHTML = ... wipes ALL JS event listeners, including the
+    // tr.onclick = function() { openEditFullForm(this); } that
+    // upsertCaseRow attaches. Without re-attaching, clicking a row does
+    // nothing — only the explicit "📋 פרטים" button works (because that
+    // uses an onclick HTML attribute, which IS preserved by innerHTML).
+    try { _reattachCaseRowClicks(); } catch(e) {
+      console.warn('[v2.9.43] re-attach click handlers failed:', e);
     }
 
     // Restore MAP_CASES (replace contents, keep same array reference)
@@ -10665,6 +10766,12 @@ function _bootSequence() {
   loadState();
   updateReturnedCount();
   recomputeTowingStats();
+
+  // ═══ v2.9.43: ensure click delegation is installed on #cases-tbody  ═══
+  // (loadState calls this too, but if there's no saved state to load,  ═
+  // it's still needed for rows that come from Firebase or default HTML)═
+  try { if (typeof _reattachCaseRowClicks === 'function') _reattachCaseRowClicks(); } catch(e){}
+
   try {
     if (typeof updateAllCounters === 'function') updateAllCounters();
     if (typeof syncDashboardWithCases === 'function') syncDashboardWithCases();
