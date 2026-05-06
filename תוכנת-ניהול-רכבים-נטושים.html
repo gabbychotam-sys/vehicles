@@ -2163,7 +2163,7 @@ body.inspector-mode {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.38 — full edit fix</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.39 — strip Arabic display</div>
     </div>
   </div>
 
@@ -2236,7 +2236,7 @@ body.inspector-mode {
       <div class="tb-date" id="live-date">יום שבת, 2 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.38 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.39 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2902,7 +2902,7 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.38 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.39 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -4056,6 +4056,90 @@ function safePlateKey(plate) {
    - extraMeta: { action: 'printed'|'sent', sentDate, regnum, deadline... }
    Returns a Promise.
    ═══════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════
+   v2.9.38 archiveStatusChangeNoDup — Records a status change to the
+   archive WITHOUT creating duplicates. If a status of the same type
+   already exists for this plate, OVERWRITE it with new timestamp +
+   updated content.
+   ═══════════════════════════════════════════════════════════════════ */
+function archiveStatusChangeNoDup(docType, title, html, statusValue) {
+  try {
+    var db = (typeof fbDb !== 'undefined' && fbDb) || window.fbDb;
+    if (!db || !CASE || !CASE.plate) {
+      console.warn('[archiveNoDup] missing prerequisites');
+      // Fall back to regular archive
+      if (typeof archivePrintedDocument === 'function') {
+        return archivePrintedDocument(docType, title, html, {
+          action: 'status_change',
+          status: statusValue,
+          sentDate: new Date().toISOString().split('T')[0]
+        });
+      }
+      return;
+    }
+    var safePlate = safePlateKey(CASE.plate);
+    var savedByEmail = '';
+    try {
+      var u = (typeof currentUser !== 'undefined' && currentUser) || window.currentUser;
+      savedByEmail = (u && u.email) || (document.getElementById('auth-status-email') || {}).textContent || '';
+    } catch(e) {}
+    var inspectorName = (typeof getCurrentInspectorName === 'function') ? getCurrentInspectorName() : '';
+
+    // Step 1: scan existing archive for THIS case to find duplicates of same type
+    db.ref('archives/' + safePlate).once('value').then(function(snapshot) {
+      var existingDocs = snapshot.val() || {};
+      var existingKey = null;
+      // Find an existing entry of the same docType and action='status_change'
+      Object.keys(existingDocs).forEach(function(k) {
+        var d = existingDocs[k];
+        if (d && d.type === docType && d.action === 'status_change') {
+          existingKey = k; // remember the LAST one we find (will overwrite)
+        }
+      });
+
+      var payload = {
+        type: docType,
+        title: title || '',
+        html: html || '',
+        action: 'status_change',
+        status: statusValue,
+        sentDate: new Date().toISOString().split('T')[0],
+        savedAt: Date.now(),
+        savedBy: savedByEmail,
+        inspector: inspectorName
+      };
+
+      // Step 2: if exists, overwrite same key (no new key = no duplicate)
+      // Otherwise, create with a fresh key.
+      var key = existingKey || (docType + '_' + Date.now());
+      db.ref('archives/' + safePlate + '/' + key).set(payload)
+        .then(function() {
+          console.log('[archiveNoDup] ✓', existingKey ? 'updated existing' : 'created new', key);
+          if (typeof loadCaseDocuments === 'function') {
+            setTimeout(function() { loadCaseDocuments(CASE.plate); }, 300);
+          }
+        })
+        .catch(function(err) {
+          console.warn('[archiveNoDup] save failed:', err);
+        });
+    }).catch(function(err) {
+      console.warn('[archiveNoDup] read failed, falling back:', err);
+      // Fallback: regular archive
+      if (typeof archivePrintedDocument === 'function') {
+        archivePrintedDocument(docType, title, html, {
+          action: 'status_change',
+          status: statusValue,
+          sentDate: new Date().toISOString().split('T')[0]
+        });
+      }
+    });
+  } catch(e) {
+    console.error('[archiveNoDup] error:', e);
+  }
+}
+window.archiveStatusChangeNoDup = archiveStatusChangeNoDup;
+
 function archivePrintedDocument(docType, title, html, extraMeta) {
   // Returns a Promise that RESOLVES with the docKey on success,
   // or REJECTS with an Error so callers can show proper feedback.
@@ -4910,6 +4994,23 @@ function _nfReadCity() {
   return v;
 }
 window._nfReadCity = _nfReadCity;
+
+/* ═══ v2.9.39: strip Arabic characters from location strings ═══
+   Used to clean up location values for display & save.
+   Returns the same string but with Arabic words removed.
+   If the entire string is Arabic, returns empty string. */
+function stripArabicFromLocation(loc) {
+  if (!loc) return '';
+  var s = String(loc).trim();
+  // Split by comma, filter Arabic-only parts, rejoin
+  var parts = s.split(',').map(function(p) { return p.trim(); });
+  var clean = parts.filter(function(p) {
+    // Keep parts that are NOT Arabic (Hebrew, English, numbers OK)
+    return p && !/[\u0600-\u06FF]/.test(p);
+  });
+  return clean.join(', ');
+}
+window.stripArabicFromLocation = stripArabicFromLocation;
 
 function _populateTowFields(caseData) {
   var cb = document.getElementById('nf-is-towed');
@@ -5983,6 +6084,12 @@ function upsertCaseRow(oldPlate, c, fullData) {
     (Array.prototype.indexOf.call(tbody.children, existing) + 1) :
     (tbody.children.length + 1);
 
+  // ═══ v2.9.39: clean location of Arabic for display ═══
+  var displayLoc = (typeof stripArabicFromLocation === 'function')
+    ? stripArabicFromLocation(c.location || '')
+    : (c.location || '');
+  if (!displayLoc) displayLoc = '—';
+
   var rowHtml =
     '<td style="text-align:center;" onclick="event.stopPropagation()">' +
       '<input type="checkbox" class="ms-cb" onchange="msUpdateCount(\'cases-tbody\',\'ms-bar-cases\',\'ms-count-cases\',\'ms-all-cases\')">' +
@@ -5992,9 +6099,9 @@ function upsertCaseRow(oldPlate, c, fullData) {
     '<td><span class="plate-badge">' + safe(c.plate || '—') + '</span></td>' +
     '<td>' +
       '<div class="owner-name">' + safe(c.owner || '—') + '</div>' +
-      '<div class="owner-loc">📍 ' + safe(c.location || '—') + '</div>' +
+      '<div class="owner-loc">📍 ' + safe(displayLoc) + '</div>' +
     '</td>' +
-    '<td style="font-size:12px;">📍 ' + safe(c.location || '—') + '</td>' +
+    '<td style="font-size:12px;">📍 ' + safe(displayLoc) + '</td>' +
     '<td><span class="status-badge ' + s.cls + '">' + s.label + '</span></td>' +
     '<td>' +
       '<div class="countdown-cell">' +
@@ -8089,13 +8196,42 @@ function saveNewCase() {
         fullSnap.photos = casePhotos.slice();
         existingRow.setAttribute('data-case', JSON.stringify(fullSnap));
 
-        // Update visible cells in the row
-        var plateBadge = existingRow.querySelector('.plate-badge');
-        if (plateBadge) plateBadge.textContent = CASE.plate;
-        var ownerNameEl = existingRow.querySelector('.owner-name');
-        if (ownerNameEl) ownerNameEl.textContent = CASE.ownerName || '—';
-        var ownerLocEl = existingRow.querySelector('.owner-loc');
-        if (ownerLocEl) ownerLocEl.textContent = '📍 ' + (CASE.location || '');
+        // ═══ v2.9.38: re-render the FULL row using upsertCaseRow ═══
+        // This ensures status badge, countdown, location, and ALL other cells
+        // refresh — not just the few cells we used to update manually.
+        // upsertCaseRow finds the row by old plate and rewrites innerHTML.
+        try {
+          var oldPlate = existingRow.querySelector('.plate-badge');
+          var oldPlateTxt = oldPlate ? oldPlate.textContent.trim() : CASE.plate;
+          var rowDataForUpsert = {
+            plate:       CASE.plate || '',
+            owner:       CASE.ownerName || '',
+            ownerName:   CASE.ownerName || '',
+            ownerId:     CASE.ownerId || '',
+            ownerAddr:   CASE.ownerAddr || '',
+            ownerPhone:  CASE.ownerPhone || '',
+            location:    CASE.location || '',
+            status:      CASE.status || 'yellow',
+            inspector:   document.getElementById('nf-inspector')?.value || CASE.inspector || '',
+            date:        CASE.date || (new Date()).toISOString().split('T')[0],
+            vehicleType: CASE.vehicleType || '',
+            color:       CASE.color || ''
+          };
+          if (typeof upsertCaseRow === 'function') {
+            upsertCaseRow(oldPlateTxt, rowDataForUpsert, fullSnap);
+            console.log('[v2.9.38 EDIT] ✓ row re-rendered with new status:', CASE.status);
+          } else {
+            // Fallback: update individual cells
+            var plateBadge = existingRow.querySelector('.plate-badge');
+            if (plateBadge) plateBadge.textContent = CASE.plate;
+            var ownerNameEl = existingRow.querySelector('.owner-name');
+            if (ownerNameEl) ownerNameEl.textContent = CASE.ownerName || '—';
+            var ownerLocEl = existingRow.querySelector('.owner-loc');
+            if (ownerLocEl) ownerLocEl.textContent = '📍 ' + (CASE.location || '');
+          }
+        } catch(rerr) {
+          console.warn('[v2.9.38 EDIT] row re-render failed, falling back:', rerr);
+        }
 
         // Push to Firebase if we have an id
         var dbForUpdate = (typeof fbDb !== 'undefined' && fbDb) || window.fbDb;
@@ -8200,11 +8336,18 @@ function saveNewCase() {
             '<p><b>תאריך:</b> ' + ts + '</p>' +
             '<p><b>מבצע:</b> ' + ((currentUser && currentUser.email) || '—') + '</p>' +
             '</div>';
-          archivePrintedDocument(label.type, label.title, summaryHtml, {
-            action: 'status_change',
-            status: window._nfSelectedStatus,
-            sentDate: new Date().toISOString().split('T')[0]
-          });
+          // ═══ v2.9.38: NO DUPLICATES — overwrite existing entry of same type ═══
+          // If this status was already recorded for this case, update that
+          // entry (overwrite with new timestamp) instead of creating a duplicate.
+          if (typeof archiveStatusChangeNoDup === 'function') {
+            archiveStatusChangeNoDup(label.type, label.title, summaryHtml, window._nfSelectedStatus);
+          } else {
+            archivePrintedDocument(label.type, label.title, summaryHtml, {
+              action: 'status_change',
+              status: window._nfSelectedStatus,
+              sentDate: new Date().toISOString().split('T')[0]
+            });
+          }
           console.log('[status-archive] ✓ logged status change:', window._nfSelectedStatus);
         }
         // Reset for next save
@@ -8258,7 +8401,11 @@ function _newCaseReadFields() {
   CASE.ownerId = document.getElementById('nf-owner-id').value.trim();
   CASE.ownerAddr = document.getElementById('nf-owner-addr').value.trim();
   CASE.ownerPhone = document.getElementById('nf-owner-phone').value.trim();
-  CASE.location = street ? city + ', ' + street : city;
+  // ═══ v2.9.39: clean Arabic from saved location ═══
+  var combinedLoc = street ? city + ', ' + street : city;
+  CASE.location = (typeof stripArabicFromLocation === 'function')
+    ? stripArabicFromLocation(combinedLoc)
+    : combinedLoc;
   CASE.notes = document.getElementById('nf-notes').value.trim();
 
   // ═══ v2.9.28: Apply status from chips (if user selected one) ═══
@@ -11764,7 +11911,7 @@ if (document.readyState === 'loading') {
         '<div class="owner-name">' + safe(c.owner || '—') + '</div>' +
         '<div class="owner-loc">📱 מהשטח</div>' +
       '</td>' +
-      '<td style="font-size:12px;">📍 ' + safe(c.location || '—') + '</td>' +
+      '<td style="font-size:12px;">📍 ' + safe((typeof stripArabicFromLocation === 'function' ? stripArabicFromLocation(c.location || '') : (c.location || '')) || '—') + '</td>' +
       '<td><span class="status-badge ' + s.cls + '">' + s.label + '</span></td>' +
       '<td>' +
         '<div class="countdown-cell">' +
