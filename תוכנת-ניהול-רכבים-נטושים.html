@@ -2163,7 +2163,7 @@ body.inspector-mode {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.30 — diagnostic</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.31 — visible UI</div>
     </div>
   </div>
 
@@ -2236,7 +2236,7 @@ body.inspector-mode {
       <div class="tb-date" id="live-date">יום שבת, 2 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.30 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.31 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2558,8 +2558,11 @@ body.inspector-mode {
             <div class="edit-section-title">📍 מיקום הרכב</div>
             <div class="edit-grid">
               <div class="edit-group"><div class="edit-label">יישוב</div>
-                <select class="edit-input" id="nf-location-city" onchange="onCitySelectChange()"><option>מטולה</option><option>קריית שמונה</option><option>כפר גלעדי</option><option>מחניים</option><option>חצור הגלילית</option><option>ראש פינה</option><option>יסוד המעלה</option><option>אחר</option></select>
-                <input type="text" id="nf-location-city-other" placeholder="הזן שם יישוב ידנית..." style="display:none;width:100%;margin-top:8px;padding:10px 12px;border:2px solid #2563eb;border-radius:10px;font-size:14px;font-family:inherit;direction:rtl;">
+                <div style="display:flex;gap:6px;align-items:stretch;">
+                  <select class="edit-input" id="nf-location-city" onchange="onCitySelectChange()" style="flex:1;"><option>מטולה</option><option>קריית שמונה</option><option>כפר גלעדי</option><option>מחניים</option><option>חצור הגלילית</option><option>ראש פינה</option><option>יסוד המעלה</option><option>אחר</option></select>
+                  <button type="button" onclick="toggleCityManualEdit()" id="nf-city-edit-btn" title="ערוך ידנית את שם הישוב" style="padding:0 14px;background:#fff7ed;color:#c2410c;border:1.5px solid #fb923c;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">✏️ ידני</button>
+                </div>
+                <input type="text" id="nf-location-city-other" placeholder="הזן שם יישוב ידנית..." style="display:none;width:100%;margin-top:8px;padding:10px 12px;border:2px solid #fb923c;border-radius:10px;font-size:14px;font-family:inherit;direction:rtl;background:#fff7ed;">
               </div>
               <div class="edit-group"><div class="edit-label">ניווט למיקום הרכב</div>
                 <input type="hidden" id="nf-location-street" value="נחל עורבים">
@@ -2591,16 +2594,19 @@ body.inspector-mode {
           <!-- ═══ v2.9.28: סטטוס תיק (מדבקות וכו') ═══ -->
           <div class="edit-section">
             <div class="edit-section-title">🏷️ סטטוס התיק</div>
-            <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">בחר את הפעולה האחרונה. בעת שמירה - ייווצר רישום בארכיון</div>
-            <div class="status-chips" id="nf-status-chips">
-              <span class="status-chip sc-yellow"   data-status="yellow"        onclick="nfSelectStatus(this)">🟡 מדבקה צהובה</span>
-              <span class="status-chip sc-red"      data-status="red"           onclick="nfSelectStatus(this)">🔴 מדבקה אדומה</span>
-              <span class="status-chip sc-letter1"  data-status="letter1_sent"  onclick="nfSelectStatus(this)">📮 נשלח מכתב ראשון</span>
-              <span class="status-chip sc-letter2"  data-status="letter2_sent"  onclick="nfSelectStatus(this)">📮 נשלח מכתב שני</span>
-              <span class="status-chip sc-towed"    data-status="towed"         onclick="nfSelectStatus(this)">🚛 נגרר</span>
-              <span class="status-chip sc-scrapped" data-status="scrapped"      onclick="nfSelectStatus(this)">♻️ פינוי גרוטאה</span>
-              <span class="status-chip sc-waiver"   data-status="waiver"        onclick="nfSelectStatus(this)">✍️ הצהרת ויתור</span>
-              <span class="status-chip sc-closed"   data-status="closed"        onclick="nfSelectStatus(this)">✅ סגור</span>
+            <div style="background:linear-gradient(135deg,rgba(102,51,153,0.06),rgba(0,180,216,0.04));border:2px dashed rgba(102,51,153,0.3);border-radius:12px;padding:16px;">
+              <div style="font-size:13px;color:var(--text);margin-bottom:14px;font-weight:600;">📝 בחר את הפעולה האחרונה שבוצעה:</div>
+              <div class="status-chips" id="nf-status-chips" style="display:flex;flex-wrap:wrap;gap:10px;">
+                <span class="status-chip sc-yellow"   data-status="yellow"        onclick="nfSelectStatus(this)">🟡 מדבקה צהובה</span>
+                <span class="status-chip sc-red"      data-status="red"           onclick="nfSelectStatus(this)">🔴 מדבקה אדומה</span>
+                <span class="status-chip sc-letter1"  data-status="letter1_sent"  onclick="nfSelectStatus(this)">📮 נשלח מכתב ראשון</span>
+                <span class="status-chip sc-letter2"  data-status="letter2_sent"  onclick="nfSelectStatus(this)">📮 נשלח מכתב שני</span>
+                <span class="status-chip sc-towed"    data-status="towed"         onclick="nfSelectStatus(this)">🚛 נגרר</span>
+                <span class="status-chip sc-scrapped" data-status="scrapped"      onclick="nfSelectStatus(this)">♻️ פינוי גרוטאה</span>
+                <span class="status-chip sc-waiver"   data-status="waiver"        onclick="nfSelectStatus(this)">✍️ הצהרת ויתור</span>
+                <span class="status-chip sc-closed"   data-status="closed"        onclick="nfSelectStatus(this)">✅ סגור</span>
+              </div>
+              <div style="font-size:11px;color:var(--muted);margin-top:10px;">💡 בעת שמירת התיק - הפעולה תירשם בארכיון המסמכים</div>
             </div>
           </div>
 
@@ -2854,7 +2860,7 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.30 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.31 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -4953,12 +4959,41 @@ function onCitySelectChange() {
 }
 window.onCitySelectChange = onCitySelectChange;
 
-/* Read effective city: from "other" input if "אחר" is selected, else from the dropdown */
+/* ═══ v2.9.31: explicit "edit manually" button — opens the free-text input
+   regardless of which city is currently selected. Use case: the dropdown
+   shows an Arabic name from a previous session and the user wants to type
+   the Hebrew name. ═══ */
+function toggleCityManualEdit() {
+  var inp = document.getElementById('nf-location-city-other');
+  if (!inp) return;
+  if (inp.style.display === 'none' || !inp.style.display) {
+    // Show the manual input, pre-fill with current dropdown value if useful
+    var sel = document.getElementById('nf-location-city');
+    var current = sel ? sel.value : '';
+    // Don't pre-fill if the current value is Arabic
+    if (current && !/[\u0600-\u06FF]/.test(current) && current !== 'אחר') {
+      inp.value = current;
+    } else {
+      inp.value = '';
+    }
+    inp.style.display = 'block';
+    setTimeout(function(){ inp.focus(); inp.select(); }, 50);
+  } else {
+    inp.style.display = 'none';
+    inp.value = '';
+  }
+}
+window.toggleCityManualEdit = toggleCityManualEdit;
+
+/* Read effective city: from "other" input if it's visible/has value, else from the dropdown */
 function _nfReadCity() {
   var sel = document.getElementById('nf-location-city');
   var inp = document.getElementById('nf-location-city-other');
+  // If the manual input is visible AND has a value, it wins
+  if (inp && inp.style.display !== 'none' && inp.value && inp.value.trim()) {
+    return inp.value.trim();
+  }
   if (!sel) return '';
-  if (sel.value === 'אחר' && inp && inp.value.trim()) return inp.value.trim();
   return sel.value;
 }
 window._nfReadCity = _nfReadCity;
