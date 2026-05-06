@@ -2163,7 +2163,7 @@ body.inspector-mode {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.32 — single edit</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.34 — city dropdown</div>
     </div>
   </div>
 
@@ -2236,7 +2236,7 @@ body.inspector-mode {
       <div class="tb-date" id="live-date">יום שבת, 2 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.32 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.34 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2558,10 +2558,36 @@ body.inspector-mode {
             <div class="edit-section-title">📍 מיקום הרכב</div>
             <div class="edit-grid">
               <div class="edit-group"><div class="edit-label">יישוב</div>
-                <div style="display:flex;gap:6px;align-items:stretch;">
-                  <select class="edit-input" id="nf-location-city" onchange="onCitySelectChange()" style="flex:1;"><option>מטולה</option><option>קריית שמונה</option><option>כפר גלעדי</option><option>מחניים</option><option>חצור הגלילית</option><option>ראש פינה</option><option>יסוד המעלה</option><option>אחר</option></select>
-                  <button type="button" onclick="toggleCityManualEdit()" id="nf-city-edit-btn" title="ערוך ידנית את שם הישוב" style="padding:0 14px;background:#fff7ed;color:#c2410c;border:1.5px solid #fb923c;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;">✏️ ידני</button>
-                </div>
+                <select class="edit-input" id="nf-location-city" onchange="onCitySelectChange()">
+                  <option value="">— בחר יישוב —</option>
+                  <option>מטולה</option>
+                  <option>קריית שמונה</option>
+                  <option>כפר גלעדי</option>
+                  <option>מחניים</option>
+                  <option>חצור הגלילית</option>
+                  <option>ראש פינה</option>
+                  <option>יסוד המעלה</option>
+                  <option>מרגליות</option>
+                  <option>מנרה</option>
+                  <option>שדה אליעזר</option>
+                  <option>בית הלל</option>
+                  <option>גונן</option>
+                  <option>דישון</option>
+                  <option>דפנה</option>
+                  <option>חולתא</option>
+                  <option>יראון</option>
+                  <option>כפר בלום</option>
+                  <option>כפר ראש פינה</option>
+                  <option>מלכיה</option>
+                  <option>משגב עם</option>
+                  <option>נאות מרדכי</option>
+                  <option>סאסא</option>
+                  <option>עין זיוון</option>
+                  <option>שדה נחמיה</option>
+                  <option>שמיר</option>
+                  <option>תל חי</option>
+                  <option value="other">✏️ אחר (הזן ידנית)</option>
+                </select>
                 <input type="text" id="nf-location-city-other" placeholder="הזן שם יישוב ידנית..." style="display:none;width:100%;margin-top:8px;padding:10px 12px;border:2px solid #fb923c;border-radius:10px;font-size:14px;font-family:inherit;direction:rtl;background:#fff7ed;">
               </div>
               <div class="edit-group"><div class="edit-label">ניווט למיקום הרכב</div>
@@ -2860,7 +2886,7 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.32 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.34 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -3290,176 +3316,6 @@ body.inspector-mode {
 </div>
 
 
-<!-- ═══ v2.9.32: Old edit modal — kept hidden for legacy compatibility ═══ -->
-<!-- All edit operations now go through the openEditFullForm screen -->
-<div class="modal-overlay" id="edit-modal-overlay" style="display:none !important;" onclick="closeEditModal(event)">
-  <div class="edit-modal" onclick="event.stopPropagation()">
-    <div class="modal-header">
-      <div class="modal-title">✏️ עריכת פרטי תיק — <span id="edit-plate-title">98-765-43</span></div>
-      <button class="modal-close" onclick="closeEditModal()">✕</button>
-    </div>
-    <div class="edit-modal-body">
-
-      <!-- Section: רכב -->
-      <div class="edit-section">
-        <div class="edit-section-title">🚗 פרטי הרכב</div>
-        <div class="edit-grid three">
-          <div class="edit-group" style="grid-column:span 1">
-            <div class="edit-label">לוחית רישוי</div>
-            <input class="edit-input plate-input" id="e-plate" type="text" placeholder="98-765-43">
-          </div>
-          <div class="edit-group">
-            <div class="edit-label">סוג / דגם רכב</div>
-            <input class="edit-input" id="e-vehicle-type" type="text" placeholder="קיה ספורטאז׳">
-          </div>
-          <div class="edit-group">
-            <div class="edit-label">צבע</div>
-            <select class="edit-input" id="e-color">
-              <option>כסף</option><option>לבן</option><option>שחור</option>
-              <option>אפור</option><option>כחול</option><option>אדום</option>
-              <option>ירוק</option><option>חום</option><option>צהוב</option><option>אחר</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- Section: בעל הרכב -->
-      <div class="edit-section">
-        <div class="edit-section-title">👤 פרטי בעל הרכב</div>
-        <div class="edit-grid">
-          <div class="edit-group">
-            <div class="edit-label">שם מלא</div>
-            <input class="edit-input" id="e-owner-name" type="text" placeholder="שם בעל הרכב">
-          </div>
-          <div class="edit-group">
-            <div class="edit-label">מספר תעודת זהות</div>
-            <input class="edit-input" id="e-owner-id" type="text" placeholder="000000000">
-          </div>
-          <div class="edit-group">
-            <div class="edit-label">כתובת מגורים</div>
-            <input class="edit-input" id="e-owner-addr" type="text" placeholder="רחוב, עיר, מיקוד">
-          </div>
-          <div class="edit-group">
-            <div class="edit-label">טלפון</div>
-            <input class="edit-input" id="e-owner-phone" type="tel" placeholder="050-0000000">
-          </div>
-        </div>
-      </div>
-
-      <!-- Section: מיקום -->
-      <div class="edit-section">
-        <div class="edit-section-title">📍 מיקום הרכב</div>
-        <div class="edit-grid">
-          <div class="edit-group">
-            <div class="edit-label">יישוב</div>
-            <select class="edit-input" id="e-location-city">
-              <option>מטולה</option><option>קריית שמונה</option><option>כפר גלעדי</option>
-              <option>מחניים</option><option>חצור הגלילית</option><option>ראש פינה</option>
-              <option>יסוד המעלה</option><option>אחר</option>
-            </select>
-          </div>
-          <div class="edit-group">
-            <div class="edit-label">כתובת / מיקום מדויק</div>
-            <input class="edit-input" id="e-location-street" type="text" placeholder="רחוב ומספר">
-          </div>
-          <div class="edit-group">
-            <div class="edit-label">פקח מטפל <span style="font-size:10px;color:var(--muted);font-weight:400;">(אוטומטי)</span></div>
-            <div class="edit-input edit-input-readonly" id="e-inspector-display">— לא נקבע פקח —</div>
-            <input type="hidden" id="e-inspector" value="">
-          </div>
-          <div class="edit-group">
-            <div class="edit-label">תאריך גילוי</div>
-            <input class="edit-input" id="e-found-date" type="date">
-          </div>
-        </div>
-      </div>
-
-      <!-- Section: סטטוס -->
-      <div class="edit-section">
-        <div class="edit-section-title">🏷️ סטטוס תיק</div>
-        <div class="edit-group">
-          <div class="edit-label">שלב נוכחי</div>
-          <div class="status-chips" id="e-status-chips">
-            <span class="status-chip sc-yellow" data-status="yellow" onclick="selectStatus(this)">🟡 מדבקה צהובה</span>
-            <span class="status-chip sc-red active" data-status="red" onclick="selectStatus(this)">🔴 מדבקה אדומה</span>
-            <span class="status-chip sc-letter1" data-status="letter1_sent" onclick="selectStatus(this)">📮 נשלח מכתב ראשון</span>
-            <span class="status-chip sc-letter2" data-status="letter2_sent" onclick="selectStatus(this)">📮 נשלח מכתב שני</span>
-            <span class="status-chip sc-towed" data-status="towed" onclick="selectStatus(this)">🚛 נגרר</span>
-            <span class="status-chip sc-scrapped" data-status="scrapped" onclick="selectStatus(this)">♻️ פינוי גרוטאה</span>
-            <span class="status-chip sc-waiver" data-status="waiver" onclick="selectStatus(this)">✍️ הצהרת ויתור</span>
-            <span class="status-chip sc-closed" data-status="closed" onclick="selectStatus(this)">✅ סגור</span>
-          </div>
-        </div>
-        <div class="edit-grid" style="margin-top:12px" id="e-tow-section">
-          <div class="edit-group">
-            <div class="edit-label">תאריך גרירה</div>
-            <input class="edit-input" id="e-tow-date" type="date">
-          </div>
-          <div class="edit-group">
-            <div class="edit-label">מיקום מגרש</div>
-            <select class="edit-input" id="e-tow-location">
-              <option>מגרש אליפלט</option><option>מגרש קריית שמונה</option><option>אחר</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- ═══ NEW: Section: מספרי דואר רשום ═══ -->
-      <div class="edit-section">
-        <div class="edit-section-title">📮 מספרי דואר רשום</div>
-        <div class="edit-grid">
-          <div class="edit-group">
-            <div class="edit-label">מספר דואר רשום — מכתב ראשון</div>
-            <input class="edit-input" id="e-regnum-1" type="text" placeholder="למשל RR123456789IL" style="font-family:monospace;direction:ltr;text-align:right;">
-            <div style="font-size:10px;color:var(--muted);margin-top:4px;">מספר זה יופיע אוטומטית במכתב הראשון</div>
-          </div>
-          <div class="edit-group">
-            <div class="edit-label">מספר דואר רשום — מכתב שני</div>
-            <input class="edit-input" id="e-regnum-2" type="text" placeholder="למשל RR987654321IL" style="font-family:monospace;direction:ltr;text-align:right;">
-            <div style="font-size:10px;color:var(--muted);margin-top:4px;">מספר זה יופיע אוטומטית במכתב השני</div>
-          </div>
-          <div class="edit-group">
-            <div class="edit-label">תאריך שליחת מכתב ראשון</div>
-            <input class="edit-input" id="e-letter1-date" type="date">
-          </div>
-          <div class="edit-group">
-            <div class="edit-label">תאריך שליחת מכתב שני</div>
-            <input class="edit-input" id="e-letter2-date" type="date">
-          </div>
-        </div>
-      </div>
-
-      <!-- Section: הערות -->
-      <div class="edit-section">
-        <div class="edit-section-title">📝 הערות</div>
-        <div class="edit-group">
-          <textarea class="edit-input" id="e-notes" rows="3" placeholder="הערות נוספות, מידע רלוונטי..." style="resize:vertical;"></textarea>
-        </div>
-      </div>
-
-      <!-- Photo upload section -->
-      <div class="edit-section">
-        <div class="edit-section-title">📷 תמונות מהשטח</div>
-        <div class="photo-upload-area" id="photo-upload-area">
-          <div class="photo-thumbs" id="photo-thumbs"></div>
-          <label class="photo-add-btn" id="photo-add-label">
-            <input type="file" id="photo-input" accept="image/*" multiple="" style="display:none;" onchange="handlePhotoUpload(event)">
-            <span class="photo-add-icon">+</span>
-            <span class="photo-add-text">הוסף תמונות</span>
-          </label>
-        </div>
-        <div style="font-size:10px;color:var(--muted);margin-top:6px;">ניתן להעלות עד 10 תמונות · JPG, PNG · גודל מקסימלי 5MB לתמונה</div>
-      </div>
-
-    </div><!-- end edit-modal-body -->
-
-    <div class="edit-actions">
-      <button class="btn-cancel" onclick="closeEditModal()">ביטול</button>
-      <button class="btn-cancel" onclick="saveCaseSnapshotToArchive()" style="background:#f3e5f5;color:#6a1b9a;border-color:#ce93d8;">💾 שמור בארכיון</button>
-      <button class="btn-save" id="edit-save-btn" onclick="saveCase()">💾 שמור שינויים</button>
-    </div>
-  </div>
-</div>
 
 <!-- Toast notification -->
 <div class="edit-toast" id="edit-toast">📋 פרטי השטח נטענו — בדוק, ערוך ולחץ "💾 שמור ופתח תיק"</div>
@@ -4951,7 +4807,9 @@ function onCitySelectChange() {
   var sel = document.getElementById('nf-location-city');
   var inp = document.getElementById('nf-location-city-other');
   if (!sel || !inp) return;
-  if (sel.value === 'אחר') {
+  var v = sel.value;
+  // Trigger manual input for both "other" (new value) and "אחר" (legacy text)
+  if (v === 'other' || v === 'אחר') {
     inp.style.display = 'block';
     setTimeout(function(){ inp.focus(); }, 50);
   } else {
@@ -4987,16 +4845,19 @@ function toggleCityManualEdit() {
 }
 window.toggleCityManualEdit = toggleCityManualEdit;
 
-/* Read effective city: from "other" input if it's visible/has value, else from the dropdown */
+/* Read effective city: from "other" input if "אחר/other" is selected, else from the dropdown */
 function _nfReadCity() {
   var sel = document.getElementById('nf-location-city');
   var inp = document.getElementById('nf-location-city-other');
-  // If the manual input is visible AND has a value, it wins
+  if (!sel) return '';
+  // If manual input is visible AND has a value, prefer it
   if (inp && inp.style.display !== 'none' && inp.value && inp.value.trim()) {
     return inp.value.trim();
   }
-  if (!sel) return '';
-  return sel.value;
+  var v = sel.value;
+  // Don't return the marker values themselves
+  if (v === 'other' || v === 'אחר' || v === '') return '';
+  return v;
 }
 window._nfReadCity = _nfReadCity;
 
@@ -5603,79 +5464,13 @@ function openEditModal() {
     }
     return;
   }
-
-  // ═══ Legacy fallback (should not be reached) ═══
-  document.getElementById('e-plate').value         = CASE.plate;
-  document.getElementById('e-vehicle-type').value  = CASE.vehicleType;
-  document.getElementById('e-owner-name').value    = CASE.ownerName;
-  document.getElementById('e-owner-id').value      = CASE.ownerId;
-  document.getElementById('e-owner-addr').value    = CASE.ownerAddr;
-  document.getElementById('e-owner-phone').value   = CASE.ownerPhone || '';
-  document.getElementById('e-notes').value         = CASE.notes || '';
-
-  // ═══ NEW: Auto-populate "פקח מטפל" — display only, not editable ═══
-  // Priority: 1) inspector saved on the case  2) "נפתח בשטח ע״י" note
-  // 3) currently signed-in user (mapped from email)
-  var autoInsp = '';
-  if (CASE.inspector && String(CASE.inspector).trim()) {
-    autoInsp = String(CASE.inspector).trim();
-  } else {
-    var cardInspText = ((document.getElementById('cv-card-inspector') || {}).textContent || '').replace('פקח:', '').trim();
-    if (cardInspText && cardInspText !== '—') {
-      autoInsp = cardInspText;
-    } else {
-      autoInsp = (typeof getCurrentInspectorName === 'function') ? getCurrentInspectorName() : '';
-    }
-  }
-  var inspHidden = document.getElementById('e-inspector');
-  var inspDisplay = document.getElementById('e-inspector-display');
-  if (inspHidden) inspHidden.value = autoInsp;
-  if (inspDisplay) inspDisplay.textContent = autoInsp || '— לא נקבע פקח —';
-
-  const colorSel = document.getElementById('e-color');
-  for (let o of colorSel.options) { if (o.value === CASE.color) { o.selected=true; break; } }
-
-  const parts = (CASE.location||'').split(', ');
-  const city = parts[0]; const street = parts.slice(1).join(', ');
-  const citySel = document.getElementById('e-location-city');
-  for (let o of citySel.options) { if (o.value === city) { o.selected=true; break; } }
-  document.getElementById('e-location-street').value = street;
-
-  document.getElementById('e-tow-date').value = CASE.towDate || '';
-  currentStatus = CASE.status || 'red';
-  document.querySelectorAll('.status-chip').forEach(c =>
-    c.classList.toggle('active', c.dataset.status === currentStatus));
-
-  // ═══ NEW: Populate registered-mail fields from SENT data ═══
-  var regnum1El = document.getElementById('e-regnum-1');
-  var regnum2El = document.getElementById('e-regnum-2');
-  var letter1DateEl = document.getElementById('e-letter1-date');
-  var letter2DateEl = document.getElementById('e-letter2-date');
-  if (regnum1El)     regnum1El.value     = (SENT && SENT.letter1 && SENT.letter1.regnum) || CASE.regnum1 || '';
-  if (regnum2El)     regnum2El.value     = (SENT && SENT.letter2 && SENT.letter2.regnum) || CASE.regnum2 || '';
-  if (letter1DateEl) letter1DateEl.value = (SENT && SENT.letter1 && SENT.letter1.date)   || '';
-  if (letter2DateEl) letter2DateEl.value = (SENT && SENT.letter2 && SENT.letter2.date)   || '';
-
-  // ═══ NEW: Auto-fill location from GPS coordinates if available ═══
-  // Uses Nominatim (OpenStreetMap) reverse geocoding — free, no key.
-  // Only fills empty fields so we don't clobber user edits.
-  try {
-    var hasGps = CASE.lat != null && CASE.lon != null && CASE.lat !== '' && CASE.lon !== '';
-    var cityEmpty = !citySel.value || citySel.value === citySel.options[0].value;
-    var streetEmpty = !document.getElementById('e-location-street').value;
-    if (hasGps && (cityEmpty || streetEmpty) && typeof window._gx_reverseGeocodeForEdit === 'function') {
-      window._gx_reverseGeocodeForEdit(CASE.lat, CASE.lon);
-    }
-  } catch(e) { console.warn('[edit] geocode failed:', e); }
-
-  updateTowSection();
-  renderPhotoThumbs();
-  document.getElementById('edit-modal-overlay').classList.add('open');
+  // ═══ v2.9.33: Old modal was removed — nothing else to do here ═══
 }
 
+
 function closeEditModal(e) {
-  if (e && e.target !== document.getElementById('edit-modal-overlay')) return;
-  document.getElementById('edit-modal-overlay').classList.remove('open');
+  // ═══ v2.9.33: stub — old modal was removed ═══
+  return;
 }
 
 function selectStatus(el) {
@@ -6388,6 +6183,7 @@ function openEditFullForm(tr) {
   if (CASE.location) {
     var parts = String(CASE.location).split(',').map(function(s){return s.trim();});
     var citySel = document.getElementById('nf-location-city');
+    var cityOther = document.getElementById('nf-location-city-other');
     if (citySel && parts[0]) {
       var found = false;
       for (var i = 0; i < citySel.options.length; i++) {
@@ -6396,8 +6192,21 @@ function openEditFullForm(tr) {
           found = true; break;
         }
       }
-      if (!found && citySel.querySelector('option[value="אחר"]')) {
-        citySel.value = 'אחר';
+      // ═══ v2.9.34: if city not in list (e.g. "עמיר", "الجيزة"), show in manual input ═══
+      if (!found) {
+        // Skip Arabic — leave the manual input empty so the user types Hebrew
+        var isArabic = /[\u0600-\u06FF]/.test(parts[0]);
+        // Pick the "other" option in the dropdown
+        var otherOpt = citySel.querySelector('option[value="other"]') || citySel.querySelector('option[value="אחר"]');
+        if (otherOpt) citySel.value = otherOpt.value;
+        // Show the manual input pre-filled with the existing Hebrew value
+        if (cityOther) {
+          cityOther.style.display = 'block';
+          cityOther.value = isArabic ? '' : parts[0];
+        }
+      } else if (cityOther) {
+        cityOther.style.display = 'none';
+        cityOther.value = '';
       }
     }
     var streetEl = document.getElementById('nf-location-street');
