@@ -2167,7 +2167,7 @@ body.inspector-mode {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.47 — auto sync אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.48 — towns merge typos אמיר→עמיר</div>
     </div>
   </div>
 
@@ -5042,12 +5042,34 @@ function stripArabicFromLocation(loc) {
   // ═══ v2.9.42: fix common typos in kibbutz names ═══
   // The Galil Elyon kibbutz is "עמיר" (with ע), NOT "אמיר" (with א).
   // Auto-correct any saved data that has the wrong spelling.
-  return clean.map(function(p) {
+  clean = clean.map(function(p) {
     // Match "אמיר" only as a whole word (not part of larger word like "סהמיר")
     if (p === 'אמיר') return 'עמיר';
     // If "אמיר" appears at start followed by space/comma
     return p.replace(/^אמיר($|\s|,)/, 'עמיר$1').replace(/(\s|,)אמיר($|\s|,)/g, '$1עמיר$2');
-  }).join(', ');
+  });
+  // ═══ v2.9.47: deduplicate consecutive duplicates ═══
+  // Geocoding sometimes returns the city name in BOTH the city and street
+  // fields (e.g. "עמיר, עמיר"). Also catches "כפר עמיר, עמיר" → "כפר עמיר".
+  // We compare normalised values (case-insensitive, trimmed) and skip a part
+  // if it equals or is contained in the previously-kept part.
+  var deduped = [];
+  clean.forEach(function(p) {
+    var norm = p.trim();
+    if (!norm) return;
+    if (deduped.length === 0) { deduped.push(norm); return; }
+    var prev = deduped[deduped.length - 1];
+    // Exact match → skip
+    if (prev === norm) return;
+    // One contains the other → keep the longer one
+    if (prev.indexOf(norm) !== -1) return;             // prev already contains norm
+    if (norm.indexOf(prev) !== -1) {
+      deduped[deduped.length - 1] = norm;              // norm contains prev — replace
+      return;
+    }
+    deduped.push(norm);
+  });
+  return deduped.join(', ');
 }
 window.stripArabicFromLocation = stripArabicFromLocation;
 
@@ -8896,9 +8918,6 @@ function getTownDataFromCases() {
     if (CLOSED_STATUSES.indexOf(st) !== -1) return;
 
     // ═══ v2.9.45: Read location from data-case (the source of truth) ═══
-    // NOT from .owner-loc — for mobile cases, .owner-loc shows "📱 מהשטח"
-    // which is a UI label, not the actual location. The location field in
-    // the case data has the real city name.
     var loc = '';
     var caseDataStr = row.getAttribute('data-case');
     if (caseDataStr) {
@@ -8907,7 +8926,6 @@ function getTownDataFromCases() {
         loc = (cd.location || cd.locationCity || '').trim();
       } catch(e){}
     }
-    // Fallback: read from the dedicated location cell (cells[5] in upsertCaseRow's layout)
     if (!loc) {
       var cells = row.querySelectorAll('td');
       if (cells.length >= 6) {
@@ -8916,8 +8934,13 @@ function getTownDataFromCases() {
     }
     if (!loc) return;
 
-    // Take ONLY the city part (before the first comma).
-    // Without this, "עמיר, רחוב 5" and "עמיר, רחוב 7" become two separate towns.
+    // ═══ v2.9.48: NORMALIZE the location (אמיר→עמיר, dedup, strip Arabic) ═══
+    // Old data in Firebase may still have the typo "אמיר" or duplicates
+    // like "עמיר, עמיר". Run stripArabicFromLocation to fix on-the-fly.
+    if (typeof stripArabicFromLocation === 'function') {
+      loc = stripArabicFromLocation(loc);
+    }
+    // Take ONLY the city part (before the first comma)
     loc = loc.split(',')[0].trim();
     if (!loc || loc === '—' || loc === 'מהשטח') return;
 
@@ -8950,7 +8973,7 @@ function renderTownsPage() {
   });
 
   var html = '';
-  html += '<div class="town-summary-card' + (currentTownFilter === null ? ' active-town' : '') + '" onclick="selectTown(null)">';
+  html += '<div class="town-summary-card' + (currentTownFilter === '_all' ? ' active-town' : '') + '" onclick="selectTown(\'_all\')">';
   html += '<div class="town-card-name">🏘️ כל היישובים</div>';
   html += '<div class="town-card-stats">';
   html += '<span class="town-stat ts-total">' + totalAll + ' תיקים</span>';
@@ -9001,8 +9024,6 @@ function renderTownsCasesTable() {
 
   // ═══ v2.9.45: Only show cases when a specific town is selected ═══
   // Default state (no town selected) = empty state asking the user to pick a town.
-  // This matches the "סינון תיקים לפי יישוב" page subtitle — it's a filter view,
-  // not a "show everything" view.
   if (currentTownFilter === null) {
     tbody.innerHTML = '';
     panelTitle.textContent = '📋 בחר יישוב לצפייה בתיקים';
@@ -9015,19 +9036,31 @@ function renderTownsCasesTable() {
     return;
   }
 
+  // ═══ v2.9.48: "_all" filter shows ALL active cases across every town ═══
   var matchingRows = [];
-  if (towns[currentTownFilter]) {
+  if (currentTownFilter === '_all') {
+    // Concatenate rows from every town
+    Object.keys(towns).forEach(function(townKey) {
+      towns[townKey].rows.forEach(function(r) { matchingRows.push(r); });
+    });
+    panelTitle.textContent = '📋 כל התיקים בכל היישובים (' + matchingRows.length + ')';
+    clearBtn.style.display = '';
+  } else if (towns[currentTownFilter]) {
     matchingRows = towns[currentTownFilter].rows;
+    panelTitle.textContent = '📋 תיקים ב' + currentTownFilter + ' (' + matchingRows.length + ')';
+    clearBtn.style.display = '';
+  } else {
+    panelTitle.textContent = '📋 תיקים ב' + currentTownFilter + ' (0)';
+    clearBtn.style.display = '';
   }
-  panelTitle.textContent = '📋 תיקים ב' + currentTownFilter + ' (' + matchingRows.length + ')';
-  clearBtn.style.display = '';
 
   if (matchingRows.length === 0) {
     tbody.innerHTML = '';
     emptyState.style.display = '';
     table.querySelector('thead').style.display = 'none';
+    var who = (currentTownFilter === '_all') ? 'באף יישוב' : ('ב' + currentTownFilter);
     emptyState.innerHTML = '<div style="font-size:40px;margin-bottom:12px;">📭</div>'
-      + '<div style="font-size:15px;font-weight:600;margin-bottom:6px;">אין תיקים פתוחים ב' + currentTownFilter + '</div>'
+      + '<div style="font-size:15px;font-weight:600;margin-bottom:6px;">אין תיקים פתוחים ' + who + '</div>'
       + '<div style="font-size:13px;">תיקים סגורים מופיעים בלשונית "היסטוריה"</div>';
     return;
   }
@@ -9041,19 +9074,12 @@ function renderTownsCasesTable() {
     var plate = (row.querySelector('.plate-badge')?.textContent || '').trim();
     html += '<tr style="cursor:pointer;" onclick="openCaseFromTown(\'' + plate.replace(/'/g, "\\'") + '\')">';
     html += '<td style="color:var(--muted);font-size:11px;">' + (idx + 1) + '</td>';
-    // date
     html += '<td style="font-size:12px;color:var(--muted);">' + (cells[2] ? cells[2].innerHTML : '') + '</td>';
-    // plate
     html += '<td>' + (cells[3] ? cells[3].innerHTML : '') + '</td>';
-    // owner
     html += '<td>' + (cells[4] ? cells[4].innerHTML : '') + '</td>';
-    // location
     html += '<td style="font-size:12px;color:var(--muted);">' + (cells[5] ? cells[5].innerHTML : '') + '</td>';
-    // status
     html += '<td>' + (cells[6] ? cells[6].innerHTML : '') + '</td>';
-    // days remaining
     html += '<td>' + (cells[7] ? cells[7].innerHTML : '') + '</td>';
-    // inspector
     html += '<td style="color:var(--muted);font-size:12px">' + (cells[8] ? cells[8].innerHTML : '') + '</td>';
     html += '</tr>';
   });
@@ -9062,8 +9088,6 @@ function renderTownsCasesTable() {
 }
 
 // ═══ v2.9.45: Open the actual case from a town-page row click ═══
-// The town page rebuilds rows from the main #cases-tbody, so we need to find
-// the original row by plate and open it.
 function openCaseFromTown(plate) {
   var rows = document.querySelectorAll('#cases-tbody tr');
   for (var i = 0; i < rows.length; i++) {
@@ -11004,6 +11028,18 @@ if (document.readyState === 'loading') {
       result.street = '';
     }
 
+    // ═══ v2.9.47: prevent the same name in BOTH fields ═══
+    // Some geocoders (e.g. Nominatim) return the same kibbutz name for both
+    // city and street when querying inside a kibbutz. Without this guard the
+    // user would end up with "עמיר, עמיר" in their case.
+    if (result.city && result.street) {
+      var c = String(result.city).trim();
+      var s = String(result.street).trim();
+      if (c === s || c.indexOf(s) !== -1 || s.indexOf(c) !== -1) {
+        result.street = ''; // keep only the city
+      }
+    }
+
     // Street — only fill if empty
     var sEl = streetEl || document.getElementById('nf-location-street');
     if (sEl && result.street && !(sEl.value || '').trim()) {
@@ -11015,6 +11051,17 @@ if (document.readyState === 'loading') {
     if (cEl && result.city && !(cEl.value || '').trim()) {
       cEl.value = String(result.city).trim();
       try { cEl.dispatchEvent(new Event('input', { bubbles: true })); } catch(e){}
+    }
+
+    // ═══ v2.9.47: AFTER filling, double-check no field duplicates the other ═══
+    // Handles the case where the user already had "עמיר" in city and we just
+    // filled "עמיר" into street (or vice versa).
+    if (sEl && cEl) {
+      var ss = (sEl.value || '').trim();
+      var cc = (cEl.value || '').trim();
+      if (ss && cc && (ss === cc || cc.indexOf(ss) !== -1)) {
+        sEl.value = ''; // city contains the street info, drop the street
+      }
     }
   }
 
