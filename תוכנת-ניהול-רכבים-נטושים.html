@@ -2163,7 +2163,7 @@ body.inspector-mode {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.37 — clean dropdown</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.38 — full edit fix</div>
     </div>
   </div>
 
@@ -2236,7 +2236,7 @@ body.inspector-mode {
       <div class="tb-date" id="live-date">יום שבת, 2 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.37 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.38 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2560,6 +2560,7 @@ body.inspector-mode {
               <div class="edit-group"><div class="edit-label">יישוב</div>
                 <select class="edit-input" id="nf-location-city" onchange="onCitySelectChange()" size="1">
                   <option value="">— בחר יישוב —</option>
+                  <optgroup label="קיבוצי מועצה אזורית הגליל העליון">
                   <option>איילת השחר</option>
                   <option>אמיר</option>
                   <option>ברעם</option>
@@ -2588,7 +2589,16 @@ body.inspector-mode {
                   <option>שדה נחמיה</option>
                   <option>שמיר</option>
                   <option>תל חי</option>
-                  <option>הראל</option>
+                  <option>עמיר</option>
+                  </optgroup>
+                  <optgroup label="ערים סמוכות">
+                  <option>קריית שמונה</option>
+                  <option>מטולה</option>
+                  <option>חצור הגלילית</option>
+                  <option>ראש פינה</option>
+                  <option>יסוד המעלה</option>
+                  <option>צפת</option>
+                  </optgroup>
                   <option value="other">✏️ אחר (הזן ידנית)</option>
                 </select>
                 <div id="nf-city-manual-wrap" style="display:none;margin-top:8px;">
@@ -2892,7 +2902,7 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.37 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.38 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -6166,40 +6176,6 @@ function openCaseFromRow(tr) {
 function openEditFullForm(tr) {
   if (!tr) return;
 
-  // ═══ v2.9.37: clean up dropdown — remove Arabic city names that may have
-  // been added in earlier sessions (before the geocoder Arabic filter was in
-  // place). These names get stuck in the DOM, but we want only the 29
-  // kibbutzim + "אחר". ═══
-  try {
-    var citySel = document.getElementById('nf-location-city');
-    if (citySel) {
-      // Remove any options that contain Arabic characters
-      var toRemove = [];
-      for (var k = 0; k < citySel.options.length; k++) {
-        var txt = citySel.options[k].textContent || '';
-        if (/[\u0600-\u06FF]/.test(txt)) {
-          toRemove.push(citySel.options[k]);
-        }
-      }
-      toRemove.forEach(function(o) { o.remove(); });
-      if (toRemove.length) console.log('[v2.9.37] removed', toRemove.length, 'Arabic option(s) from city dropdown');
-
-      // Also remove duplicate "אחר" / "other" — keep only the last one (the value="other")
-      var seenOther = false;
-      var toRemoveOther = [];
-      for (var m = citySel.options.length - 1; m >= 0; m--) {
-        var t = (citySel.options[m].textContent || '').trim();
-        var v = citySel.options[m].value;
-        if (v === 'other' || t === 'אחר' || /אחר.*\(הזן/.test(t)) {
-          if (!seenOther) seenOther = true;
-          else toRemoveOther.push(citySel.options[m]);
-        }
-      }
-      toRemoveOther.forEach(function(o) { o.remove(); });
-      if (toRemoveOther.length) console.log('[v2.9.37] removed', toRemoveOther.length, 'duplicate "other" option(s)');
-    }
-  } catch(e) { console.warn('[v2.9.37] city cleanup failed:', e); }
-
   var caseDataStr = tr.getAttribute('data-case');
   if (!caseDataStr) {
     // No inline data — fall back to the legacy behavior (which can fetch from FB)
@@ -6259,29 +6235,73 @@ function openEditFullForm(tr) {
     var citySel = document.getElementById('nf-location-city');
     var cityWrap = document.getElementById('nf-city-manual-wrap');
     var cityOther = document.getElementById('nf-location-city-other');
+
+    // ═══ v2.9.38: STEP 1 — clean dropdown FIRST (after openNewCase reset) ═══
+    // Remove any Arabic options that survived from old localStorage data
+    if (citySel) {
+      var toRemoveArabic = [];
+      for (var k = 0; k < citySel.options.length; k++) {
+        var txt = citySel.options[k].textContent || '';
+        if (/[\u0600-\u06FF]/.test(txt)) {
+          toRemoveArabic.push(citySel.options[k]);
+        }
+      }
+      toRemoveArabic.forEach(function(o) { o.remove(); });
+      if (toRemoveArabic.length) {
+        console.log('[v2.9.38] removed', toRemoveArabic.length, 'Arabic option(s)');
+      }
+      // Also dedupe "other" — keep only the FIRST "other" (the original from HTML)
+      var seenOther = false;
+      var toRemoveOther = [];
+      for (var m = 0; m < citySel.options.length; m++) {
+        if (citySel.options[m].value === 'other') {
+          if (!seenOther) { seenOther = true; }
+          else { toRemoveOther.push(citySel.options[m]); }
+        }
+      }
+      toRemoveOther.forEach(function(o) { o.remove(); });
+    }
+
+    // ═══ STEP 2 — populate city based on existing case data ═══
     if (citySel && parts[0]) {
+      var cityValue = parts[0];
+      var isArabic = /[\u0600-\u06FF]/.test(cityValue);
+
+      // Try to find the city in the cleaned dropdown (skip "other" option)
       var found = false;
       for (var i = 0; i < citySel.options.length; i++) {
-        if (citySel.options[i].text === parts[0] || citySel.options[i].value === parts[0]) {
+        if (citySel.options[i].value === 'other') continue;
+        if (citySel.options[i].text === cityValue) {
           citySel.selectedIndex = i;
-          found = true; break;
+          found = true;
+          break;
         }
       }
-      // ═══ v2.9.35: if city not in list, switch to manual input mode ═══
-      if (!found) {
-        var isArabic = /[\u0600-\u06FF]/.test(parts[0]);
-        // Switch to manual input mode (hide dropdown, show input)
-        citySel.style.display = 'none';
-        if (cityWrap) cityWrap.style.display = 'block';
-        if (cityOther) {
-          cityOther.value = isArabic ? '' : parts[0];
-        }
-      } else {
-        // Found in list - make sure dropdown visible, manual hidden
-        citySel.style.display = '';
-        if (cityWrap) cityWrap.style.display = 'none';
+
+      if (found) {
+        // City IS in the list — show dropdown, hide manual input
+        citySel.style.removeProperty('display');
+        if (cityWrap) cityWrap.style.setProperty('display', 'none', 'important');
         if (cityOther) cityOther.value = '';
+      } else {
+        // City NOT in list (or Arabic) — switch to manual input mode
+        citySel.style.setProperty('display', 'none', 'important');
+        if (cityWrap) cityWrap.style.setProperty('display', 'block', 'important');
+        if (cityOther) {
+          // If the value is Arabic, leave input empty so user types Hebrew
+          // If it's any other valid Hebrew value not in the list, show it
+          cityOther.value = isArabic ? '' : cityValue;
+          cityOther.removeAttribute('disabled');
+          cityOther.removeAttribute('readonly');
+          cityOther.style.setProperty('pointer-events', 'auto', 'important');
+        }
       }
+    } else if (citySel) {
+      // No location at all — reset to default state (dropdown visible, manual hidden)
+      citySel.style.removeProperty('display');
+      citySel.value = '';
+      if (cityWrap) cityWrap.style.setProperty('display', 'none', 'important');
+      if (cityOther) cityOther.value = '';
     }
     var streetEl = document.getElementById('nf-location-street');
     if (streetEl) streetEl.value = parts.slice(1).join(', ') || '';
@@ -7851,6 +7871,21 @@ function openNewCase() {
   var nfIds = ['nf-plate','nf-vehicle-type','nf-owner-name','nf-owner-id','nf-owner-addr','nf-owner-phone','nf-location-street','nf-notes'];
   nfIds.forEach(function(id) { var el = document.getElementById(id); if (el) el.value = ''; });
   var nfDate = document.getElementById('nf-found-date'); if (nfDate) nfDate.value = '';
+
+  // ═══ v2.9.38: reset city dropdown state — visible, no selection, manual hidden ═══
+  var nfCitySelect = document.getElementById('nf-location-city');
+  var nfCityWrap = document.getElementById('nf-city-manual-wrap');
+  var nfCityOther = document.getElementById('nf-location-city-other');
+  if (nfCitySelect) {
+    nfCitySelect.style.removeProperty('display');
+    nfCitySelect.value = '';
+  }
+  if (nfCityWrap) nfCityWrap.style.setProperty('display', 'none', 'important');
+  if (nfCityOther) {
+    nfCityOther.value = '';
+    nfCityOther.removeAttribute('disabled');
+    nfCityOther.removeAttribute('readonly');
+  }
   // Hide the GPS nav buttons by default — only mobile-created cases should show them.
   // Show the placeholder "no GPS" box instead.
   var navBox = document.getElementById('nf-nav-buttons');
