@@ -2163,7 +2163,7 @@ body.inspector-mode {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.41 — free city input</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.42 — auto-fix אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2236,7 +2236,7 @@ body.inspector-mode {
       <div class="tb-date" id="live-date">יום שבת, 2 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.41 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.42 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2860,7 +2860,7 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.41 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.42 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -4977,7 +4977,15 @@ function stripArabicFromLocation(loc) {
     // Keep parts that are NOT Arabic (Hebrew, English, numbers OK)
     return p && !/[\u0600-\u06FF]/.test(p);
   });
-  return clean.join(', ');
+  // ═══ v2.9.42: fix common typos in kibbutz names ═══
+  // The Galil Elyon kibbutz is "עמיר" (with ע), NOT "אמיר" (with א).
+  // Auto-correct any saved data that has the wrong spelling.
+  return clean.map(function(p) {
+    // Match "אמיר" only as a whole word (not part of larger word like "סהמיר")
+    if (p === 'אמיר') return 'עמיר';
+    // If "אמיר" appears at start followed by space/comma
+    return p.replace(/^אמיר($|\s|,)/, 'עמיר$1').replace(/(\s|,)אמיר($|\s|,)/g, '$1עמיר$2');
+  }).join(', ');
 }
 window.stripArabicFromLocation = stripArabicFromLocation;
 
@@ -8138,6 +8146,19 @@ function saveNewCase() {
           console.warn('[v2.9.38 EDIT] row re-render failed, falling back:', rerr);
         }
 
+        // ═══ v2.9.42: persist to localStorage IMMEDIATELY after row update ═══
+        // Without this, the auto-save runs on a 15s interval — meaning if the
+        // user closes the app within 15s of editing, the change is LOST and
+        // the table shows the old value on next launch.
+        try {
+          if (typeof saveState === 'function') {
+            saveState();
+            console.log('[v2.9.42 EDIT] ✓ saveState() called immediately after upsertCaseRow');
+          }
+        } catch(e) {
+          console.warn('[v2.9.42 EDIT] immediate saveState failed:', e);
+        }
+
         // Push to Firebase if we have an id
         var dbForUpdate = (typeof fbDb !== 'undefined' && fbDb) || window.fbDb;
         if (dbForUpdate && existingId) {
@@ -8312,6 +8333,18 @@ function _newCaseReadFields() {
     ? stripArabicFromLocation(combinedLoc)
     : combinedLoc;
   CASE.notes = document.getElementById('nf-notes').value.trim();
+
+  // ═══ v2.9.42: READ INSPECTOR & DATE — without these, CASE keeps OLD values ═══
+  // and fullSnap (built from CASE) saves stale data to the row's data-case attribute,
+  // causing the table to show outdated info even after editing.
+  var inspEl = document.getElementById('nf-inspector');
+  if (inspEl) {
+    CASE.inspector = inspEl.value || '';
+  }
+  var dateEl = document.getElementById('nf-found-date');
+  if (dateEl && dateEl.value) {
+    CASE.date = dateEl.value;
+  }
 
   // ═══ v2.9.28: Apply status from chips (if user selected one) ═══
   if (window._nfSelectedStatus) {
@@ -11487,6 +11520,21 @@ if (document.readyState === 'loading') {
         try { fbDb.ref('cases/' + snap.key).remove().catch(function(){}); } catch(e){}
         return;
       }
+      // ═══ v2.9.42: auto-correct legacy data — fix "אמיר" → "עמיר" + strip Arabic ═══
+      try {
+        if (c.location && typeof window.stripArabicFromLocation === 'function') {
+          var fixedLoc = window.stripArabicFromLocation(c.location);
+          if (fixedLoc !== c.location) {
+            console.log('[Firebase autoFix] location:', c.location, '→', fixedLoc, 'in', snap.key);
+            c.location = fixedLoc;
+            // Push the fix back to Firebase so it persists
+            try {
+              fbDb.ref('cases/' + snap.key).update({ location: fixedLoc, updatedAt: Date.now() })
+                .catch(function(e) { console.warn('[Firebase autoFix] update failed:', e); });
+            } catch(e){}
+          }
+        }
+      } catch(e){}
       if (c.source === 'mobile') {
         mobileCasesCache[c.id] = c;
         addOrUpdateMobileRow(c, true);
@@ -11536,6 +11584,20 @@ if (document.readyState === 'loading') {
         return;
       }
       if (_isStaleCase(c, snap.key)) return;
+      // ═══ v2.9.42: auto-correct legacy data — fix "אמיר" → "עמיר" + strip Arabic ═══
+      try {
+        if (c.location && typeof window.stripArabicFromLocation === 'function') {
+          var fixedLoc2 = window.stripArabicFromLocation(c.location);
+          if (fixedLoc2 !== c.location) {
+            console.log('[Firebase autoFix child_changed] location:', c.location, '→', fixedLoc2, 'in', snap.key);
+            c.location = fixedLoc2;
+            try {
+              fbDb.ref('cases/' + snap.key).update({ location: fixedLoc2, updatedAt: Date.now() })
+                .catch(function(e) { console.warn('[Firebase autoFix child_changed] update failed:', e); });
+            } catch(e){}
+          }
+        }
+      } catch(e){}
       if (c.source === 'mobile') {
         mobileCasesCache[c.id] = c;
         addOrUpdateMobileRow(c, false);
