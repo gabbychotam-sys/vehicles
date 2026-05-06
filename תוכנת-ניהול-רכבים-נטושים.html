@@ -2173,7 +2173,7 @@ body.inspector-mode {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.49 — auto update check אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.50 — viewer perms אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2251,7 +2251,7 @@ body.inspector-mode {
       <div class="tb-date" id="live-date">יום שבת, 2 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.49 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.50 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2875,7 +2875,7 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.49 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.50 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -3960,8 +3960,18 @@ var EMAIL_TO_INSPECTOR_NAME = {
 //   ✗ Cannot create/edit/delete cases
 //   ✗ Cannot send letters or place stickers
 //   ✗ No access to mobile app
+// ═══ v2.9.50: VIEWER_EMAILS — read-only access to the manager UI ═══
+// Per Gabby's request: ONLY Gabby & Moran can edit. Inspectors (Shimi,
+// Francis, Eyal) and the department head (Maya) all use the manager UI
+// in read-only mode. They can view everything but cannot edit, delete,
+// place stickers, send letters, or change settings.
+// (Inspectors still use the mobile app to open new cases from the field —
+// the read-only restriction applies ONLY to the desktop manager UI.)
 var VIEWER_EMAILS = [
-  'mayag@galil-elion.org.il'
+  'mayag@galil-elion.org.il',     // מאיה גורדון — מנהלת אגף
+  'shimi@galil-elion.org.il',     // שימי רוזנברג — פקח
+  'francis@galil-elion.org.il',   // פרנסיס ברוטמן — פקח
+  'eyal@galil-elion.org.il'       // אייל ארצי — פקח
 ];
 
 // ═══ v2.9.17: ADMIN users (full access — can edit/delete anything) ═══
@@ -8501,12 +8511,14 @@ function _newCaseReadFields() {
     CASE.towDate = '';
   }
 
-  // ═══ v2.9.11: only set status='yellow' for genuinely NEW cases.        ═══
-  // ═══ When editing an existing case (e.g. status='photographed' from   ═══
-  // ═══ the mobile app), do NOT overwrite the status — preserve whatever  ═══
-  // ═══ the manager (or mobile app) already set.                          ═══
+  // ═══ v2.9.50: status defaults to 'photographed' (ממתין להשלמת פרטים)  ═══
+  // ═══ for genuinely NEW cases that the user has not actively marked.    ═══
+  // ═══ Only when the user clicks "מדבקה צהובה" / "מדבקה אדומה" / etc.   ═══
+  // ═══ does the case become yellow/red/closed/scrapped/etc.              ═══
+  // ═══ This prevents the admin from accidentally creating a case that    ═══
+  // ═══ shows "🟡 מדבקה צהובה" without ever actually placing one.        ═══
   if (!window._editingExistingRow && CASE.status !== 'towed' && !window._nfSelectedStatus) {
-    CASE.status = 'yellow';
+    CASE.status = 'photographed';
   }
   // else: keep existing CASE.status as it was loaded from data-case
   CASE.caseType = newCaseType;
@@ -10799,7 +10811,7 @@ document.addEventListener('keydown', function(e) {
 // ═══════════════════════════════════════════════════════════════════
 function _getCurrentVersion() {
   // Read from the visible version label in the sidebar
-  // <div ...>v2.9.49 — auto update check ...</div>
+  // <div ...>v2.9.50 — viewer perms ...</div>
   try {
     var nodes = document.querySelectorAll('div');
     for (var i = 0; i < nodes.length; i++) {
