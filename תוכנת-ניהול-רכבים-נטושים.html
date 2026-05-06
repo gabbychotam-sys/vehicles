@@ -2163,7 +2163,7 @@ body.inspector-mode {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.36 — 29 kibbutzim</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.37 — clean dropdown</div>
     </div>
   </div>
 
@@ -2236,7 +2236,7 @@ body.inspector-mode {
       <div class="tb-date" id="live-date">יום שבת, 2 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.36 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.37 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2892,7 +2892,7 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.36 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.37 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -4818,16 +4818,27 @@ function onCitySelectChange() {
   var sel = document.getElementById('nf-location-city');
   var wrap = document.getElementById('nf-city-manual-wrap');
   var inp = document.getElementById('nf-location-city-other');
-  if (!sel || !wrap || !inp) return;
+  if (!sel || !wrap || !inp) {
+    console.warn('[onCitySelectChange] missing elements:', { sel: !!sel, wrap: !!wrap, inp: !!inp });
+    return;
+  }
   var v = sel.value;
+  console.log('[onCitySelectChange] selected value:', v);
   if (v === 'other' || v === 'אחר') {
-    // Show manual input, hide dropdown
-    wrap.style.display = 'block';
-    sel.style.display = 'none';
-    setTimeout(function(){ inp.focus(); }, 50);
+    // Show manual input — use setProperty with !important to override any CSS
+    wrap.style.setProperty('display', 'block', 'important');
+    sel.style.setProperty('display', 'none', 'important');
+    inp.removeAttribute('disabled');
+    inp.removeAttribute('readonly');
+    inp.style.setProperty('pointer-events', 'auto', 'important');
+    inp.style.setProperty('background', '#fff7ed', 'important');
+    setTimeout(function(){
+      inp.focus();
+      console.log('[onCitySelectChange] manual input focused, visible:', wrap.style.display);
+    }, 50);
   } else {
-    wrap.style.display = 'none';
-    sel.style.display = '';
+    wrap.style.setProperty('display', 'none', 'important');
+    sel.style.removeProperty('display');
     inp.value = '';
   }
 }
@@ -4839,10 +4850,10 @@ function cancelManualCity() {
   var wrap = document.getElementById('nf-city-manual-wrap');
   var inp = document.getElementById('nf-location-city-other');
   if (sel) {
-    sel.style.display = '';
+    sel.style.removeProperty('display');
     sel.value = '';
   }
-  if (wrap) wrap.style.display = 'none';
+  if (wrap) wrap.style.setProperty('display', 'none', 'important');
   if (inp) inp.value = '';
 }
 window.cancelManualCity = cancelManualCity;
@@ -6154,6 +6165,40 @@ function openCaseFromRow(tr) {
    ═══════════════════════════════════════════════════════════════════════ */
 function openEditFullForm(tr) {
   if (!tr) return;
+
+  // ═══ v2.9.37: clean up dropdown — remove Arabic city names that may have
+  // been added in earlier sessions (before the geocoder Arabic filter was in
+  // place). These names get stuck in the DOM, but we want only the 29
+  // kibbutzim + "אחר". ═══
+  try {
+    var citySel = document.getElementById('nf-location-city');
+    if (citySel) {
+      // Remove any options that contain Arabic characters
+      var toRemove = [];
+      for (var k = 0; k < citySel.options.length; k++) {
+        var txt = citySel.options[k].textContent || '';
+        if (/[\u0600-\u06FF]/.test(txt)) {
+          toRemove.push(citySel.options[k]);
+        }
+      }
+      toRemove.forEach(function(o) { o.remove(); });
+      if (toRemove.length) console.log('[v2.9.37] removed', toRemove.length, 'Arabic option(s) from city dropdown');
+
+      // Also remove duplicate "אחר" / "other" — keep only the last one (the value="other")
+      var seenOther = false;
+      var toRemoveOther = [];
+      for (var m = citySel.options.length - 1; m >= 0; m--) {
+        var t = (citySel.options[m].textContent || '').trim();
+        var v = citySel.options[m].value;
+        if (v === 'other' || t === 'אחר' || /אחר.*\(הזן/.test(t)) {
+          if (!seenOther) seenOther = true;
+          else toRemoveOther.push(citySel.options[m]);
+        }
+      }
+      toRemoveOther.forEach(function(o) { o.remove(); });
+      if (toRemoveOther.length) console.log('[v2.9.37] removed', toRemoveOther.length, 'duplicate "other" option(s)');
+    }
+  } catch(e) { console.warn('[v2.9.37] city cleanup failed:', e); }
 
   var caseDataStr = tr.getAttribute('data-case');
   if (!caseDataStr) {
@@ -10409,7 +10454,7 @@ if (document.readyState === 'loading') {
   function applyGeocodeResult(result, streetEl, citySel) {
     if (!result) return;
 
-    // ═══ v2.9.28: filter out Arabic-only results ═══
+    // ═══ v2.9.37: filter out Arabic-only results ═══
     // Nominatim sometimes returns Arabic names even with accept-language=he.
     // If the city/street looks Arabic, leave the field empty so the user can
     // type the correct Hebrew name manually.
@@ -10431,8 +10476,7 @@ if (document.readyState === 'loading') {
       sEl.value = result.street;
       try { sEl.dispatchEvent(new Event('input', { bubbles: true })); } catch(e){}
     }
-    // City — match against the dropdown using the same Hebrew normalization
-    // used elsewhere (e.g. "קרית"/"קריית"). If no match, add as a new option.
+    // City — match against the dropdown using Hebrew normalization
     var cEl = citySel || document.getElementById('nf-location-city');
     if (cEl && result.city && (!cEl.value || cEl.value === cEl.options[0].value)) {
       var city = String(result.city).trim();
@@ -10451,23 +10495,24 @@ if (document.readyState === 'loading') {
           break;
         }
       }
+      // ═══ v2.9.37: NO LONGER add new options to the dropdown ═══
+      // Previously, geocoded city names that weren't in the list were
+      // automatically added as new options. This caused Arabic city names
+      // (like "الجيزة") to appear in the dropdown forever. Now: if the city
+      // isn't in the list, switch to manual input mode instead.
       if (!matched) {
-        var newOpt = document.createElement('option');
-        newOpt.value = city;
-        newOpt.text = city;
-        // Insert just before "אחר" if it exists
-        var inserted = false;
-        for (var j = 0; j < cEl.options.length; j++) {
-          if (cEl.options[j].text === 'אחר') {
-            cEl.add(newOpt, cEl.options[j]);
-            inserted = true;
-            break;
-          }
+        // Switch to manual input mode (hide dropdown, show free-text input)
+        var wrap = document.getElementById('nf-city-manual-wrap');
+        var inp = document.getElementById('nf-location-city-other');
+        if (wrap && inp) {
+          cEl.style.display = 'none';
+          wrap.style.display = 'block';
+          // Pre-fill the manual input with the geocoded value (already filtered for Arabic above)
+          inp.value = city;
         }
-        if (!inserted) cEl.add(newOpt);
-        cEl.value = city;
+      } else {
+        try { cEl.dispatchEvent(new Event('change', { bubbles: true })); } catch(e){}
       }
-      try { cEl.dispatchEvent(new Event('change', { bubbles: true })); } catch(e){}
     }
   }
 
