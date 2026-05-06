@@ -2,6 +2,12 @@
 <html lang="he" dir="rtl"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- ═══ v2.9.49: Force browsers to always fetch the latest HTML — no cache ═══ -->
+<!-- Without this, Chrome can serve a stale copy of the page for hours after  -->
+<!-- a deploy, and users see the old version even after Cmd+Shift+R.          -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&amp;family=Rubik:wght@400;500;600;700;800&amp;family=Assistant:wght@400;500;600;700;800&amp;family=Varela+Round&amp;family=Frank+Ruhl+Libre:wght@400;500;700;900&amp;family=Secular+One&amp;family=Suez+One&amp;display=swap" rel="stylesheet">
@@ -2167,7 +2173,7 @@ body.inspector-mode {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.48 — towns merge typos אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.49 — auto update check אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2244,8 +2250,8 @@ body.inspector-mode {
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <div class="tb-date" id="live-date">יום שבת, 2 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
-      <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.47 ✓</span>
+      <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.49 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2869,8 +2875,8 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.47 ✓</span>
-      <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.49 ✓</span>
+      <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
     </div>
@@ -10784,6 +10790,92 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
+// ═══════════════════════════════════════════════════════════════════
+// v2.9.49: Version update detection
+// On every load, fetch the live HTML from GitHub Pages (bypassing all
+// caches via a timestamp query string) and compare its embedded version
+// number to the one we're currently running. If GitHub has a newer one,
+// show a confirm() dialog and reload on "OK".
+// ═══════════════════════════════════════════════════════════════════
+function _getCurrentVersion() {
+  // Read from the visible version label in the sidebar
+  // <div ...>v2.9.49 — auto update check ...</div>
+  try {
+    var nodes = document.querySelectorAll('div');
+    for (var i = 0; i < nodes.length; i++) {
+      var t = nodes[i].textContent || '';
+      var m = t.match(/v(\d+\.\d+\.\d+)/);
+      if (m) return m[1];
+    }
+  } catch(e){}
+  return '';
+}
+
+function _checkForVersionUpdate() {
+  var currentVersion = _getCurrentVersion();
+  if (!currentVersion) return; // can't tell, skip
+
+  // Build URL to the live HTML page on GitHub Pages with a cache-buster
+  var liveUrl = location.origin + location.pathname + '?_check=' + Date.now();
+
+  // Don't check more than once every 5 minutes (avoid spamming GitHub)
+  try {
+    var lastCheck = +(localStorage.getItem('galilElyon_lastVersionCheck') || 0);
+    if (Date.now() - lastCheck < 5 * 60 * 1000) {
+      console.log('[v2.9.49 version-check] skipped (checked recently)');
+      return;
+    }
+    localStorage.setItem('galilElyon_lastVersionCheck', String(Date.now()));
+  } catch(e){}
+
+  fetch(liveUrl, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } })
+    .then(function(resp) {
+      if (!resp.ok) throw new Error('fetch failed: ' + resp.status);
+      return resp.text();
+    })
+    .then(function(html) {
+      // Extract version number from the live HTML
+      var match = html.match(/v(\d+\.\d+\.\d+)\s*—\s*[^<]+<\/div>/);
+      if (!match) {
+        console.log('[v2.9.49 version-check] could not parse remote version');
+        return;
+      }
+      var remoteVersion = match[1];
+      if (remoteVersion === currentVersion) {
+        console.log('[v2.9.49 version-check] up to date:', currentVersion);
+        return;
+      }
+      // Compare versions semantically (newer=larger)
+      var cmp = function(a, b) {
+        var pa = a.split('.').map(Number), pb = b.split('.').map(Number);
+        for (var k = 0; k < 3; k++) {
+          if ((pa[k]||0) > (pb[k]||0)) return 1;
+          if ((pa[k]||0) < (pb[k]||0)) return -1;
+        }
+        return 0;
+      };
+      if (cmp(remoteVersion, currentVersion) > 0) {
+        console.log('[v2.9.49 version-check] NEW VERSION available:', remoteVersion, '(running ' + currentVersion + ')');
+        // Show a friendly confirm dialog
+        var msg = '🆕 גרסה חדשה זמינה!\n\n'
+                + 'גרסה נוכחית: ' + currentVersion + '\n'
+                + 'גרסה חדשה: ' + remoteVersion + '\n\n'
+                + 'האם תרצה לעדכן עכשיו?\n\n'
+                + '(הנתונים שלך נשמרו בענן ולא יאבדו)';
+        if (confirm(msg)) {
+          // Force reload bypassing cache
+          window.location.reload(true);
+        }
+      } else {
+        console.log('[v2.9.49 version-check] running newer than remote:', currentVersion, '>', remoteVersion);
+      }
+    })
+    .catch(function(err) {
+      console.warn('[v2.9.49 version-check] failed:', err.message || err);
+    });
+}
+window._checkForVersionUpdate = _checkForVersionUpdate;
+
 // Restore on page load (run after all DOM + scripts are ready)
 function _bootSequence() {
   injectSaveButtons();
@@ -10795,6 +10887,9 @@ function _bootSequence() {
   // (loadState calls this too, but if there's no saved state to load,  ═
   // it's still needed for rows that come from Firebase or default HTML)═
   try { if (typeof _reattachCaseRowClicks === 'function') _reattachCaseRowClicks(); } catch(e){}
+
+  // ═══ v2.9.49: Auto-detect new version & offer to upgrade ═══
+  try { _checkForVersionUpdate(); } catch(e) { console.warn('[v2.9.49] version check failed:', e); }
 
   try {
     if (typeof updateAllCounters === 'function') updateAllCounters();
