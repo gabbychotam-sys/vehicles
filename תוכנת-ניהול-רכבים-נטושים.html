@@ -2173,7 +2173,7 @@ body.inspector-mode {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.52 — remove clear-all אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.53 — sidebar user אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2251,7 +2251,7 @@ body.inspector-mode {
       <div class="tb-date" id="live-date">יום שבת, 2 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב (Enter להצגה מלאה)" oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.52 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.53 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2875,7 +2875,7 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.52 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.53 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <!-- v2.9.52: "נקה הכל" button removed per Gabby's request - too risky to expose at the top of the page. -->
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -10859,7 +10859,7 @@ document.addEventListener('keydown', function(e) {
 // ═══════════════════════════════════════════════════════════════════
 function _getCurrentVersion() {
   // Read from the visible version label in the sidebar
-  // <div ...>v2.9.52 — remove clear-all ...</div>
+  // <div ...>v2.9.53 — sidebar user ...</div>
   try {
     var nodes = document.querySelectorAll('div');
     for (var i = 0; i < nodes.length; i++) {
@@ -11591,10 +11591,13 @@ if (document.readyState === 'loading') {
       }
       console.log('[Auth] signed in as', user.email);
 
+      // ═══ v2.9.53: Update the sidebar's "logged in user" panel ═══
+      // Without this, the bottom of the sidebar always shows "גבי חותם",
+      // even when Moran (or anyone else) is logged in.
+      try { _updateSidebarUserPanel(user); } catch(e){}
+
       // Auto-refresh field cases on every login so the manager always sees
       // up-to-date data without having to click the manual refresh button.
-      // Slight delay so Firebase has a chance to finish reconnecting and
-      // the listener is wired up first.
       setTimeout(function() {
         try { refreshNow(); } catch(e) { console.warn('[Auth] auto-refresh failed:', e); }
       }, 800);
@@ -11606,6 +11609,48 @@ if (document.readyState === 'loading') {
       }
     }
   }
+
+  // ═══ v2.9.53: Update the sidebar bottom (avatar + name + role) to reflect ═══
+  // ═══ the currently signed-in user. Looks them up in staffList by email.   ═══
+  function _updateSidebarUserPanel(user) {
+    if (!user || !user.email) return;
+    var email = String(user.email).toLowerCase().trim();
+    var staff = null;
+    try {
+      if (typeof staffList !== 'undefined' && Array.isArray(staffList)) {
+        for (var i = 0; i < staffList.length; i++) {
+          if (String(staffList[i].email || '').toLowerCase().trim() === email) {
+            staff = staffList[i]; break;
+          }
+        }
+      }
+    } catch(e){}
+
+    var avatarEl = document.querySelector('.sb-bottom .sb-avatar');
+    var nameEl   = document.querySelector('.sb-bottom .sb-uname');
+    var roleEl   = document.querySelector('.sb-bottom .sb-urole');
+
+    if (staff) {
+      if (avatarEl) avatarEl.textContent = (staff.name || '?').charAt(0);
+      if (nameEl)   nameEl.textContent   = staff.name || email;
+      if (roleEl)   roleEl.textContent   = staff.role || '';
+      // Apply the staff's color gradient to the avatar
+      try {
+        if (avatarEl && staff.color) {
+          var cols = String(staff.color).split(',');
+          avatarEl.style.background = 'linear-gradient(135deg,' + cols[0] + ',' + (cols[1] || cols[0]) + ')';
+          avatarEl.style.color = '#fff';
+        }
+      } catch(e){}
+    } else {
+      // Fallback for users not in staffList (e.g. an admin who hasn't added themselves)
+      if (avatarEl) avatarEl.textContent = (email.charAt(0) || '?').toUpperCase();
+      if (nameEl)   nameEl.textContent   = email;
+      if (roleEl)   roleEl.textContent   = '';
+    }
+  }
+  window._updateSidebarUserPanel = _updateSidebarUserPanel;
+
 
   // Test whether the current Firebase rules require authentication.
   // We attempt a single small read; if it's denied, we flip into "auth required" mode.
