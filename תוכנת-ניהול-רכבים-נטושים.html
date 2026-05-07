@@ -2,6 +2,12 @@
 <html lang="he" dir="rtl"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- ═══ v2.9.49: Force browsers to always fetch the latest HTML — no cache ═══ -->
+<!-- Without this, Chrome can serve a stale copy of the page for hours after  -->
+<!-- a deploy, and users see the old version even after Cmd+Shift+R.          -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&amp;family=Rubik:wght@400;500;600;700;800&amp;family=Assistant:wght@400;500;600;700;800&amp;family=Varela+Round&amp;family=Frank+Ruhl+Libre:wght@400;500;700;900&amp;family=Secular+One&amp;family=Suez+One&amp;display=swap" rel="stylesheet">
@@ -1057,6 +1063,8 @@ select.edit-input { cursor:pointer; }
 .sc-scrapped.active { border-color:#5d4037; }
 .sc-waiver { background:#f3e5f5; color:#6a1b9a; }
 .sc-waiver.active { border-color:#6a1b9a; }
+.sc-owner-removed { background:#e0f2f1; color:#00695c; }
+.sc-owner-removed.active { border-color:#00695c; }
 .edit-actions {
   display:flex; gap:10px; justify-content:flex-end;
   padding:16px 22px; border-top:1px solid var(--border); flex-shrink:0;
@@ -2167,7 +2175,7 @@ body.inspector-mode {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.45 — towns filter אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.54 — owner removed אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2243,9 +2251,9 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="✓ מסונכרן" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(46, 125, 50); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <div class="tb-date" id="live-date">יום שבת, 2 מאי 2026</div>
-      <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterDashboardTable()">
-      <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.45 ✓</span>
+      <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב (Enter להצגה מלאה)" oninput="filterDashboardTable()">
+      <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.54 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2613,6 +2621,7 @@ body.inspector-mode {
                 <span class="status-chip sc-towed"    data-status="towed"         onclick="nfSelectStatus(this)">🚛 נגרר</span>
                 <span class="status-chip sc-scrapped" data-status="scrapped"      onclick="nfSelectStatus(this)">♻️ פינוי גרוטאה</span>
                 <span class="status-chip sc-waiver"   data-status="waiver"        onclick="nfSelectStatus(this)">✍️ הצהרת ויתור</span>
+                <span class="status-chip sc-owner-removed" data-status="owner_removed" onclick="nfSelectStatus(this)">🚗 פונה ע״י הבעלים</span>
                 <span class="status-chip sc-closed"   data-status="closed"        onclick="nfSelectStatus(this)">✅ סגור</span>
               </div>
               <div style="font-size:11px;color:var(--muted);margin-top:10px;">💡 בעת שמירת התיק - הפעולה תירשם בארכיון המסמכים</div>
@@ -2869,9 +2878,9 @@ body.inspector-mode {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-idle" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">שמור</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.45 ✓</span>
-      <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow()" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <button class="tb-new-case" onclick="nukeAllVisibleCases()" style="background:#fff;color:#c62828;border:1.5px solid #ef5350;font-weight:700;" title="מסתיר ומוחק לתמיד את כל התיקים שמוצגים כעת">🗑️ נקה הכל</button>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.54 ✓</span>
+      <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
+      <!-- v2.9.52: "נקה הכל" button removed per Gabby's request - too risky to expose at the top of the page. -->
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -3243,6 +3252,7 @@ body.inspector-mode {
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button class="row-action" id="history-filter-all" onclick="setHistoryFilter('all')" style="background:var(--accent);color:#fff;">הכל</button>
           <button class="row-action" id="history-filter-closed" onclick="setHistoryFilter('closed')">✅ סגור</button>
+          <button class="row-action" id="history-filter-owner_removed" onclick="setHistoryFilter('owner_removed')">🚗 פונה ע״י הבעלים</button>
           <button class="row-action" id="history-filter-scrapped" onclick="setHistoryFilter('scrapped')">♻️ פינוי גרוטאה</button>
           <button class="row-action" id="history-filter-waiver" onclick="setHistoryFilter('waiver')">✍️ הצהרת ויתור</button>
         </div>
@@ -3954,8 +3964,18 @@ var EMAIL_TO_INSPECTOR_NAME = {
 //   ✗ Cannot create/edit/delete cases
 //   ✗ Cannot send letters or place stickers
 //   ✗ No access to mobile app
+// ═══ v2.9.50: VIEWER_EMAILS — read-only access to the manager UI ═══
+// Per Gabby's request: ONLY Gabby & Moran can edit. Inspectors (Shimi,
+// Francis, Eyal) and the department head (Maya) all use the manager UI
+// in read-only mode. They can view everything but cannot edit, delete,
+// place stickers, send letters, or change settings.
+// (Inspectors still use the mobile app to open new cases from the field —
+// the read-only restriction applies ONLY to the desktop manager UI.)
 var VIEWER_EMAILS = [
-  'mayag@galil-elion.org.il'
+  'mayag@galil-elion.org.il',     // מאיה גורדון — מנהלת אגף
+  'shimi@galil-elion.org.il',     // שימי רוזנברג — פקח
+  'francis@galil-elion.org.il',   // פרנסיס ברוטמן — פקח
+  'eyal@galil-elion.org.il'       // אייל ארצי — פקח
 ];
 
 // ═══ v2.9.17: ADMIN users (full access — can edit/delete anything) ═══
@@ -5042,12 +5062,34 @@ function stripArabicFromLocation(loc) {
   // ═══ v2.9.42: fix common typos in kibbutz names ═══
   // The Galil Elyon kibbutz is "עמיר" (with ע), NOT "אמיר" (with א).
   // Auto-correct any saved data that has the wrong spelling.
-  return clean.map(function(p) {
+  clean = clean.map(function(p) {
     // Match "אמיר" only as a whole word (not part of larger word like "סהמיר")
     if (p === 'אמיר') return 'עמיר';
     // If "אמיר" appears at start followed by space/comma
     return p.replace(/^אמיר($|\s|,)/, 'עמיר$1').replace(/(\s|,)אמיר($|\s|,)/g, '$1עמיר$2');
-  }).join(', ');
+  });
+  // ═══ v2.9.47: deduplicate consecutive duplicates ═══
+  // Geocoding sometimes returns the city name in BOTH the city and street
+  // fields (e.g. "עמיר, עמיר"). Also catches "כפר עמיר, עמיר" → "כפר עמיר".
+  // We compare normalised values (case-insensitive, trimmed) and skip a part
+  // if it equals or is contained in the previously-kept part.
+  var deduped = [];
+  clean.forEach(function(p) {
+    var norm = p.trim();
+    if (!norm) return;
+    if (deduped.length === 0) { deduped.push(norm); return; }
+    var prev = deduped[deduped.length - 1];
+    // Exact match → skip
+    if (prev === norm) return;
+    // One contains the other → keep the longer one
+    if (prev.indexOf(norm) !== -1) return;             // prev already contains norm
+    if (norm.indexOf(prev) !== -1) {
+      deduped[deduped.length - 1] = norm;              // norm contains prev — replace
+      return;
+    }
+    deduped.push(norm);
+  });
+  return deduped.join(', ');
 }
 window.stripArabicFromLocation = stripArabicFromLocation;
 
@@ -6096,6 +6138,8 @@ function upsertCaseRow(oldPlate, c, fullData) {
     letter2_sent:  { cls: 'sb-pink',   label: '📮 נשלח מכתב שני',   days: 14, cd: 'urgent' },
     scrapped:      { cls: 'sb-brown',  label: '♻️ פינוי גרוטאה',    days: 0,  cd: 'ok' },
     waiver:        { cls: 'sb-purple', label: '✍️ הצהרת ויתור',     days: 0,  cd: 'ok' },
+    /* ═══ v2.9.54: case closed because the owner came and removed the car ═══ */
+    owner_removed: { cls: 'sb-green',  label: '🚗 פונה ע״י הבעלים',  days: 0,  cd: 'ok' },
     /* ═══ v2.9.11: status from mobile app — vehicle photographed but ═══ */
     /* ═══ no sticker yet, manager still needs to fill in details.    ═══ */
     photographed:  { cls: 'sb-gray',   label: '📷 ממתין להשלמת פרטים', days: 0, cd: 'ok' }
@@ -8348,8 +8392,9 @@ function saveNewCase() {
           'letter2_sent': { type: 'letter2_log',    title: 'נרשם: מכתב שני נשלח' },
           'towed':        { type: 'towed_log',      title: 'נרשם: רכב נגרר' },
           'scrapped':     { type: 'scrapped_log',   title: 'נרשם: פינוי גרוטאה' },
-          'waiver':       { type: 'waiver_log',     title: 'נרשם: הצהרת ויתור' },
-          'closed':       { type: 'closed_log',     title: 'נרשם: התיק נסגר' }
+          'waiver':        { type: 'waiver_log',         title: 'נרשם: הצהרת ויתור' },
+          'owner_removed': { type: 'owner_removed_log',  title: 'נרשם: הרכב פונה ע״י הבעלים' },
+          'closed':        { type: 'closed_log',          title: 'נרשם: התיק נסגר' }
         };
         var label = statusLabels[window._nfSelectedStatus];
         if (label) {
@@ -8450,7 +8495,7 @@ function _newCaseReadFields() {
   // When status moves to closed/green/scrapped/waiver, stamp the close date so
   // the history table can show "תאריך סגירה". Don't overwrite if already set.
   if (window._nfSelectedStatus &&
-      ['green', 'closed', 'scrapped', 'waiver'].indexOf(window._nfSelectedStatus) !== -1) {
+      ['green', 'closed', 'scrapped', 'waiver', 'owner_removed'].indexOf(window._nfSelectedStatus) !== -1) {
     if (!CASE.closedAt) {
       CASE.closedAt = new Date().toISOString();
     }
@@ -8473,12 +8518,14 @@ function _newCaseReadFields() {
     CASE.towDate = '';
   }
 
-  // ═══ v2.9.11: only set status='yellow' for genuinely NEW cases.        ═══
-  // ═══ When editing an existing case (e.g. status='photographed' from   ═══
-  // ═══ the mobile app), do NOT overwrite the status — preserve whatever  ═══
-  // ═══ the manager (or mobile app) already set.                          ═══
+  // ═══ v2.9.50: status defaults to 'photographed' (ממתין להשלמת פרטים)  ═══
+  // ═══ for genuinely NEW cases that the user has not actively marked.    ═══
+  // ═══ Only when the user clicks "מדבקה צהובה" / "מדבקה אדומה" / etc.   ═══
+  // ═══ does the case become yellow/red/closed/scrapped/etc.              ═══
+  // ═══ This prevents the admin from accidentally creating a case that    ═══
+  // ═══ shows "🟡 מדבקה צהובה" without ever actually placing one.        ═══
   if (!window._editingExistingRow && CASE.status !== 'towed' && !window._nfSelectedStatus) {
-    CASE.status = 'yellow';
+    CASE.status = 'photographed';
   }
   // else: keep existing CASE.status as it was loaded from data-case
   CASE.caseType = newCaseType;
@@ -8628,15 +8675,63 @@ function applyCasesFilter() {
   });
 }
 
-// Dashboard search - filter urgent table
+// Dashboard search — filters the dashboard's "תיקים דחופים" table AND, if the
+// user pressed Enter or types something the dashboard doesn't have, jumps to
+// "כל התיקים" with the same search applied.
+// v2.9.51: also expand the search to ALL cases (not just urgent ones), and
+// when the user presses Enter, navigate to the cases-list view to show the
+// full results.
 function filterDashboardTable() {
-  var search = (document.getElementById('dash-search')?.value || '').trim().toLowerCase();
+  var input = document.getElementById('dash-search');
+  if (!input) return;
+  var search = (input.value || '').trim().toLowerCase();
+
+  // Filter the small "urgent cases" table inline (instant feedback)
   var rows = document.querySelectorAll('#view-dashboard .tbl tbody tr');
   rows.forEach(function(row) {
     var text = row.textContent.toLowerCase();
     row.style.display = (!search || text.indexOf(search) !== -1) ? '' : 'none';
   });
+
+  // ═══ v2.9.51: ALSO drive the main cases list filter ═══
+  // Copy the search term over to #cases-search and apply, so when the user
+  // jumps to "כל התיקים" they see the same filter already applied.
+  var casesSearch = document.getElementById('cases-search');
+  if (casesSearch) {
+    casesSearch.value = input.value;
+    if (typeof applyCasesFilter === 'function') {
+      try { applyCasesFilter(); } catch(e){}
+    }
+  }
 }
+
+// ═══ v2.9.51: Pressing Enter in the dashboard search jumps to "כל התיקים" ═══
+// This handles the case where the search term doesn't match any URGENT case
+// (so the inline dashboard filter shows nothing) but DOES match a regular
+// case in the main list.
+document.addEventListener('DOMContentLoaded', function() {
+  var dashSearch = document.getElementById('dash-search');
+  if (!dashSearch) return;
+  dashSearch.addEventListener('keydown', function(ev) {
+    if (ev.key === 'Enter') {
+      ev.preventDefault();
+      var val = (dashSearch.value || '').trim();
+      if (!val) return;
+      // Mirror the value into cases-search and switch view
+      var casesSearch = document.getElementById('cases-search');
+      if (casesSearch) casesSearch.value = val;
+      if (typeof showView === 'function') showView('cases-list');
+      // Apply the filter on the now-visible cases list
+      setTimeout(function() {
+        if (typeof applyCasesFilter === 'function') {
+          try { applyCasesFilter(); } catch(e){}
+        }
+        // Focus the cases-list search so the user can refine
+        if (casesSearch) casesSearch.focus();
+      }, 50);
+    }
+  });
+});
 
 // ═══════════════ SETTINGS PAGE ═══════════════
 var defaultColors = {
@@ -8890,15 +8985,12 @@ function getTownDataFromCases() {
   var rows = document.querySelectorAll('#cases-tbody tr');
   var towns = {};
   // ═══ v2.9.43: Statuses that mean "case is closed" — go to History, not Towns ═══
-  var CLOSED_STATUSES = ['green', 'closed', 'scrapped', 'waiver'];
+  var CLOSED_STATUSES = ['green', 'closed', 'scrapped', 'waiver', 'owner_removed'];
   rows.forEach(function(row) {
     var st = row.dataset.status;
     if (CLOSED_STATUSES.indexOf(st) !== -1) return;
 
     // ═══ v2.9.45: Read location from data-case (the source of truth) ═══
-    // NOT from .owner-loc — for mobile cases, .owner-loc shows "📱 מהשטח"
-    // which is a UI label, not the actual location. The location field in
-    // the case data has the real city name.
     var loc = '';
     var caseDataStr = row.getAttribute('data-case');
     if (caseDataStr) {
@@ -8907,7 +8999,6 @@ function getTownDataFromCases() {
         loc = (cd.location || cd.locationCity || '').trim();
       } catch(e){}
     }
-    // Fallback: read from the dedicated location cell (cells[5] in upsertCaseRow's layout)
     if (!loc) {
       var cells = row.querySelectorAll('td');
       if (cells.length >= 6) {
@@ -8916,8 +9007,13 @@ function getTownDataFromCases() {
     }
     if (!loc) return;
 
-    // Take ONLY the city part (before the first comma).
-    // Without this, "עמיר, רחוב 5" and "עמיר, רחוב 7" become two separate towns.
+    // ═══ v2.9.48: NORMALIZE the location (אמיר→עמיר, dedup, strip Arabic) ═══
+    // Old data in Firebase may still have the typo "אמיר" or duplicates
+    // like "עמיר, עמיר". Run stripArabicFromLocation to fix on-the-fly.
+    if (typeof stripArabicFromLocation === 'function') {
+      loc = stripArabicFromLocation(loc);
+    }
+    // Take ONLY the city part (before the first comma)
     loc = loc.split(',')[0].trim();
     if (!loc || loc === '—' || loc === 'מהשטח') return;
 
@@ -8950,7 +9046,7 @@ function renderTownsPage() {
   });
 
   var html = '';
-  html += '<div class="town-summary-card' + (currentTownFilter === null ? ' active-town' : '') + '" onclick="selectTown(null)">';
+  html += '<div class="town-summary-card' + (currentTownFilter === '_all' ? ' active-town' : '') + '" onclick="selectTown(\'_all\')">';
   html += '<div class="town-card-name">🏘️ כל היישובים</div>';
   html += '<div class="town-card-stats">';
   html += '<span class="town-stat ts-total">' + totalAll + ' תיקים</span>';
@@ -9001,8 +9097,6 @@ function renderTownsCasesTable() {
 
   // ═══ v2.9.45: Only show cases when a specific town is selected ═══
   // Default state (no town selected) = empty state asking the user to pick a town.
-  // This matches the "סינון תיקים לפי יישוב" page subtitle — it's a filter view,
-  // not a "show everything" view.
   if (currentTownFilter === null) {
     tbody.innerHTML = '';
     panelTitle.textContent = '📋 בחר יישוב לצפייה בתיקים';
@@ -9015,19 +9109,31 @@ function renderTownsCasesTable() {
     return;
   }
 
+  // ═══ v2.9.48: "_all" filter shows ALL active cases across every town ═══
   var matchingRows = [];
-  if (towns[currentTownFilter]) {
+  if (currentTownFilter === '_all') {
+    // Concatenate rows from every town
+    Object.keys(towns).forEach(function(townKey) {
+      towns[townKey].rows.forEach(function(r) { matchingRows.push(r); });
+    });
+    panelTitle.textContent = '📋 כל התיקים בכל היישובים (' + matchingRows.length + ')';
+    clearBtn.style.display = '';
+  } else if (towns[currentTownFilter]) {
     matchingRows = towns[currentTownFilter].rows;
+    panelTitle.textContent = '📋 תיקים ב' + currentTownFilter + ' (' + matchingRows.length + ')';
+    clearBtn.style.display = '';
+  } else {
+    panelTitle.textContent = '📋 תיקים ב' + currentTownFilter + ' (0)';
+    clearBtn.style.display = '';
   }
-  panelTitle.textContent = '📋 תיקים ב' + currentTownFilter + ' (' + matchingRows.length + ')';
-  clearBtn.style.display = '';
 
   if (matchingRows.length === 0) {
     tbody.innerHTML = '';
     emptyState.style.display = '';
     table.querySelector('thead').style.display = 'none';
+    var who = (currentTownFilter === '_all') ? 'באף יישוב' : ('ב' + currentTownFilter);
     emptyState.innerHTML = '<div style="font-size:40px;margin-bottom:12px;">📭</div>'
-      + '<div style="font-size:15px;font-weight:600;margin-bottom:6px;">אין תיקים פתוחים ב' + currentTownFilter + '</div>'
+      + '<div style="font-size:15px;font-weight:600;margin-bottom:6px;">אין תיקים פתוחים ' + who + '</div>'
       + '<div style="font-size:13px;">תיקים סגורים מופיעים בלשונית "היסטוריה"</div>';
     return;
   }
@@ -9041,19 +9147,12 @@ function renderTownsCasesTable() {
     var plate = (row.querySelector('.plate-badge')?.textContent || '').trim();
     html += '<tr style="cursor:pointer;" onclick="openCaseFromTown(\'' + plate.replace(/'/g, "\\'") + '\')">';
     html += '<td style="color:var(--muted);font-size:11px;">' + (idx + 1) + '</td>';
-    // date
     html += '<td style="font-size:12px;color:var(--muted);">' + (cells[2] ? cells[2].innerHTML : '') + '</td>';
-    // plate
     html += '<td>' + (cells[3] ? cells[3].innerHTML : '') + '</td>';
-    // owner
     html += '<td>' + (cells[4] ? cells[4].innerHTML : '') + '</td>';
-    // location
     html += '<td style="font-size:12px;color:var(--muted);">' + (cells[5] ? cells[5].innerHTML : '') + '</td>';
-    // status
     html += '<td>' + (cells[6] ? cells[6].innerHTML : '') + '</td>';
-    // days remaining
     html += '<td>' + (cells[7] ? cells[7].innerHTML : '') + '</td>';
-    // inspector
     html += '<td style="color:var(--muted);font-size:12px">' + (cells[8] ? cells[8].innerHTML : '') + '</td>';
     html += '</tr>';
   });
@@ -9062,8 +9161,6 @@ function renderTownsCasesTable() {
 }
 
 // ═══ v2.9.45: Open the actual case from a town-page row click ═══
-// The town page rebuilds rows from the main #cases-tbody, so we need to find
-// the original row by plate and open it.
 function openCaseFromTown(plate) {
   var rows = document.querySelectorAll('#cases-tbody tr');
   for (var i = 0; i < rows.length; i++) {
@@ -9093,7 +9190,7 @@ function filterTownCards() {
 var currentHistoryFilter = 'all';
 
 // Statuses that count as "closed" for history purposes
-var HISTORY_STATUSES = ['green', 'closed', 'scrapped', 'waiver'];
+var HISTORY_STATUSES = ['green', 'closed', 'scrapped', 'waiver', 'owner_removed'];
 
 function isHistoryStatus(st) {
   return HISTORY_STATUSES.indexOf(st) !== -1;
@@ -9102,6 +9199,7 @@ function isHistoryStatus(st) {
 function getHistoryStatusInfo(st) {
   if (st === 'scrapped') return { label: '♻️ פינוי גרוטאה', cls: 'sb-brown' };
   if (st === 'waiver')   return { label: '✍️ הצהרת ויתור', cls: 'sb-purple' };
+  if (st === 'owner_removed') return { label: '🚗 פונה ע״י הבעלים', cls: 'sb-green' };
   return { label: '✅ סגור', cls: 'sb-green' };  // 'green' or 'closed'
 }
 
@@ -9117,7 +9215,7 @@ function getHistoryRowsFromCases() {
 function setHistoryFilter(filterName) {
   currentHistoryFilter = filterName;
   // Update button highlights
-  ['all', 'closed', 'scrapped', 'waiver'].forEach(function(f) {
+  ['all', 'closed', 'scrapped', 'waiver', 'owner_removed'].forEach(function(f) {
     var btn = document.getElementById('history-filter-' + f);
     if (btn) {
       if (f === filterName) {
@@ -9151,6 +9249,8 @@ function renderHistoryPage() {
     filteredRows = allHistoryRows.filter(function(r) { return r.dataset.status === 'scrapped'; });
   } else if (currentHistoryFilter === 'waiver') {
     filteredRows = allHistoryRows.filter(function(r) { return r.dataset.status === 'waiver'; });
+  } else if (currentHistoryFilter === 'owner_removed') {
+    filteredRows = allHistoryRows.filter(function(r) { return r.dataset.status === 'owner_removed'; });
   }
 
   // Apply search filter
@@ -10760,6 +10860,92 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
+// ═══════════════════════════════════════════════════════════════════
+// v2.9.49: Version update detection
+// On every load, fetch the live HTML from GitHub Pages (bypassing all
+// caches via a timestamp query string) and compare its embedded version
+// number to the one we're currently running. If GitHub has a newer one,
+// show a confirm() dialog and reload on "OK".
+// ═══════════════════════════════════════════════════════════════════
+function _getCurrentVersion() {
+  // Read from the visible version label in the sidebar
+  // <div ...>v2.9.54 — owner removed ...</div>
+  try {
+    var nodes = document.querySelectorAll('div');
+    for (var i = 0; i < nodes.length; i++) {
+      var t = nodes[i].textContent || '';
+      var m = t.match(/v(\d+\.\d+\.\d+)/);
+      if (m) return m[1];
+    }
+  } catch(e){}
+  return '';
+}
+
+function _checkForVersionUpdate() {
+  var currentVersion = _getCurrentVersion();
+  if (!currentVersion) return; // can't tell, skip
+
+  // Build URL to the live HTML page on GitHub Pages with a cache-buster
+  var liveUrl = location.origin + location.pathname + '?_check=' + Date.now();
+
+  // Don't check more than once every 5 minutes (avoid spamming GitHub)
+  try {
+    var lastCheck = +(localStorage.getItem('galilElyon_lastVersionCheck') || 0);
+    if (Date.now() - lastCheck < 5 * 60 * 1000) {
+      console.log('[v2.9.49 version-check] skipped (checked recently)');
+      return;
+    }
+    localStorage.setItem('galilElyon_lastVersionCheck', String(Date.now()));
+  } catch(e){}
+
+  fetch(liveUrl, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } })
+    .then(function(resp) {
+      if (!resp.ok) throw new Error('fetch failed: ' + resp.status);
+      return resp.text();
+    })
+    .then(function(html) {
+      // Extract version number from the live HTML
+      var match = html.match(/v(\d+\.\d+\.\d+)\s*—\s*[^<]+<\/div>/);
+      if (!match) {
+        console.log('[v2.9.49 version-check] could not parse remote version');
+        return;
+      }
+      var remoteVersion = match[1];
+      if (remoteVersion === currentVersion) {
+        console.log('[v2.9.49 version-check] up to date:', currentVersion);
+        return;
+      }
+      // Compare versions semantically (newer=larger)
+      var cmp = function(a, b) {
+        var pa = a.split('.').map(Number), pb = b.split('.').map(Number);
+        for (var k = 0; k < 3; k++) {
+          if ((pa[k]||0) > (pb[k]||0)) return 1;
+          if ((pa[k]||0) < (pb[k]||0)) return -1;
+        }
+        return 0;
+      };
+      if (cmp(remoteVersion, currentVersion) > 0) {
+        console.log('[v2.9.49 version-check] NEW VERSION available:', remoteVersion, '(running ' + currentVersion + ')');
+        // Show a friendly confirm dialog
+        var msg = '🆕 גרסה חדשה זמינה!\n\n'
+                + 'גרסה נוכחית: ' + currentVersion + '\n'
+                + 'גרסה חדשה: ' + remoteVersion + '\n\n'
+                + 'האם תרצה לעדכן עכשיו?\n\n'
+                + '(הנתונים שלך נשמרו בענן ולא יאבדו)';
+        if (confirm(msg)) {
+          // Force reload bypassing cache
+          window.location.reload(true);
+        }
+      } else {
+        console.log('[v2.9.49 version-check] running newer than remote:', currentVersion, '>', remoteVersion);
+      }
+    })
+    .catch(function(err) {
+      console.warn('[v2.9.49 version-check] failed:', err.message || err);
+    });
+}
+window._checkForVersionUpdate = _checkForVersionUpdate;
+
 // Restore on page load (run after all DOM + scripts are ready)
 function _bootSequence() {
   injectSaveButtons();
@@ -10771,6 +10957,9 @@ function _bootSequence() {
   // (loadState calls this too, but if there's no saved state to load,  ═
   // it's still needed for rows that come from Firebase or default HTML)═
   try { if (typeof _reattachCaseRowClicks === 'function') _reattachCaseRowClicks(); } catch(e){}
+
+  // ═══ v2.9.49: Auto-detect new version & offer to upgrade ═══
+  try { _checkForVersionUpdate(); } catch(e) { console.warn('[v2.9.49] version check failed:', e); }
 
   try {
     if (typeof updateAllCounters === 'function') updateAllCounters();
@@ -11004,6 +11193,18 @@ if (document.readyState === 'loading') {
       result.street = '';
     }
 
+    // ═══ v2.9.47: prevent the same name in BOTH fields ═══
+    // Some geocoders (e.g. Nominatim) return the same kibbutz name for both
+    // city and street when querying inside a kibbutz. Without this guard the
+    // user would end up with "עמיר, עמיר" in their case.
+    if (result.city && result.street) {
+      var c = String(result.city).trim();
+      var s = String(result.street).trim();
+      if (c === s || c.indexOf(s) !== -1 || s.indexOf(c) !== -1) {
+        result.street = ''; // keep only the city
+      }
+    }
+
     // Street — only fill if empty
     var sEl = streetEl || document.getElementById('nf-location-street');
     if (sEl && result.street && !(sEl.value || '').trim()) {
@@ -11015,6 +11216,17 @@ if (document.readyState === 'loading') {
     if (cEl && result.city && !(cEl.value || '').trim()) {
       cEl.value = String(result.city).trim();
       try { cEl.dispatchEvent(new Event('input', { bubbles: true })); } catch(e){}
+    }
+
+    // ═══ v2.9.47: AFTER filling, double-check no field duplicates the other ═══
+    // Handles the case where the user already had "עמיר" in city and we just
+    // filled "עמיר" into street (or vice versa).
+    if (sEl && cEl) {
+      var ss = (sEl.value || '').trim();
+      var cc = (cEl.value || '').trim();
+      if (ss && cc && (ss === cc || cc.indexOf(ss) !== -1)) {
+        sEl.value = ''; // city contains the street info, drop the street
+      }
     }
   }
 
@@ -11389,10 +11601,13 @@ if (document.readyState === 'loading') {
       }
       console.log('[Auth] signed in as', user.email);
 
+      // ═══ v2.9.53: Update the sidebar's "logged in user" panel ═══
+      // Without this, the bottom of the sidebar always shows "גבי חותם",
+      // even when Moran (or anyone else) is logged in.
+      try { _updateSidebarUserPanel(user); } catch(e){}
+
       // Auto-refresh field cases on every login so the manager always sees
       // up-to-date data without having to click the manual refresh button.
-      // Slight delay so Firebase has a chance to finish reconnecting and
-      // the listener is wired up first.
       setTimeout(function() {
         try { refreshNow(); } catch(e) { console.warn('[Auth] auto-refresh failed:', e); }
       }, 800);
@@ -11404,6 +11619,48 @@ if (document.readyState === 'loading') {
       }
     }
   }
+
+  // ═══ v2.9.53: Update the sidebar bottom (avatar + name + role) to reflect ═══
+  // ═══ the currently signed-in user. Looks them up in staffList by email.   ═══
+  function _updateSidebarUserPanel(user) {
+    if (!user || !user.email) return;
+    var email = String(user.email).toLowerCase().trim();
+    var staff = null;
+    try {
+      if (typeof staffList !== 'undefined' && Array.isArray(staffList)) {
+        for (var i = 0; i < staffList.length; i++) {
+          if (String(staffList[i].email || '').toLowerCase().trim() === email) {
+            staff = staffList[i]; break;
+          }
+        }
+      }
+    } catch(e){}
+
+    var avatarEl = document.querySelector('.sb-bottom .sb-avatar');
+    var nameEl   = document.querySelector('.sb-bottom .sb-uname');
+    var roleEl   = document.querySelector('.sb-bottom .sb-urole');
+
+    if (staff) {
+      if (avatarEl) avatarEl.textContent = (staff.name || '?').charAt(0);
+      if (nameEl)   nameEl.textContent   = staff.name || email;
+      if (roleEl)   roleEl.textContent   = staff.role || '';
+      // Apply the staff's color gradient to the avatar
+      try {
+        if (avatarEl && staff.color) {
+          var cols = String(staff.color).split(',');
+          avatarEl.style.background = 'linear-gradient(135deg,' + cols[0] + ',' + (cols[1] || cols[0]) + ')';
+          avatarEl.style.color = '#fff';
+        }
+      } catch(e){}
+    } else {
+      // Fallback for users not in staffList (e.g. an admin who hasn't added themselves)
+      if (avatarEl) avatarEl.textContent = (email.charAt(0) || '?').toUpperCase();
+      if (nameEl)   nameEl.textContent   = email;
+      if (roleEl)   roleEl.textContent   = '';
+    }
+  }
+  window._updateSidebarUserPanel = _updateSidebarUserPanel;
+
 
   // Test whether the current Firebase rules require authentication.
   // We attempt a single small read; if it's denied, we flip into "auth required" mode.
@@ -11735,7 +11992,8 @@ if (document.readyState === 'loading') {
     fbDb.ref('cases').once('value')
       .then(function(snap) {
         var data = snap.val() || {};
-        var count = 0;
+        var mobileCount = 0;
+        var manualCount = 0;
         var skipped = 0;
         // ═══ Read tombstone list to filter out deleted cases ═══
         var deletedIds = [];
@@ -11746,6 +12004,9 @@ if (document.readyState === 'loading') {
           resetAt = parseInt(localStorage.getItem('galilElyon_resetAt') || '0', 10) || 0;
         } catch(e){}
 
+        // ═══ v2.9.46: Track which plates exist in Firebase (for cleanup pass) ═══
+        var firebasePlates = {};
+
         Object.keys(data).forEach(function(id) {
           var c = data[id];
           if (!c) return;
@@ -11753,6 +12014,34 @@ if (document.readyState === 'loading') {
           if (deletedIds.indexOf(id) !== -1) { skipped++; return; }
           // ═══ Skip cases marked with _deleted flag ═══
           if (c._deleted) { skipped++; return; }
+          // ═══ v2.9.46: STICKY DELETE — even if _deleted was wiped by a   ═══
+          // ═══ later mobile-app update, honor the deletion if _deletedAt  ═══
+          // ═══ is more recent than the case's updatedAt. This prevents    ═══
+          // ═══ the scenario where:                                         ═══
+          // ═══   1) Manager deletes case at the office                    ═══
+          // ═══   2) Inspector's mobile app, unaware of the deletion,      ═══
+          // ═══      pushes a refresh of the same case to Firebase         ═══
+          // ═══   3) That refresh strips _deleted=true                     ═══
+          // ═══   4) Manager re-opens the system at home and sees ghost    ═══
+          // ═══ Now: the deletion sticks until someone explicitly edits    ═══
+          // ═══ AFTER the deletion timestamp.                              ═══
+          if (c._deletedAt) {
+            var deletedAt = +c._deletedAt || 0;
+            var updatedAtNum = +(c.updatedAt) || 0;
+            // If we have a deletedAt but no fresh update after it, treat as deleted
+            if (deletedAt && (!updatedAtNum || updatedAtNum <= deletedAt)) {
+              skipped++;
+              // Re-flag in Firebase so other devices also see _deleted
+              try {
+                if (typeof fbDb !== 'undefined' && fbDb) {
+                  fbDb.ref('cases/' + id).update({ _deleted: true })
+                    .then(function() { console.log('[v2.9.46 sticky-delete] re-flagged', id); })
+                    .catch(function(){});
+                }
+              } catch(e){}
+              return;
+            }
+          }
           // ═══ Skip cases older than resetAt ═══
           if (resetAt) {
             var updatedAt = +(c.updatedAt) || 0;
@@ -11764,18 +12053,93 @@ if (document.readyState === 'loading') {
               if (!dateMs) { skipped++; return; }
             }
           }
+
+          // ═══ Track this plate as "seen in Firebase" ═══
+          var plate = (c.plate || (c.fullData && c.fullData.plate) || '').trim();
+          if (plate) firebasePlates[plate] = true;
+
           if (c.source === 'mobile') {
+            // Mobile-app case → handled by the dedicated mobile row updater
             mobileCasesCache[id] = c;
             addOrUpdateMobileRow(c);
-            count++;
+            mobileCount++;
+          } else {
+            // ═══ v2.9.46: Manual case (created in admin) ═══
+            // Previously these were NOT being loaded — only mobile cases were.
+            // That meant a case created on the office Mac would not appear on
+            // the home iMac's "refresh from cloud" until the user visited the
+            // office. Now we upsert them directly via upsertCaseRow.
+            try {
+              var fullData = c.fullData || c;
+              var rowData = {
+                plate:       plate,
+                owner:       c.owner || (c.fullData && c.fullData.ownerName) || '',
+                ownerName:   (c.fullData && c.fullData.ownerName) || c.owner || '',
+                location:    c.location || (c.fullData && c.fullData.location) || '',
+                status:      c.status || 'yellow',
+                inspector:   c.inspector || (c.fullData && c.fullData.inspector) || '',
+                date:        c.date || (c.fullData && c.fullData.date) || '',
+                vehicleType: c.vehicleType || (c.fullData && c.fullData.vehicleType) || '',
+                color:       c.color || (c.fullData && c.fullData.color) || ''
+              };
+              if (typeof upsertCaseRow === 'function' && plate) {
+                upsertCaseRow(plate, rowData, fullData);
+                manualCount++;
+              }
+            } catch(e) {
+              console.warn('[refreshNow] failed to upsert manual case:', id, e);
+            }
           }
         });
+
+        // ═══ v2.9.46: CLEANUP — remove rows that no longer exist in Firebase ═══
+        // Without this, a case deleted on the office Mac would still appear on
+        // the home iMac because it's still in the home's localStorage tbody.
+        var cleanupCount = 0;
+        try {
+          var tbody = document.getElementById('cases-tbody');
+          if (tbody) {
+            var allRows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+            allRows.forEach(function(row) {
+              var pb = row.querySelector('.plate-badge');
+              if (!pb) return;
+              var rowPlate = pb.textContent.trim();
+              if (!rowPlate || rowPlate === '—') return;
+              if (!firebasePlates[rowPlate]) {
+                // This row's plate isn't in Firebase — it was deleted elsewhere
+                row.parentNode.removeChild(row);
+                cleanupCount++;
+              }
+            });
+          }
+        } catch(e) { console.warn('[refreshNow] cleanup pass failed:', e); }
+
+        // ═══ Save the synced state immediately so the local tbody snapshot ═══
+        // ═══ in localStorage matches the cloud state.                       ═══
+        try { if (typeof saveState === 'function') saveState(); } catch(e){}
+
+        // ═══ Refresh derived views (counters, towns, history, map) ═══
+        try { if (typeof updateAllCounters === 'function') updateAllCounters(); } catch(e){}
+        try { if (typeof renderTownsPage === 'function') renderTownsPage(); } catch(e){}
+        try { if (typeof renderHistoryPage === 'function') renderHistoryPage(); } catch(e){}
+        try { if (typeof renderMapMarkers === 'function') renderMapMarkers(); } catch(e){}
+
         if (typeof showToast === 'function') {
-          var msg = '🔄 רוענן: ' + count + ' תיקים מהשטח';
-          if (skipped > 0) msg += ' (' + skipped + ' נמחקו)';
+          var total = mobileCount + manualCount;
+          var msg = '🔄 רוענן: ' + total + ' תיקים';
+          if (mobileCount && manualCount) {
+            msg += ' (' + manualCount + ' מהמשרד, ' + mobileCount + ' מהשטח)';
+          } else if (manualCount) {
+            msg += ' מהמשרד';
+          } else if (mobileCount) {
+            msg += ' מהשטח';
+          }
+          if (cleanupCount > 0) msg += ' • ' + cleanupCount + ' הוסרו';
+          if (skipped > 0) msg += ' • ' + skipped + ' נמחקים';
           showToast(msg);
         }
-        console.log('[refreshNow] loaded ' + count + ', skipped ' + skipped + ' (deleted/stale)');
+        console.log('[refreshNow] manual=' + manualCount + ', mobile=' + mobileCount +
+                    ', removed=' + cleanupCount + ', skipped=' + skipped);
       })
       .catch(function(err) {
         if (typeof showToast === 'function') showToast('⚠️ שגיאה: ' + err.message);
@@ -11870,14 +12234,60 @@ if (document.readyState === 'loading') {
           // disconnected. Skipped if auth is required and we aren't
           // signed in yet — handleAuthStateChange will do it after login.
           if (!authRequired || currentUser) {
+            // ═══ v2.9.47: AGGRESSIVE auto-sync on every (re)connection ═══
+            // Run refreshNow TWICE — once immediately and once after 2s —
+            // to handle the case where the first run happens before the
+            // listenerRef has had time to receive child_added events.
+            setTimeout(function() {
+              try {
+                if (typeof showToast === 'function') showToast('🔄 מסנכרן עם הענן...');
+                refreshNow();
+              } catch(e){}
+            }, 800);
             setTimeout(function() {
               try { refreshNow(); } catch(e){}
-            }, 800);
+            }, 2500);
           }
         } else {
           setStatus('pending', 'מתחבר...');
         }
       });
+
+      // ═══ v2.9.47: Also re-sync whenever the user returns to the tab ═══
+      // (e.g. after switching apps, locking the Mac, etc.). This catches the
+      // case where the user has the app open at home AND at the office, and
+      // a change made on one device should appear on the other when they
+      // switch back to it.
+      document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible' && fbReady &&
+            (!authRequired || currentUser)) {
+          // Debounce: don't re-sync if a sync ran within the last 5 seconds
+          var now = Date.now();
+          var lastSync = +(window._lastAutoSyncTs) || 0;
+          if (now - lastSync < 5000) return;
+          window._lastAutoSyncTs = now;
+          try {
+            console.log('[v2.9.47 auto-sync] tab became visible, refreshing...');
+            refreshNow();
+          } catch(e){}
+        }
+      });
+
+      // ═══ v2.9.47: Periodic background sync — every 60 seconds ═══
+      // So that even if the user keeps the tab open all day, they see
+      // changes made on other devices within a minute.
+      setInterval(function() {
+        if (!fbReady || (authRequired && !currentUser)) return;
+        if (document.visibilityState !== 'visible') return; // skip if tab hidden
+        var now = Date.now();
+        var lastSync = +(window._lastAutoSyncTs) || 0;
+        if (now - lastSync < 30000) return; // never more often than every 30s
+        window._lastAutoSyncTs = now;
+        try {
+          console.log('[v2.9.47 auto-sync] periodic refresh');
+          refreshNow();
+        } catch(e){}
+      }, 60000);
     } catch(e) {
       console.error('Firebase init error:', e);
       setStatus('err', 'שגיאה: ' + (e.message || ''));
@@ -11910,6 +12320,26 @@ if (document.readyState === 'loading') {
     function _isStaleCase(c, fbKey) {
       // ═══ Marker-based delete (used as fallback when Firebase remove() fails) ═══
       if (c && c._deleted) return true;
+      // ═══ v2.9.46: STICKY DELETE — _deletedAt outlives _deleted     ═══
+      // ═══ If the case was deleted (we have _deletedAt) and there has  ═══
+      // ═══ been no fresh update since, treat as deleted. Mobile apps   ═══
+      // ═══ can accidentally write new data without _deleted=true and   ═══
+      // ═══ resurrect ghost cases — this stops that from happening.     ═══
+      if (c && c._deletedAt) {
+        var deletedAt = +c._deletedAt || 0;
+        var updatedAtSticky = +(c.updatedAt) || 0;
+        if (deletedAt && (!updatedAtSticky || updatedAtSticky <= deletedAt)) {
+          // Re-flag _deleted so other devices also see it
+          try {
+            if (fbKey && typeof fbDb !== 'undefined' && fbDb) {
+              fbDb.ref('cases/' + fbKey).update({ _deleted: true })
+                .then(function() { console.log('[v2.9.46 sticky-delete listener] re-flagged', fbKey); })
+                .catch(function(){});
+            }
+          } catch(e){}
+          return true;
+        }
+      }
       // Tombstone wins: if this id is in the deleted list, hide it
       if (fbKey) {
         var deleted = _getDeletedIds();
@@ -12229,6 +12659,8 @@ if (document.readyState === 'loading') {
       letter2_sent:  { cls: 'sb-pink',   label: '📮 נשלח מכתב שני',   days: 14, cd: 'urgent' },
       scrapped:      { cls: 'sb-brown',  label: '♻️ פינוי גרוטאה',    days: 0,  cd: 'ok' },
       waiver:        { cls: 'sb-purple', label: '✍️ הצהרת ויתור',     days: 0,  cd: 'ok' },
+      /* ═══ v2.9.54: case closed — owner came and removed the car ═══ */
+      owner_removed: { cls: 'sb-green',  label: '🚗 פונה ע״י הבעלים',  days: 0,  cd: 'ok' },
       /* ═══ v2.9.11: status from mobile app — photographed only ═══ */
       photographed:  { cls: 'sb-gray',   label: '📷 ממתין להשלמת פרטים', days: 0, cd: 'ok' }
     };
