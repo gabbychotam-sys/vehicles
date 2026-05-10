@@ -2184,7 +2184,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.79 — Firebase tombstones (cross-device) אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.82 — last-edited + presence אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2235,14 +2235,47 @@ try {
     </div>
   </div>
 
-  <div class="sb-bottom">
-    <div class="sb-user">
-      <div class="sb-avatar" style="background: linear-gradient(135deg, rgb(26, 188, 156), rgb(14, 102, 85)); color: rgb(255, 255, 255);">ג</div>
-      <div>
-        <div class="sb-uname">גבי חותם</div>
-        <div class="sb-urole">מנהל פיקוח</div>
+  <div class="sb-bottom" style="position:relative;">
+    <div class="sb-user" onclick="toggleUserDropdown()" style="cursor:pointer;">
+      <div class="sb-avatar" id="active-user-avatar" style="background: linear-gradient(135deg, rgb(26, 188, 156), rgb(14, 102, 85)); color: rgb(255, 255, 255);">ג</div>
+      <div style="flex:1;min-width:0;">
+        <div class="sb-uname" id="active-user-name">גבי חותם</div>
+        <div class="sb-urole" id="active-user-role">מנהל פיקוח</div>
       </div>
-      <div class="sb-dot"></div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);">▼</div>
+    </div>
+    <div id="user-dropdown-menu" style="display:none;position:absolute;bottom:100%;left:8px;right:8px;background:#fff;border:1px solid #ddd;border-radius:10px;margin-bottom:8px;box-shadow:0 4px 16px rgba(0,0,0,0.2);z-index:1000;direction:rtl;overflow:hidden;">
+      <div style="padding:10px 14px;background:#f5f7fa;font-size:11px;color:#666;font-weight:600;border-bottom:1px solid #e5e7eb;">החלף משתמש פעיל:</div>
+      <div onclick="setActiveUser('gabbyc@galil-elion.org.il')" class="user-opt" style="padding:11px 14px;cursor:pointer;font-size:13px;color:#0f172a;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:10px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''">
+        <span style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#1abc9c,#0e6655);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">ג</span>
+        <span style="flex:1;">גבי חותם<br><span style="font-size:11px;color:#888;">מנהל פיקוח</span></span>
+        <span style="font-size:9px;background:#16a34a;color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;">ADMIN</span>
+      </div>
+      <div onclick="setActiveUser('moranl@galil-elion.org.il')" class="user-opt" style="padding:11px 14px;cursor:pointer;font-size:13px;color:#0f172a;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:10px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''">
+        <span style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#e91e63,#ad1457);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">מ</span>
+        <span style="flex:1;">מורן לוז<br><span style="font-size:11px;color:#888;">מזכירה</span></span>
+        <span style="font-size:9px;background:#16a34a;color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;">ADMIN</span>
+      </div>
+      <div onclick="setActiveUser('shimi@galil-elion.org.il')" class="user-opt" style="padding:11px 14px;cursor:pointer;font-size:13px;color:#0f172a;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:10px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''">
+        <span style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#3498db,#1f3a5f);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">ש</span>
+        <span style="flex:1;">שימי רוזנברג<br><span style="font-size:11px;color:#888;">פקח</span></span>
+        <span style="font-size:9px;background:#94a3b8;color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;">צפייה</span>
+      </div>
+      <div onclick="setActiveUser('francis@galil-elion.org.il')" class="user-opt" style="padding:11px 14px;cursor:pointer;font-size:13px;color:#0f172a;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:10px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''">
+        <span style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#f39c12,#b9770e);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">פ</span>
+        <span style="flex:1;">פרנסיס ברוטמן<br><span style="font-size:11px;color:#888;">פקח</span></span>
+        <span style="font-size:9px;background:#94a3b8;color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;">צפייה</span>
+      </div>
+      <div onclick="setActiveUser('eyal@galil-elion.org.il')" class="user-opt" style="padding:11px 14px;cursor:pointer;font-size:13px;color:#0f172a;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:10px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''">
+        <span style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#9b59b6,#6c3483);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">א</span>
+        <span style="flex:1;">אייל ארצי<br><span style="font-size:11px;color:#888;">פקח</span></span>
+        <span style="font-size:9px;background:#94a3b8;color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;">צפייה</span>
+      </div>
+      <div onclick="setActiveUser('mayag@galil-elion.org.il')" class="user-opt" style="padding:11px 14px;cursor:pointer;font-size:13px;color:#0f172a;display:flex;align-items:center;gap:10px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''">
+        <span style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#16a085,#0e6655);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">מ</span>
+        <span style="flex:1;">מאיה גורדון<br><span style="font-size:11px;color:#888;">מנהלת אגף</span></span>
+        <span style="font-size:9px;background:#94a3b8;color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;">צפייה</span>
+      </div>
     </div>
   </div>
 </div>
@@ -2262,7 +2295,7 @@ try {
       <div class="tb-date" id="live-date">יום ראשון, 10 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב (Enter להצגה מלאה)" oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.79 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.82 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2521,6 +2554,14 @@ try {
       <div class="ch-loc" id="cv-loc"></div>
     </div>
     <div class="ch-pills" id="cv-pills"><span class="chip chip-blue">🚗 רכב נטוש</span><span class="chip" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);">📝 חדש</span></div>
+  </div>
+
+  <!-- ═══ v2.9.82: Last-Edited + Currently-Editing banner ═══ -->
+  <div id="case-edit-info" style="display:none;background:rgba(0,180,216,0.08);border-left:3px solid var(--teal);padding:8px 14px;margin:0 24px 12px;border-radius:6px;font-size:12px;color:var(--text);direction:rtl;">
+    <span id="case-edit-info-text">📝 ערך לאחרונה: —</span>
+  </div>
+  <div id="case-presence-warning" style="display:none;background:rgba(245,158,11,0.12);border-left:3px solid #f59e0b;padding:10px 14px;margin:0 24px 12px;border-radius:6px;font-size:13px;color:var(--text);direction:rtl;font-weight:600;">
+    <span id="case-presence-warning-text">⚠️ —</span>
   </div>
 
   <!-- Page content -->
@@ -2911,7 +2952,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-saved" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">נשמר ✓</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.79 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.82 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <!-- v2.9.52: "נקה הכל" button removed per Gabby's request - too risky to expose at the top of the page. -->
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -5462,7 +5503,9 @@ function saveTowedEdit() {
           towResultDate: resultDate,
           towAmount: amount ? (parseInt(amount, 10) || 0) : 0,
           towNotes: notes || '',
-          updatedAt: Date.now()
+          updatedAt: Date.now(),
+          _updatedBy:     (typeof currentUser !== 'undefined' && currentUser && currentUser.email) || 'unknown',
+          _updatedByName: (typeof window.getActiveUserName === 'function') ? window.getActiveUserName() : 'משתמש'
         }).then(function() {
           console.log('[towedEdit] ✓ closed case in Firebase:', target.plate);
         }).catch(function(err) {
@@ -5988,6 +6031,8 @@ function saveCase() {
             status: CASE.status,
             inspector: (document.getElementById('e-inspector') || {}).value || '',
             updatedAt: Date.now(),
+            _updatedBy:     (typeof currentUser !== 'undefined' && currentUser && currentUser.email) || 'unknown',
+            _updatedByName: (typeof window.getActiveUserName === 'function') ? window.getActiveUserName() : 'משתמש',
             fullData: fullCaseSnapshot
           };
           if (fbId) {
@@ -6547,6 +6592,16 @@ function openEditFullForm(tr) {
   if (!saved.ownerName  && saved.owner)   saved.ownerName  = saved.owner;
   if (!saved.ownerAddr  && saved.address) saved.ownerAddr  = saved.address;
   if (!saved.ownerPhone && saved.phone)   saved.ownerPhone = saved.phone;
+
+  // ═══ v2.9.82: Show "last edited by" banner + start presence tracking ═══
+  try {
+    if (typeof window.updateLastEditedBanner === 'function') {
+      window.updateLastEditedBanner(saved._updatedBy, saved._updatedByName, saved.updatedAt || saved._updatedAt);
+    }
+    if (typeof window.startCasePresence === 'function' && saved.plate) {
+      window.startCasePresence(saved.plate);
+    }
+  } catch(e) { console.warn('[openEditFullForm] presence/banner setup error:', e); }
 
   // ═══ Mark that we're editing an existing case ═══
   // saveNewCase will check this flag to decide whether to add a new row
@@ -9189,6 +9244,8 @@ function saveNewCase() {
             lat:         CASE.lat || '',
             lon:         CASE.lon || '',
             updatedAt:   Date.now(),
+            _updatedBy:     (typeof currentUser !== 'undefined' && currentUser && currentUser.email) || 'unknown',
+            _updatedByName: (typeof window.getActiveUserName === 'function') ? window.getActiveUserName() : 'משתמש',
             fullData:    fullSnap     // entire CASE object as a single field
           };
           dbForUpdate.ref('cases/' + existingId).update(payload)
@@ -11832,7 +11889,7 @@ document.addEventListener('keydown', function(e) {
 // ═══════════════════════════════════════════════════════════════════
 function _getCurrentVersion() {
   // Read from the visible version label in the sidebar
-  // <div ...>v2.9.79 — Firebase tombstones (cross-device) ...</div>
+  // <div ...>v2.9.82 — last-edited + presence ...</div>
   try {
     var nodes = document.querySelectorAll('div');
     for (var i = 0; i < nodes.length; i++) {
@@ -12208,12 +12265,292 @@ window.forceDeleteByPlate = function() {
     alert('שגיאה: ' + err.message);
   });
 };
-// Runs every 10 seconds to actively remove rows from any table whose
-// plate (or mobile-id) is in the local tombstone list. This is a
-// safety net: even if something bypasses upsertCaseRow's check or the
-// loadState scrub, the row will get removed within seconds. Cheap to
-// run because it only iterates table rows in the DOM.
+
 // ═══════════════════════════════════════════════════════════════════
+// v2.9.82: PRESENCE & LAST-EDITED INDICATORS
+// When a manager opens a case for editing, we:
+//   1. Display "ערך לאחרונה: [name] [time-ago]" from Firebase
+//   2. Write our presence to _editing/{plate}/{sessionId} so other
+//      managers see "Gabby is currently editing this case"
+//   3. Listen on _editing/{plate} for other editors and show a warning
+//      banner if anyone else is editing the same case
+//   4. Use onDisconnect().remove() so the presence auto-clears if the
+//      browser closes/crashes/loses network
+// ═══════════════════════════════════════════════════════════════════
+window._presenceCurrentPlate = null;
+window._presenceListenerRef = null;
+window._presenceMyRef = null;
+
+function _getSessionId() {
+  try {
+    var sid = sessionStorage.getItem('galilElyon_sessionId');
+    if (!sid) {
+      sid = 'sess_' + Math.random().toString(36).substring(2, 10) + '_' + Date.now();
+      sessionStorage.setItem('galilElyon_sessionId', sid);
+    }
+    return sid;
+  } catch(e) { return 'sess_anon_' + Date.now(); }
+}
+
+function _formatTimeAgo(ts) {
+  if (!ts) return '';
+  var diff = (Date.now() - ts) / 60000;
+  if (diff < 1) return 'הרגע';
+  if (diff < 60) return 'לפני ' + Math.floor(diff) + ' דק׳';
+  if (diff < 1440) return 'לפני ' + Math.floor(diff/60) + ' שעות';
+  return 'לפני ' + Math.floor(diff/1440) + ' ימים';
+}
+
+window.updateLastEditedBanner = function(updatedBy, updatedByName, updatedAt) {
+  var info = document.getElementById('case-edit-info');
+  var text = document.getElementById('case-edit-info-text');
+  if (!info || !text) return;
+  if (!updatedAt && !updatedByName && !updatedBy) {
+    info.style.display = 'none';
+    return;
+  }
+  var who = updatedByName || updatedBy || 'משתמש';
+  var when = _formatTimeAgo(updatedAt);
+  text.textContent = '📝 ערך לאחרונה: ' + who + (when ? ' · ' + when : '');
+  info.style.display = 'block';
+};
+
+window.startCasePresence = function(plate) {
+  if (!plate || !window.fbReady || !window.fbDb) return;
+  var safePlate = String(plate).trim().replace(/[.#$\[\]\/]/g, '_');
+  if (!safePlate) return;
+  // Stop any previous presence first
+  if (window._presenceCurrentPlate && window._presenceCurrentPlate !== safePlate) {
+    window.stopCasePresence();
+  }
+  window._presenceCurrentPlate = safePlate;
+  var sid = _getSessionId();
+  var email = (typeof currentUser !== 'undefined' && currentUser && currentUser.email) ||
+              localStorage.getItem('galilElyon_activeUser') ||
+              'gabbyc@galil-elion.org.il';
+  var name = (typeof window.getActiveUserName === 'function') ? window.getActiveUserName() : 'משתמש';
+
+  // Write our presence
+  var myPath = '_editing/' + safePlate + '/' + sid;
+  window._presenceMyRef = fbDb.ref(myPath);
+  window._presenceMyRef.set({ email: email, name: name, since: Date.now() })
+    .catch(function(err){ console.warn('[presence] write failed:', err); });
+  // Auto-remove on disconnect
+  try { window._presenceMyRef.onDisconnect().remove(); } catch(e){}
+
+  // Listen for other editors
+  window._presenceListenerRef = fbDb.ref('_editing/' + safePlate);
+  window._presenceListenerRef.on('value', function(snap) {
+    var data = snap.val() || {};
+    var others = [];
+    var now = Date.now();
+    Object.keys(data).forEach(function(k) {
+      if (k === sid) return; // skip myself
+      var entry = data[k];
+      if (!entry) return;
+      // Treat presence as stale after 5 minutes (in case onDisconnect failed)
+      if (entry.since && (now - entry.since) > 5 * 60000) return;
+      if (entry.name) others.push(entry.name);
+    });
+    var warn = document.getElementById('case-presence-warning');
+    var warnText = document.getElementById('case-presence-warning-text');
+    if (!warn || !warnText) return;
+    if (others.length === 0) {
+      warn.style.display = 'none';
+    } else {
+      var unique = [];
+      others.forEach(function(n) { if (unique.indexOf(n) === -1) unique.push(n); });
+      warnText.textContent = '⚠️ ' + unique.join(', ') + (unique.length === 1 ? ' עורך/ת כעת את התיק הזה — הימנע משינויים סותרים' : ' עורכים כעת את התיק — הימנע משינויים סותרים');
+      warn.style.display = 'block';
+    }
+  });
+};
+
+window.stopCasePresence = function() {
+  if (window._presenceListenerRef) {
+    try { window._presenceListenerRef.off(); } catch(e){}
+    window._presenceListenerRef = null;
+  }
+  if (window._presenceMyRef) {
+    try { window._presenceMyRef.remove(); } catch(e){}
+    window._presenceMyRef = null;
+  }
+  window._presenceCurrentPlate = null;
+  // Hide warning banner
+  var warn = document.getElementById('case-presence-warning');
+  if (warn) warn.style.display = 'none';
+  var info = document.getElementById('case-edit-info');
+  if (info) info.style.display = 'none';
+};
+
+// Auto-stop presence when leaving the case view
+(function setupPresenceCleanup() {
+  // Hook into showView so leaving the case clears presence
+  var origShowView = window.showView;
+  if (typeof origShowView === 'function') {
+    window.showView = function(viewName) {
+      if (viewName !== 'case' && window._presenceCurrentPlate) {
+        window.stopCasePresence();
+      }
+      return origShowView.apply(this, arguments);
+    };
+  }
+  // Also clear on window unload
+  window.addEventListener('beforeunload', function() {
+    try { window.stopCasePresence(); } catch(e){}
+  });
+})();
+
+// ═══════════════════════════════════════════════════════════════════
+// v2.9.80: ONE-USER AUTO-LOGIN MODE
+// Removes the login screen entirely. The 6 staff members each have a
+// known password (their phone number without dashes). On startup we
+// auto-login with whichever user was last selected (default = Gabby).
+// A dropdown in the sidebar lets the user switch identity in 1 click.
+// Every action records who did it via logActivity(plate, action, who).
+// ═══════════════════════════════════════════════════════════════════
+window.STAFF_AUTH = {
+  'gabbyc@galil-elion.org.il':  { pwd: '0507574451', name: 'גבי חותם',     role: 'מנהל פיקוח', initial: 'ג', color: 'linear-gradient(135deg,#1abc9c,#0e6655)' },
+  'moranl@galil-elion.org.il':  { pwd: '0523791659', name: 'מורן לוז',     role: 'מזכירה',     initial: 'מ', color: 'linear-gradient(135deg,#e91e63,#ad1457)' },
+  'shimi@galil-elion.org.il':   { pwd: '0546693634', name: 'שימי רוזנברג', role: 'פקח',        initial: 'ש', color: 'linear-gradient(135deg,#3498db,#1f3a5f)' },
+  'francis@galil-elion.org.il': { pwd: '0544527582', name: 'פרנסיס ברוטמן', role: 'פקח',        initial: 'פ', color: 'linear-gradient(135deg,#f39c12,#b9770e)' },
+  'eyal@galil-elion.org.il':    { pwd: '0526191985', name: 'אייל ארצי',    role: 'פקח',        initial: 'א', color: 'linear-gradient(135deg,#9b59b6,#6c3483)' },
+  'mayag@galil-elion.org.il':   { pwd: '0525585201', name: 'מאיה גורדון',   role: 'מנהלת אגף',  initial: 'מ', color: 'linear-gradient(135deg,#16a085,#0e6655)' }
+};
+
+window.toggleUserDropdown = function() {
+  var menu = document.getElementById('user-dropdown-menu');
+  if (!menu) return;
+  menu.style.display = (menu.style.display === 'none' || !menu.style.display) ? 'block' : 'none';
+};
+
+document.addEventListener('click', function(e) {
+  var menu = document.getElementById('user-dropdown-menu');
+  if (!menu || menu.style.display === 'none') return;
+  var bottom = e.target.closest('.sb-bottom');
+  if (!bottom) menu.style.display = 'none';
+});
+
+window.setActiveUser = function(email) {
+  var creds = window.STAFF_AUTH[email];
+  if (!creds) {
+    console.warn('[setActiveUser] unknown email:', email);
+    return;
+  }
+  try { localStorage.setItem('galilElyon_activeUser', email); } catch(e){}
+  _renderActiveUserUI(email);
+  var menu = document.getElementById('user-dropdown-menu');
+  if (menu) menu.style.display = 'none';
+
+  // Inform the user about their new role
+  var ADMIN_LIST = ['gabbyc@galil-elion.org.il', 'moranl@galil-elion.org.il'];
+  var isAdminUser = ADMIN_LIST.indexOf(email) !== -1;
+  if (typeof showToast === 'function') {
+    if (isAdminUser) {
+      showToast('✅ נכנסת כ-' + creds.name + ' (הרשאות מלאות)');
+    } else {
+      showToast('👁️ נכנסת כ-' + creds.name + ' (צפייה בלבד)');
+    }
+  }
+
+  if (!window.fbAuth) {
+    console.warn('[setActiveUser] fbAuth not ready, will apply on next page load');
+    return;
+  }
+  Promise.resolve()
+    .then(function() { return window.fbAuth.currentUser ? window.fbAuth.signOut() : null; })
+    .then(function() { return window.fbAuth.signInWithEmailAndPassword(email, creds.pwd); })
+    .then(function() {
+      console.log('[setActiveUser] ✓ signed in as', email);
+      setTimeout(function() { location.reload(); }, 600);
+    })
+    .catch(function(err) {
+      console.error('[setActiveUser] ✗ login failed for', email, err);
+      if (typeof showToast === 'function') showToast('⚠️ שגיאה בכניסה: ' + (err.message || err.code || ''));
+    });
+};
+
+window._renderActiveUserUI = function(email) {
+  var creds = window.STAFF_AUTH[email];
+  if (!creds) return;
+  var av = document.getElementById('active-user-avatar');
+  var nm = document.getElementById('active-user-name');
+  var rl = document.getElementById('active-user-role');
+  if (av) {
+    av.textContent = creds.initial;
+    av.style.background = creds.color;
+  }
+  if (nm) nm.textContent = creds.name;
+  // Show role + permission badge ("ADMIN" or "צפייה בלבד")
+  if (rl) {
+    var ADMIN_LIST = ['gabbyc@galil-elion.org.il', 'moranl@galil-elion.org.il'];
+    var badge = ADMIN_LIST.indexOf(email) !== -1
+      ? '<span style="font-size:9px;background:#16a34a;color:#fff;padding:1px 6px;border-radius:3px;font-weight:700;margin-right:6px;">ADMIN</span>'
+      : '<span style="font-size:9px;background:#94a3b8;color:#fff;padding:1px 6px;border-radius:3px;font-weight:700;margin-right:6px;">צפייה</span>';
+    rl.innerHTML = badge + creds.role;
+  }
+};
+
+window.getActiveUserName = function() {
+  try {
+    var email = (window.currentUser && window.currentUser.email) ||
+                 localStorage.getItem('galilElyon_activeUser') ||
+                 'gabbyc@galil-elion.org.il';
+    var creds = window.STAFF_AUTH[String(email).toLowerCase().trim()];
+    return creds ? creds.name : (email || 'משתמש');
+  } catch(e) { return 'משתמש'; }
+};
+
+(function autoLoginOnStartup() {
+  var startTime = Date.now();
+  function tryLogin() {
+    if (!window.fbAuth) {
+      if (Date.now() - startTime > 30000) return;
+      setTimeout(tryLogin, 400);
+      return;
+    }
+    var stored = (function(){
+      try { return localStorage.getItem('galilElyon_activeUser') || 'gabbyc@galil-elion.org.il'; }
+      catch(e) { return 'gabbyc@galil-elion.org.il'; }
+    })();
+    _renderActiveUserUI(stored);
+    if (window.fbAuth.currentUser && window.fbAuth.currentUser.email === stored) return;
+    var creds = window.STAFF_AUTH[stored];
+    if (!creds) creds = window.STAFF_AUTH['gabbyc@galil-elion.org.il'];
+
+    Promise.resolve()
+      .then(function() {
+        if (window.fbAuth.currentUser && window.fbAuth.currentUser.email !== stored) {
+          return window.fbAuth.signOut();
+        }
+        return null;
+      })
+      .then(function() {
+        if (window.fbAuth.currentUser) return null;
+        return window.fbAuth.signInWithEmailAndPassword(stored, creds.pwd);
+      })
+      .then(function() { console.log('[autoLogin] ✓ signed in as', stored); })
+      .catch(function(err) {
+        console.warn('[autoLogin] ✗ failed for', stored, err && err.code, err && err.message);
+      });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { setTimeout(tryLogin, 500); });
+  } else {
+    setTimeout(tryLogin, 500);
+  }
+})();
+
+// Force-hide the legacy login overlay forever
+(function suppressLoginOverlay() {
+  setInterval(function() {
+    var ov = document.getElementById('auth-overlay');
+    if (ov && ov.style.display !== 'none') ov.style.display = 'none';
+  }, 300);
+})();
+
+// ═══════════════════════════════════════════════════════════════════
+// v2.9.77: PERIODIC TOMBSTONE SCRUB
 function _scrubTombstonedRows() {
   try {
     var dPlates = JSON.parse(localStorage.getItem('galilElyon_deletedPlates') || '[]');
@@ -12805,6 +13142,9 @@ if (document.readyState === 'loading') {
         status:     rowData.status || 'yellow',
         inspector:  rowData.inspector || '',
         updatedAt:  Date.now(),
+        // ═══ v2.9.82: track who edited last ═══
+        _updatedBy:     (typeof currentUser !== 'undefined' && currentUser && currentUser.email) || 'unknown',
+        _updatedByName: (typeof window.getActiveUserName === 'function') ? window.getActiveUserName() : 'משתמש',
         fullData:   fullData || null
       };
       console.log('[GalilSync._pushManualCase] pushing to Firebase:', id, rowData.plate);
@@ -13523,6 +13863,8 @@ if (document.readyState === 'loading') {
         if (typeof fbApp.auth === 'function') {
           fbAuth = fbApp.auth();
           fbAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(){});
+          // ═══ v2.9.80: AUTO-LOGIN — keep last selected user signed in ═══
+          window.fbAuth = fbAuth;
         }
       } catch(e) { console.warn('Auth init skipped:', e); }
       fbReady = true;
