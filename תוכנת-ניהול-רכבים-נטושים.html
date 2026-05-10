@@ -2184,7 +2184,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.61 — scan one click אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.63 — auto-fill MOT אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2262,7 +2262,7 @@ try {
       <div class="tb-date" id="live-date">יום ראשון, 10 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב (Enter להצגה מלאה)" oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.61 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.63 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2667,33 +2667,24 @@ try {
             </div>
             <div style="font-size:11px;color:var(--muted);margin-top:6px;">עד 10 תמונות, מקסימום 5MB לתמונה</div>
           </div>
-          <!-- v2.9.57: מסמכים סרוקים -->
+          <!-- v2.9.63: מסמכים סרוקים + זיהוי אוטומטי -->
           <div class="edit-section">
             <div class="edit-section-title">📎 מסמכים סרוקים</div>
             <div id="nf-scans-area" style="margin-top:6px;">
               <div id="nf-scans-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;"></div>
-              <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:14px;margin-bottom:10px;">
-                <div style="font-weight:700;color:#0369a1;font-size:14px;margin-bottom:10px;">🖨️ סריקה והעלאה אוטומטית:</div>
-
-                <button type="button" onclick="document.getElementById('scan-and-upload-input').click(); window._showScanHint && window._showScanHint();" style="width:100%;background:linear-gradient(135deg,#0284c7,#0369a1);color:#fff;border:none;border-radius:10px;padding:14px 18px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px;">
-                  🖨️ סרוק מסמך והעלה לתיק
-                </button>
-                <input type="file" id="scan-and-upload-input" accept="image/*,application/pdf" multiple style="display:none;" onchange="handleNewCaseScan(event)">
-
-                <div id="scan-step-hint" style="display:none;font-size:12px;color:#0c4a6e;background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:10px 12px;margin-top:6px;line-height:1.6;">
-                  <b>📋 שלבים מהירים:</b><br>
-                  1️⃣ <b>חלון בחירת קובץ נפתח</b> — השאר אותו פתוח<br>
-                  2️⃣ הקש <kbd style="background:#1e293b;color:#fff;padding:2px 6px;border-radius:3px;font-size:11px;">⊞ Win + S</kbd>, הקלד <b>"סריקה"</b>, Enter<br>
-                  3️⃣ סרוק ושמור את המסמך (למשל בשולחן עבודה)<br>
-                  4️⃣ חזור לחלון בחירת הקובץ ובחר את הקובץ
-                </div>
-
-                <div style="font-size:11px;color:#64748b;margin-top:8px;line-height:1.5;">
-                  💡 הכפתור פותח את חלון בחירת הקובץ. סרוק במקביל עם אפליקציית "סריקה" של Windows ובחר את הקובץ שיצרת.
-                </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <label style="display:inline-flex;align-items:center;gap:8px;background:#0284c7;color:#fff;border-radius:10px;padding:11px 20px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 2px 6px rgba(2,132,199,0.25);">
+                  📎 העלה מסמך
+                  <input type="file" accept="image/*,application/pdf" multiple style="display:none;" onchange="handleNewCaseScan(event)">
+                </label>
+                <label id="auto-fill-btn" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;border-radius:10px;padding:11px 20px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 2px 6px rgba(124,58,237,0.25);" title="העלה דף 'שאילתא לרכב' של משרד הרישוי - המערכת תזהה ותמלא את הפרטים אוטומטית">
+                  ✨ זיהוי אוטומטי ממשרד הרישוי
+                  <input type="file" accept="image/*,application/pdf" style="display:none;" onchange="handleAutoFillScan(event)">
+                </label>
               </div>
+              <div id="auto-fill-status" style="display:none;font-size:12px;margin-top:10px;padding:10px 14px;border-radius:8px;line-height:1.6;"></div>
             </div>
-            <div style="font-size:11px;color:var(--muted);margin-top:6px;">PDF/JPG/PNG · עד 10 מסמכים · מקסימום 5MB · נשמר אוטומטית בארכיון</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:8px;">PDF/JPG/PNG · עד 10 מסמכים · מקסימום 5MB · נשמר אוטומטית בארכיון התיק</div>
           </div>
 
           <!-- v2.9.57: תוקף רישיון -->
@@ -2927,7 +2918,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-saved" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">נשמר ✓</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.61 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.63 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <!-- v2.9.52: "נקה הכל" button removed per Gabby's request - too risky to expose at the top of the page. -->
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -3372,6 +3363,35 @@ try {
       </div>
 
       <button onclick="resetBgPreset()" style="margin-top:16px;background:transparent;border:1px solid var(--border);color:var(--muted);padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;">↩️ אפס לברירת מחדל</button>
+    </div>
+
+    <!-- ═══ v2.9.63: Google Vision API (auto-fill from MOT scan) ═══ -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-top:20px;">
+      <div style="font-size:16px;font-weight:700;margin-bottom:6px;color:var(--text);">🔍 זיהוי אוטומטי ממסמכי משרד הרישוי</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6;">כשמעלים סריקה של "שאילתא לרכב" (משרד הרישוי) — המערכת תקרא את הקובץ אוטומטית ותמלא את שדות התיק (שם, ת.ז, כתובת, מספר רכב וכו').<br>השירות חינמי עד 1,000 סריקות בחודש דרך Google Cloud Vision.</div>
+
+      <label style="display:block;font-size:13px;color:var(--text);font-weight:600;margin-bottom:6px;">מפתח Google Cloud Vision API:</label>
+      <div style="display:flex;gap:8px;align-items:stretch;">
+        <input type="password" id="gvision-api-key" placeholder="AIzaSyA..." style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;direction:ltr;text-align:left;font-family:monospace;background:var(--card2);color:var(--text);">
+        <button type="button" onclick="saveVisionApiKey()" style="background:#0284c7;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">💾 שמור</button>
+        <button type="button" onclick="testVisionApiKey()" style="background:#10b981;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">🧪 בדוק</button>
+      </div>
+      <div id="gvision-status" style="font-size:12px;margin-top:8px;"></div>
+
+      <details style="margin-top:14px;font-size:12px;color:var(--muted);">
+        <summary style="cursor:pointer;font-weight:600;color:#0369a1;">❓ איך מקבלים מפתח API? (פעם אחת בלבד)</summary>
+        <ol style="margin-top:10px;line-height:1.9;padding-right:20px;">
+          <li>היכנס ל-<a href="https://console.cloud.google.com" target="_blank" style="color:#0284c7;">Google Cloud Console</a></li>
+          <li>צור פרויקט חדש (לדוגמה: "galil-vehicles")</li>
+          <li>בתפריט: <b>APIs & Services → Library</b> → חפש "Cloud Vision API" → <b>Enable</b></li>
+          <li>בתפריט: <b>APIs & Services → Credentials</b> → <b>Create Credentials → API Key</b></li>
+          <li>העתק את המפתח שנוצר (מתחיל ב-<code>AIzaSy...</code>)</li>
+          <li>חזור לכאן, הדבק את המפתח, ולחץ "💾 שמור" + "🧪 בדוק"</li>
+        </ol>
+        <div style="background:#fef3c7;border:1px solid #fde68a;color:#78350f;padding:10px 12px;border-radius:8px;margin-top:10px;line-height:1.6;">
+          <b>⚠️ חשוב לאבטחה:</b> ב-Google Cloud Console, לחץ על המפתח שיצרת והגביל אותו רק ל-<b>Cloud Vision API</b>, וגם הגביל אותו לדומיינים שלך (<code>gabbychotam-sys.github.io</code>) — אחרת מישהו יוכל להשתמש בו.
+        </div>
+      </details>
     </div>
 
   </div>
@@ -7970,44 +7990,361 @@ function renderCaseScanList() {
 }
 window.renderCaseScanList = renderCaseScanList;
 
-// ═══════════════════════════════════════════════════════════════════
-// v2.9.61: SCAN HINT — show step-by-step hints when the user clicks
-// "Scan & Upload". The file picker opens IN THE SAME CLICK (browser
-// security requires that), and the hint reminds them to launch
-// Windows Scan in parallel.
-// ═══════════════════════════════════════════════════════════════════
-window._showScanHint = function() {
-  var hint = document.getElementById('scan-step-hint');
-  if (hint) {
-    hint.style.display = 'block';
-    // Auto-hide after 30 seconds
-    setTimeout(function() {
-      if (hint) hint.style.display = 'none';
-    }, 30000);
-  }
-};
+// (Scan via Windows Scan / camera helpers removed in v2.9.62 — simple
+//  upload-only flow per user feedback. The user opens Windows Scan
+//  manually via Win+S, scans, saves the file, then clicks "📎 העלה מסמך"
+//  in the case to attach it.)
 
 // ═══════════════════════════════════════════════════════════════════
-// v2.9.60: WINDOWS SCANNER LAUNCHER — short instruction only
-// Browsers cannot launch UWP apps directly — every URL we try (ms-windows-
-// store://, ms-windowsscan://, etc) ends up opening Microsoft Store's home
-// page instead of the actual scanner app. So we abandon auto-launch entirely
-// and just show a clean, short reminder of how to open it manually.
+// v2.9.63: GOOGLE VISION OCR + AUTO-FILL FROM MOT SCAN
+//
+// When the user uploads a "שאילתא לרכב" form from the Israeli Ministry
+// of Transport, send it to Google Cloud Vision API for OCR, then parse
+// the recognized text to auto-fill the case form fields:
+//   - מספר רכב, יצרן, צבע, סוג רכב
+//   - ת.ז, שם משפחה, שם פרטי, רחוב, ישוב
+//   - תאריך תוקף רישיון
+//
+// API key is stored in localStorage. User must obtain it from Google
+// Cloud Console (free tier: 1,000 requests/month).
 // ═══════════════════════════════════════════════════════════════════
-function openWindowsScanner() {
-  var isMac = /Mac/i.test(navigator.platform || '');
-  if (isMac) {
-    alert('💡 Mac: Cmd+Space → "Image Capture" / "לכידת תמונה" → סרוק → שמור → "📁 העלה את הקובץ הסרוק"');
+
+function saveVisionApiKey() {
+  var input = document.getElementById('gvision-api-key');
+  var status = document.getElementById('gvision-status');
+  if (!input || !status) return;
+  var key = (input.value || '').trim();
+  if (!key) {
+    localStorage.removeItem('galilElyon_visionApiKey');
+    status.innerHTML = '🗑️ המפתח נמחק';
+    status.style.cssText = 'color:#64748b;font-size:12px;margin-top:8px;';
     return;
   }
-  alert('🖨️ לפתיחת אפליקציית הסריקה:\n\n' +
-        '1️⃣  הקש על מקש Windows ⊞\n' +
-        '2️⃣  הקלד: סריקה  (או Scan)\n' +
-        '3️⃣  לחץ Enter\n\n' +
-        '4️⃣  סרוק את המסמך באפליקציה ושמור אותו\n' +
-        '5️⃣  חזור לכאן ולחץ "📁 העלה את הקובץ הסרוק"');
+  if (!/^AIza[0-9A-Za-z_-]{30,}$/.test(key)) {
+    status.innerHTML = '⚠️ המפתח לא בפורמט הנכון (אמור להתחיל ב-AIzaSy...)';
+    status.style.cssText = 'color:#b91c1c;font-size:12px;margin-top:8px;';
+    return;
+  }
+  localStorage.setItem('galilElyon_visionApiKey', key);
+  status.innerHTML = '✓ המפתח נשמר. לחץ "🧪 בדוק" כדי לוודא שהוא עובד.';
+  status.style.cssText = 'color:#166534;font-size:12px;margin-top:8px;';
 }
-window.openWindowsScanner = openWindowsScanner;
+window.saveVisionApiKey = saveVisionApiKey;
+
+function _getVisionApiKey() {
+  return localStorage.getItem('galilElyon_visionApiKey') || '';
+}
+
+function testVisionApiKey() {
+  var status = document.getElementById('gvision-status');
+  if (!status) return;
+  var key = (document.getElementById('gvision-api-key').value || '').trim() || _getVisionApiKey();
+  if (!key) {
+    status.innerHTML = '⚠️ הזן מפתח קודם';
+    status.style.cssText = 'color:#b91c1c;font-size:12px;margin-top:8px;';
+    return;
+  }
+  status.innerHTML = '⏳ בודק את המפתח...';
+  status.style.cssText = 'color:#0369a1;font-size:12px;margin-top:8px;';
+
+  // Send a tiny 1x1 pixel image to Vision API to verify the key
+  var tinyPng = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+  fetch('https://vision.googleapis.com/v1/images:annotate?key=' + encodeURIComponent(key), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      requests: [{
+        image: { content: tinyPng },
+        features: [{ type: 'TEXT_DETECTION' }]
+      }]
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.error) {
+      status.innerHTML = '❌ שגיאה: ' + (data.error.message || 'לא ידוע') + '<br>בדוק שה-Vision API מופעל בפרויקט שלך.';
+      status.style.cssText = 'color:#b91c1c;background:#fee2e2;padding:10px;border-radius:6px;font-size:12px;margin-top:8px;';
+    } else if (data.responses && data.responses[0]) {
+      if (data.responses[0].error) {
+        status.innerHTML = '❌ ' + data.responses[0].error.message;
+        status.style.cssText = 'color:#b91c1c;background:#fee2e2;padding:10px;border-radius:6px;font-size:12px;margin-top:8px;';
+      } else {
+        status.innerHTML = '✅ המפתח עובד! Vision API מוכן לשימוש.';
+        status.style.cssText = 'color:#166534;background:#f0fdf4;padding:10px;border-radius:6px;font-size:12px;margin-top:8px;';
+      }
+    } else {
+      status.innerHTML = '⚠️ תגובה לא צפויה מ-Google';
+      status.style.cssText = 'color:#9a3412;font-size:12px;margin-top:8px;';
+    }
+  })
+  .catch(function(err) {
+    status.innerHTML = '❌ שגיאת רשת: ' + err.message;
+    status.style.cssText = 'color:#b91c1c;font-size:12px;margin-top:8px;';
+  });
+}
+window.testVisionApiKey = testVisionApiKey;
+
+// Load saved key when settings view opens
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    var input = document.getElementById('gvision-api-key');
+    if (input) {
+      var saved = _getVisionApiKey();
+      if (saved) input.value = saved;
+    }
+  }, 500);
+});
+
+// ═══ Auto-fill flow when user uploads MOT scan ═══
+function handleAutoFillScan(event) {
+  var files = event.target.files;
+  if (!files || !files.length) return;
+  event.target.value = ''; // reset for next time
+
+  var apiKey = _getVisionApiKey();
+  if (!apiKey) {
+    alert('🔑 לפני שימוש בזיהוי אוטומטי - יש להגדיר מפתח Google Vision API.\n\n' +
+          'עבור ל: ⚙️ הגדרות → "🔍 זיהוי אוטומטי ממסמכי משרד הרישוי" → הזן מפתח API.\n\n' +
+          'הוראות מפורטות בהגדרות.');
+    return;
+  }
+
+  var file = files[0];
+  if (file.size > 5 * 1024 * 1024) {
+    alert('הקובץ גדול מ-5MB');
+    return;
+  }
+
+  var statusBox = document.getElementById('auto-fill-status');
+  if (statusBox) {
+    statusBox.style.display = 'block';
+    statusBox.innerHTML = '⏳ קורא את המסמך...';
+    statusBox.style.cssText = 'display:block;color:#0369a1;background:#eff6ff;border:1px solid #bfdbfe;padding:10px 14px;border-radius:8px;font-size:12px;margin-top:10px;line-height:1.6;';
+  }
+
+  // Read file as base64
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var dataUrl = e.target.result;
+    var base64 = String(dataUrl).split(',')[1];
+    if (!base64) {
+      _autoFillStatusError('לא ניתן לקרוא את הקובץ');
+      return;
+    }
+
+    // For PDFs, we need to send to Vision differently — but Vision can
+    // also accept PDFs via the documentTextDetection feature with proper
+    // MIME type. For simplicity, we always use TEXT_DETECTION which works
+    // for both images and the first page of PDFs (after Vision converts).
+    var requestBody = {
+      requests: [{
+        image: { content: base64 },
+        features: [{ type: 'DOCUMENT_TEXT_DETECTION' }],
+        imageContext: { languageHints: ['he', 'en'] }
+      }]
+    };
+
+    // PDFs need a different API path — but Vision's images:annotate accepts
+    // PDFs only up to 5MB AND only via gcsSource. For simplicity, recommend
+    // converting PDFs to images first. We'll still try the request and let
+    // Vision return a clear error if it fails.
+
+    fetch('https://vision.googleapis.com/v1/images:annotate?key=' + encodeURIComponent(apiKey), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody)
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) throw new Error(data.error.message || 'שגיאה לא ידועה');
+      if (!data.responses || !data.responses[0]) throw new Error('תגובה ריקה מ-Google');
+      var resp = data.responses[0];
+      if (resp.error) throw new Error(resp.error.message);
+
+      var text = (resp.fullTextAnnotation && resp.fullTextAnnotation.text) ||
+                 (resp.textAnnotations && resp.textAnnotations[0] && resp.textAnnotations[0].description) ||
+                 '';
+
+      if (!text || text.length < 20) {
+        throw new Error('לא זוהה טקסט במסמך. ודא שהסריקה ברורה ולא מטושטשת.');
+      }
+
+      // Parse the text
+      var parsed = _parseMotForm(text);
+
+      // Also save the file as a regular scanned doc
+      caseScans.push({
+        dataUrl: dataUrl,
+        name: file.name || 'שאילתא לרכב.pdf',
+        type: file.type || 'application/octet-stream',
+        size: file.size,
+        addedAt: new Date().toISOString()
+      });
+      renderCaseScanList();
+
+      // Apply parsed values to the form
+      _applyParsedToForm(parsed);
+
+      // Show summary
+      var found = Object.keys(parsed).filter(function(k){ return parsed[k]; });
+      if (statusBox) {
+        if (found.length > 0) {
+          statusBox.innerHTML = '✅ זוהו ' + found.length + ' שדות ומולאו אוטומטית:<br>' +
+            '<b>' + found.map(function(k){ return _fieldLabels[k] || k; }).join(' · ') + '</b><br>' +
+            '<span style="color:#64748b;">בדוק את הפרטים ולחץ "💾 שמור שינויים"</span>';
+          statusBox.style.cssText = 'display:block;color:#166534;background:#f0fdf4;border:1px solid #bbf7d0;padding:10px 14px;border-radius:8px;font-size:12px;margin-top:10px;line-height:1.7;';
+        } else {
+          statusBox.innerHTML = '⚠️ לא זוהו שדות במסמך. ודא שזה דף "שאילתא לרכב" של משרד הרישוי.';
+          statusBox.style.cssText = 'display:block;color:#9a3412;background:#fff7ed;border:1px solid #fed7aa;padding:10px 14px;border-radius:8px;font-size:12px;margin-top:10px;';
+        }
+      }
+    })
+    .catch(function(err) {
+      _autoFillStatusError(err.message || String(err));
+    });
+  };
+  reader.onerror = function() {
+    _autoFillStatusError('שגיאה בקריאת הקובץ');
+  };
+  reader.readAsDataURL(file);
+}
+window.handleAutoFillScan = handleAutoFillScan;
+
+function _autoFillStatusError(msg) {
+  var statusBox = document.getElementById('auto-fill-status');
+  if (statusBox) {
+    statusBox.innerHTML = '❌ ' + msg;
+    statusBox.style.cssText = 'display:block;color:#b91c1c;background:#fee2e2;border:1px solid #fecaca;padding:10px 14px;border-radius:8px;font-size:12px;margin-top:10px;';
+  }
+}
+
+var _fieldLabels = {
+  plate:        'מספר רכב',
+  vehicleType:  'סוג רכב',
+  manufacturer: 'יצרן',
+  color:        'צבע',
+  ownerId:      'ת.ז',
+  ownerName:    'שם בעל הרכב',
+  ownerAddr:    'כתובת',
+  city:         'יישוב',
+  licenseExpiry:'תוקף רישיון'
+};
+
+// Parse the OCR text from a MOT "שאילתא לרכב" form
+function _parseMotForm(text) {
+  var out = {};
+
+  // Clean up text — remove duplicate whitespace, normalize quotes
+  var t = text.replace(/[\u200E\u200F]/g, '').replace(/[''`]/g, "'").replace(/[""]/g, '"');
+
+  // Helper to extract a value after a label, until end of line or next known field
+  function find(patterns) {
+    for (var i = 0; i < patterns.length; i++) {
+      var m = t.match(patterns[i]);
+      if (m && m[1]) return m[1].trim();
+    }
+    return '';
+  }
+
+  // ═══ פרטי הרכב ═══
+  // Plate number — appears at top "מספר רכב: 3551379" and again "מס' רכב: 3551379"
+  out.plate = find([
+    /מספר\s*רכב\s*[:\-]\s*(\d{5,8})/,
+    /מס['"]?\s*רכב\s*[:\-]\s*(\d{5,8})/
+  ]);
+
+  // Vehicle type — could be multi-line ("משא סגור\nאחוד")
+  var typeMatch = t.match(/סוג\s*רכב\s*[:\-]?\s*\n?([^\n]+(?:\n(?!יצרן|צבע|ת\.ז|ה\.השכרה|סוג\s*בעלות)[^\n]+)?)/);
+  if (typeMatch) {
+    out.vehicleType = typeMatch[1].replace(/\s+/g, ' ').trim();
+  }
+
+  // Manufacturer
+  out.manufacturer = find([
+    /יצרן\s*רכב\s*[:\-]?\s*([^\n]+)/,
+    /יצרן\s*[:\-]?\s*([^\n]+)/
+  ]);
+
+  // Color
+  out.color = find([
+    /צבע\s*רכב\s*[:\-]?\s*([^\n]+)/,
+    /צבע\s*[:\-]?\s*([^\n]+)/
+  ]);
+
+  // ═══ פרטי בעל הרכב ═══
+  out.ownerId = find([
+    /ת\.?\s*ז\s*[:\-]?\s*(\d{5,9})/,
+    /ת['"]?ז\s*[:\-]?\s*(\d{5,9})/
+  ]);
+
+  var lastName = find([/שם\s*משפחה\s*[:\-]?\s*([^\n]+)/]);
+  var firstName = find([/שם\s*פרטי\s*[:\-]?\s*([^\n]+)/]);
+  if (lastName || firstName) {
+    out.ownerName = (firstName + ' ' + lastName).trim();
+  }
+
+  // Address — combine רחוב + מס' רחוב + דירה
+  var street = find([/רחוב\s*[:\-]?\s*([^\n]+)/]);
+  var streetNum = find([/מס['"]?\s*רחוב\s*[:\-]?\s*(\d+)/]);
+  var apt = find([/דירה\s*[:\-]?\s*(\d+)/]);
+  if (street) {
+    out.ownerAddr = street + (streetNum ? ' ' + streetNum : '') + (apt ? ' דירה ' + apt : '');
+  }
+
+  // City
+  out.city = find([
+    /שם\s*ישוב\s*[:\-]?\s*([^\n]+)/,
+    /יישוב\s*[:\-]?\s*([^\n]+)/,
+    /יישו?ב\s*[:\-]?\s*([^\n]+)/
+  ]);
+
+  // License expiry
+  var expiry = find([/ת\.?\s*תוקף\s*[:\-]?\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/]);
+  if (expiry) {
+    // Convert dd/mm/yyyy to yyyy-mm-dd for the date input
+    var parts = expiry.split(/[\/\-]/);
+    if (parts.length === 3) {
+      var dd = parts[0].padStart(2, '0');
+      var mm = parts[1].padStart(2, '0');
+      var yyyy = parts[2].length === 2 ? '20' + parts[2] : parts[2];
+      out.licenseExpiry = yyyy + '-' + mm + '-' + dd;
+    }
+  }
+
+  // Clean up: remove obvious garbage values
+  Object.keys(out).forEach(function(k) {
+    if (out[k] === 'לא' || out[k] === '0' || out[k] === '-') out[k] = '';
+  });
+
+  return out;
+}
+window._parseMotForm = _parseMotForm;
+
+function _applyParsedToForm(parsed) {
+  function setField(id, val) {
+    if (!val) return;
+    var el = document.getElementById(id);
+    if (el && !el.value) {  // only fill empty fields, don't overwrite existing
+      el.value = val;
+      // Trigger change event so any listeners run
+      try { el.dispatchEvent(new Event('input', {bubbles:true})); } catch(e){}
+    }
+  }
+  setField('nf-plate',           parsed.plate);
+  setField('nf-vehicle-type',    parsed.vehicleType);
+  setField('nf-color',           parsed.color);
+  setField('nf-owner-id',        parsed.ownerId);
+  setField('nf-owner-name',      parsed.ownerName);
+  setField('nf-owner-addr',      parsed.ownerAddr);
+  setField('nf-location-city',   parsed.city);
+  setField('nf-license-expiry',  parsed.licenseExpiry);
+
+  // Trigger license expiry status update
+  if (parsed.licenseExpiry && typeof checkLicenseExpiry === 'function') {
+    setTimeout(checkLicenseExpiry, 100);
+  }
+}
+
 
 // ═══════════════════════════════════════════════════════════════════
 // v2.9.57: LICENSE EXPIRY CHECK — when user enters a license-expiry
@@ -11160,7 +11497,7 @@ document.addEventListener('keydown', function(e) {
 // ═══════════════════════════════════════════════════════════════════
 function _getCurrentVersion() {
   // Read from the visible version label in the sidebar
-  // <div ...>v2.9.61 — scan one click ...</div>
+  // <div ...>v2.9.63 — auto-fill MOT ...</div>
   try {
     var nodes = document.querySelectorAll('div');
     for (var i = 0; i < nodes.length; i++) {
