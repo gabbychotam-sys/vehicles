@@ -2184,7 +2184,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.77 — periodic scrub אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.78 — diagnostics + hard delete אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2262,7 +2262,7 @@ try {
       <div class="tb-date" id="live-date">יום ראשון, 10 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב (Enter להצגה מלאה)" oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.77 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.78 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2911,7 +2911,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-saved" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">נשמר ✓</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.77 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.78 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <!-- v2.9.52: "נקה הכל" button removed per Gabby's request - too risky to expose at the top of the page. -->
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -3320,6 +3320,25 @@ try {
 
     <!-- ═══════════ v2.9.26: SIMPLIFIED SETTINGS ═══════════ -->
     <!-- Just two clear options: font size slider + 10-color background palette -->
+
+    <!-- ═══ v2.9.78: SYSTEM DIAGNOSTICS ═══ -->
+    <div style="background:var(--card);border:2px solid #f59e0b;border-radius:12px;padding:24px;margin-bottom:20px;">
+      <div style="font-size:16px;font-weight:700;margin-bottom:6px;color:var(--text);">🔧 אבחון מערכת</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:18px;">לבעיות עם מחיקת תיקים — לחץ על הכפתור כדי לראות את מצב המערכת</div>
+
+      <button onclick="runSystemDiagnostics()" style="background:#f59e0b;color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">
+        🔍 הצג מצב מערכת
+      </button>
+
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+        <div style="font-size:13px;color:var(--text);margin-bottom:8px;font-weight:600;">🚨 מחיקה כפויה לפי לוחית רישוי</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">הזן מספר לוחית רישוי - הסקריפט ימחוק לחלוטין את כל הרשומות עם המספר הזה מ-Firebase</div>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="force-delete-plate-input" placeholder="50817704" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;background:var(--bg);color:var(--text);">
+          <button onclick="forceDeleteByPlate()" style="background:#dc2626;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🗑️ מחק לחלוטין</button>
+        </div>
+      </div>
+    </div>
 
     <!-- ═══ FONT SIZE SLIDER ═══ -->
     <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px;">
@@ -10360,52 +10379,68 @@ function executeDeleteCase() {
 
     // ═══ NEW: Remove from Firebase (so it doesn't come back on reload) ═══
     if (window.GalilSync && window.GalilSync.isReady && window.GalilSync.isReady()) {
-      // ═══ v2.9.21: ONLY mark as _deleted in Firebase. Don't remove() ═══
-      // Previously we did update({_deleted:true}) followed by remove(), which
-      // caused a race condition: remove() would win, deleting the record before
-      // other users' listeners could read the _deleted flag. Result: case
-      // disappeared on this device but reappeared on others (because listener
-      // saw it and re-rendered without the flag).
-      // Now we ONLY set _deleted. The listener on every device filters those
-      // out, so the case disappears for everyone. Storage is fine — these
-      // tombstones are tiny.
+      // ═══ v2.9.78: AGGRESSIVE PLATE-LEVEL FIREBASE DELETE ═══
+      // The previous approach (find idToFlag → update _deleted=true) only
+      // worked when we could identify the case's Firebase id. If the lookup
+      // failed (mobileCasesCache not warmed up, or id-mismatch between local
+      // and remote), the case stayed in Firebase, and the next sync brought
+      // it back to the screen.
+      //
+      // New approach: scan ALL Firebase cases and HARD-REMOVE every record
+      // that has this plate, regardless of source/id. Belt and suspenders.
+      if (deletingPlate && fbDb) {
+        var hardDeletePlate = deletingPlate;
+        console.log('[deleteCase] ▶ scanning Firebase for ALL cases with plate:', hardDeletePlate);
+        fbDb.ref('cases').once('value').then(function(snap) {
+          var allCases = snap.val() || {};
+          var matched = [];
+          Object.keys(allCases).forEach(function(fid) {
+            var c = allCases[fid];
+            if (!c) return;
+            var p1 = String(c.plate || '').trim();
+            var p2 = String((c.fullData && c.fullData.plate) || '').trim();
+            if (p1 === hardDeletePlate || p2 === hardDeletePlate) {
+              matched.push(fid);
+            }
+          });
+          console.log('[deleteCase] found', matched.length, 'Firebase records matching plate', hardDeletePlate);
+          matched.forEach(function(fid) {
+            // Hard remove (not flag) — leave nothing to resurrect
+            fbDb.ref('cases/' + fid).remove()
+              .then(function() { console.log('[deleteCase] ✓ HARD-REMOVED', fid); })
+              .catch(function(err) {
+                // If remove fails (permissions?), fall back to _deleted flag
+                console.warn('[deleteCase] hard remove failed for ' + fid + ', trying _deleted flag:', err);
+                fbDb.ref('cases/' + fid).update({ _deleted: true, _deletedAt: Date.now() }).catch(function(){});
+              });
+          });
+        }).catch(function(err) {
+          console.warn('[deleteCase] scan failed:', err);
+        });
+      }
+
+      // ═══ v2.9.21: ALSO mark the located id as _deleted for sticky-delete ═══
       var idToFlag = mobileIdToDelete;
       if (!idToFlag && window.GalilSync._findIdByPlate) {
         idToFlag = window.GalilSync._findIdByPlate(deletingPlate);
       }
       if (idToFlag && fbDb) {
-        // Mark the local tombstone too (immediate effect on this device)
         if (window.GalilSync._markDeleted) window.GalilSync._markDeleted(idToFlag);
-
-        var flagPath = 'cases/' + idToFlag;
-        fbDb.ref(flagPath).update({
-          _deleted: true,
-          _deletedAt: Date.now(),
-          _deletedBy: (currentUser && currentUser.email) || ''
-        }).then(function() {
-          console.log('[deleteCase] ✓ flagged _deleted in Firebase for', idToFlag);
-        }).catch(function(err) {
-          console.warn('[deleteCase] failed to flag _deleted:', err);
-          // Fallback: try the old remove() path
-          if (window.GalilSync._deleteCase) window.GalilSync._deleteCase(idToFlag);
-        });
-
-        // ═══ v2.9.22: ALSO delete the case's archive folder ═══
-        // (so old documents don't resurface if a new case is later opened
-        // with the same plate number)
-        try {
-          if (deletingPlate && typeof safePlateKey === 'function') {
-            var safe = safePlateKey(deletingPlate);
-            fbDb.ref('archives/' + safe).remove()
-              .then(function() {
-                console.log('[deleteCase] ✓ removed archives/' + safe);
-              })
-              .catch(function(err) {
-                console.warn('[deleteCase] archive remove failed:', err);
-              });
-          }
-        } catch(e) { console.warn('[deleteCase] archive cleanup error:', e); }
       }
+
+      // ═══ v2.9.22: ALSO delete the case's archive folder ═══
+      try {
+        if (deletingPlate && typeof safePlateKey === 'function') {
+          var safe = safePlateKey(deletingPlate);
+          fbDb.ref('archives/' + safe).remove()
+            .then(function() {
+              console.log('[deleteCase] ✓ removed archives/' + safe);
+            })
+            .catch(function(err) {
+              console.warn('[deleteCase] archive remove failed:', err);
+            });
+        }
+      } catch(e) { console.warn('[deleteCase] archive cleanup error:', e); }
     }
 
     // ═══ NEW: Remove all activity entries about this plate ═══
@@ -11777,7 +11812,7 @@ document.addEventListener('keydown', function(e) {
 // ═══════════════════════════════════════════════════════════════════
 function _getCurrentVersion() {
   // Read from the visible version label in the sidebar
-  // <div ...>v2.9.77 — periodic scrub ...</div>
+  // <div ...>v2.9.78 — diagnostics + hard delete ...</div>
   try {
     var nodes = document.querySelectorAll('div');
     for (var i = 0; i < nodes.length; i++) {
@@ -11919,7 +11954,240 @@ window._checkForVersionUpdate = _checkForVersionUpdate;
 setInterval(_checkForVersionUpdate, 30 * 1000);
 
 // ═══════════════════════════════════════════════════════════════════
-// v2.9.77: PERIODIC TOMBSTONE SCRUB
+// v2.9.78: SYSTEM DIAGNOSTICS + FORCE DELETE
+// Two operator-facing tools to debug stuck cases:
+//   • runSystemDiagnostics() — open a modal showing the full state of
+//     the system: how many rows in the DOM, what's in localStorage
+//     tombstones, what Firebase has, etc. Useful for sending screenshots.
+//   • forceDeleteByPlate() — operator types a plate number and we
+//     HARD-REMOVE every record with that plate from Firebase. No
+//     fancy flagging, no race conditions; just gone.
+// ═══════════════════════════════════════════════════════════════════
+window.runSystemDiagnostics = function() {
+  var lines = [];
+  lines.push('═══ אבחון מערכת ═══');
+  lines.push('');
+  
+  // Version
+  try {
+    var ver = (typeof _getCurrentVersion === 'function') ? _getCurrentVersion() : 'לא ידוע';
+    lines.push('גרסה: ' + ver);
+  } catch(e) {}
+  
+  // Browser/UA
+  lines.push('דפדפן: ' + (navigator.userAgent.split(' ').slice(-3).join(' ') || ''));
+  lines.push('');
+  
+  // localStorage tombstones
+  lines.push('━━━ Tombstones (localStorage) ━━━');
+  try {
+    var dPlates = JSON.parse(localStorage.getItem('galilElyon_deletedPlates') || '[]');
+    var dIds = JSON.parse(localStorage.getItem('galilElyon_deletedIds') || '[]');
+    lines.push('מחוקים לפי plate: ' + (Array.isArray(dPlates) ? dPlates.length : '?') + ' רשומות');
+    if (Array.isArray(dPlates) && dPlates.length) {
+      lines.push('  → ' + dPlates.slice(0, 20).join(', ') + (dPlates.length > 20 ? ', ...' : ''));
+    }
+    lines.push('מחוקים לפי id: ' + (Array.isArray(dIds) ? dIds.length : '?') + ' רשומות');
+  } catch(e) { lines.push('שגיאה בקריאת tombstones: ' + e.message); }
+  lines.push('');
+  
+  // DOM rows
+  lines.push('━━━ שורות בטבלאות ━━━');
+  ['cases-tbody', 'dash-urgent-tbody', 'mobile-cases-tbody', 'tw-towed-tbody'].forEach(function(id) {
+    var tb = document.getElementById(id);
+    if (tb) {
+      var rows = tb.querySelectorAll('tr');
+      lines.push(id + ': ' + rows.length + ' שורות');
+      // List plates if any
+      if (id === 'cases-tbody' && rows.length) {
+        var plates = [];
+        Array.prototype.slice.call(rows).forEach(function(r) {
+          var pb = r.querySelector('.plate-badge');
+          if (pb) plates.push(pb.textContent.trim());
+        });
+        lines.push('  plates: ' + plates.slice(0, 15).join(', ') + (plates.length > 15 ? ', ...' : ''));
+      }
+    }
+  });
+  lines.push('');
+  
+  // Firebase state
+  lines.push('━━━ Firebase ━━━');
+  if (window.fbReady && window.fbDb) {
+    lines.push('Firebase מחובר ✓');
+    
+    // Show modal with current info first, then async-fetch Firebase
+    showDiagnosticsModal(lines.join('\n'));
+    
+    fbDb.ref('cases').once('value').then(function(snap) {
+      var data = snap.val() || {};
+      var fbLines = ['', '━━━ Firebase cases (' + Object.keys(data).length + ' total) ━━━'];
+      var byPlate = {};
+      var deleted = 0, manual = 0, mobile = 0, other = 0;
+      Object.keys(data).forEach(function(id) {
+        var c = data[id];
+        if (!c) return;
+        if (c._deleted === true) deleted++;
+        if (c.source === 'manual') manual++;
+        else if (c.source === 'mobile') mobile++;
+        else other++;
+        var p = String(c.plate || '').trim() || '(אין plate)';
+        if (!byPlate[p]) byPlate[p] = [];
+        byPlate[p].push({ id: id, src: c.source || '?', del: c._deleted ? '_DEL_' : '' });
+      });
+      fbLines.push('  manual: ' + manual + ' | mobile: ' + mobile + ' | אחר: ' + other);
+      fbLines.push('  עם _deleted=true: ' + deleted);
+      fbLines.push('');
+      
+      // Plates with multiple records
+      var dups = [];
+      Object.keys(byPlate).forEach(function(p) {
+        if (byPlate[p].length > 1) dups.push(p + ' (' + byPlate[p].length + ' רשומות)');
+      });
+      if (dups.length) {
+        fbLines.push('━━━ Plates עם כפילות ━━━');
+        dups.forEach(function(d) { fbLines.push('  ' + d); });
+        fbLines.push('');
+      }
+      
+      // Show a sampling
+      fbLines.push('━━━ דגימת רשומות (15 ראשונות) ━━━');
+      Object.keys(data).slice(0, 15).forEach(function(id) {
+        var c = data[id];
+        var info = id + ' | plate: ' + (c.plate || '?') + ' | src: ' + (c.source || '?');
+        if (c._deleted) info += ' | _DELETED';
+        if (c._deletedAt) info += ' | _deletedAt: ' + new Date(c._deletedAt).toLocaleString('he-IL');
+        fbLines.push('  ' + info);
+      });
+      
+      // Append to existing modal
+      var pre = document.getElementById('diagnostics-output');
+      if (pre) pre.textContent += '\n' + fbLines.join('\n');
+    }).catch(function(err) {
+      var pre = document.getElementById('diagnostics-output');
+      if (pre) pre.textContent += '\n\nשגיאה ב-Firebase: ' + err.message;
+    });
+  } else {
+    lines.push('Firebase לא מחובר ✗');
+    showDiagnosticsModal(lines.join('\n'));
+  }
+};
+
+window.showDiagnosticsModal = function(content) {
+  var existing = document.getElementById('diagnostics-modal');
+  if (existing) existing.remove();
+  
+  var modal = document.createElement('div');
+  modal.id = 'diagnostics-modal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML =
+    '<div style="background:#fff;border-radius:12px;width:100%;max-width:800px;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 50px rgba(0,0,0,0.4);">' +
+      '<div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;direction:rtl;">' +
+        '<div style="font-size:18px;font-weight:700;color:#0f172a;">🔧 אבחון מערכת</div>' +
+        '<button onclick="document.getElementById(\'diagnostics-modal\').remove()" style="background:#ef4444;color:#fff;border:none;border-radius:6px;padding:6px 14px;cursor:pointer;font-family:inherit;">סגור</button>' +
+      '</div>' +
+      '<pre id="diagnostics-output" style="margin:0;padding:20px;overflow:auto;flex:1;background:#f9fafb;font-family:monospace;font-size:12px;line-height:1.7;color:#0f172a;direction:ltr;text-align:left;white-space:pre-wrap;word-break:break-all;">' + content + '\n\nטוען נתוני Firebase...</pre>' +
+      '<div style="padding:12px 20px;border-top:1px solid #e5e7eb;direction:rtl;">' +
+        '<button onclick="copyDiagnostics()" style="background:#3b82f6;color:#fff;border:none;border-radius:6px;padding:8px 16px;cursor:pointer;font-family:inherit;font-size:13px;">📋 העתק את הטקסט</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(modal);
+};
+
+window.copyDiagnostics = function() {
+  var pre = document.getElementById('diagnostics-output');
+  if (!pre) return;
+  try {
+    navigator.clipboard.writeText(pre.textContent).then(function() {
+      showToast('✅ הועתק ללוח');
+    }).catch(function() {
+      // Fallback
+      var ta = document.createElement('textarea');
+      ta.value = pre.textContent;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); showToast('✅ הועתק ללוח'); } catch(e){}
+      ta.remove();
+    });
+  } catch(e) {}
+};
+
+window.forceDeleteByPlate = function() {
+  var input = document.getElementById('force-delete-plate-input');
+  if (!input) return;
+  var plate = input.value.trim();
+  if (!plate) {
+    alert('הזן מספר לוחית רישוי קודם');
+    return;
+  }
+  if (!confirm('🚨 פעולה זו תמחק לחלוטין את כל הרשומות ב-Firebase שיש להן את הלוחית "' + plate + '".\n\nזה בלתי הפיך. להמשיך?')) {
+    return;
+  }
+  
+  if (!window.fbReady || !window.fbDb) {
+    alert('Firebase לא מחובר');
+    return;
+  }
+  
+  // Add to tombstone list immediately
+  try {
+    var dPlates = JSON.parse(localStorage.getItem('galilElyon_deletedPlates') || '[]');
+    if (!Array.isArray(dPlates)) dPlates = [];
+    if (dPlates.indexOf(plate) === -1) {
+      dPlates.push(plate);
+      localStorage.setItem('galilElyon_deletedPlates', JSON.stringify(dPlates));
+    }
+  } catch(e) {}
+
+  fbDb.ref('cases').once('value').then(function(snap) {
+    var allCases = snap.val() || {};
+    var matched = [];
+    Object.keys(allCases).forEach(function(fid) {
+      var c = allCases[fid];
+      if (!c) return;
+      var p1 = String(c.plate || '').trim();
+      var p2 = String((c.fullData && c.fullData.plate) || '').trim();
+      if (p1 === plate || p2 === plate) {
+        matched.push(fid);
+      }
+    });
+    
+    if (matched.length === 0) {
+      alert('לא נמצאו רשומות ב-Firebase עם הלוחית "' + plate + '".');
+      return;
+    }
+    
+    var deleted = 0, failed = 0;
+    var promises = matched.map(function(fid) {
+      return fbDb.ref('cases/' + fid).remove()
+        .then(function() { deleted++; })
+        .catch(function() { failed++; });
+    });
+    
+    Promise.all(promises).then(function() {
+      // Also remove rows from DOM
+      ['cases-tbody', 'dash-urgent-tbody', 'tw-towed-tbody', 'mobile-cases-tbody'].forEach(function(tbId) {
+        var tb = document.getElementById(tbId);
+        if (!tb) return;
+        Array.prototype.slice.call(tb.querySelectorAll('tr')).forEach(function(row) {
+          var pb = row.querySelector('.plate-badge');
+          if (pb && pb.textContent.trim() === plate) {
+            row.remove();
+          }
+        });
+      });
+      
+      try { if (typeof saveState === 'function') saveState(); } catch(e){}
+      try { if (typeof updateAllCounters === 'function') updateAllCounters(); } catch(e){}
+      
+      input.value = '';
+      alert('✅ הושלם!\n\nנמחקו: ' + deleted + ' רשומות\nנכשלו: ' + failed + '\n\nהדף יתרענן עוד 2 שניות.');
+      setTimeout(function() { location.reload(); }, 2000);
+    });
+  }).catch(function(err) {
+    alert('שגיאה: ' + err.message);
+  });
+};
 // Runs every 10 seconds to actively remove rows from any table whose
 // plate (or mobile-id) is in the local tombstone list. This is a
 // safety net: even if something bypasses upsertCaseRow's check or the
