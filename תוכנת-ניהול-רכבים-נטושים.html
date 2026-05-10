@@ -2184,7 +2184,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.76 — refreshNow tombstone אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.77 — periodic scrub אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2262,7 +2262,7 @@ try {
       <div class="tb-date" id="live-date">יום ראשון, 10 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב (Enter להצגה מלאה)" oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.76 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.77 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2911,7 +2911,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-saved" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">נשמר ✓</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.76 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.77 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <!-- v2.9.52: "נקה הכל" button removed per Gabby's request - too risky to expose at the top of the page. -->
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -11116,6 +11116,46 @@ function loadState() {
       });
     }
 
+    // ═══════════════════════════════════════════════════════════════════
+    // v2.9.77: SCRUB TOMBSTONED PLATES AFTER LOAD
+    // loadState writes table HTML directly (`tb.innerHTML = ...`), which
+    // BYPASSES upsertCaseRow and its tombstone check. So if autosave ever
+    // captured a snapshot with a since-deleted row, that row would be
+    // restored on every page load. Now we scrub them out right after the
+    // restore — by plate AND by mobile-id.
+    // ═══════════════════════════════════════════════════════════════════
+    try {
+      var scrubPlates = JSON.parse(localStorage.getItem('galilElyon_deletedPlates') || '[]');
+      var scrubIds = JSON.parse(localStorage.getItem('galilElyon_deletedIds') || '[]');
+      if (!Array.isArray(scrubPlates)) scrubPlates = [];
+      if (!Array.isArray(scrubIds)) scrubIds = [];
+      if (scrubPlates.length || scrubIds.length) {
+        var scrubCount = 0;
+        ['cases-tbody', 'dash-urgent-tbody', 'tw-tow-pending-tbody', 'tw-towed-tbody', 'tw-returned-tbody', 'towed-tbody', 'mobile-cases-tbody', 'tw-history-tbody', 'towns-cases-tbody'].forEach(function(tbId) {
+          var tbody = document.getElementById(tbId);
+          if (!tbody) return;
+          Array.prototype.slice.call(tbody.querySelectorAll('tr')).forEach(function(row) {
+            // Check by mobile-id first
+            var mid = row.getAttribute('data-mobile-id');
+            if (mid && scrubIds.indexOf(mid) !== -1) {
+              row.remove(); scrubCount++; return;
+            }
+            // Then by plate
+            var pb = row.querySelector('.plate-badge');
+            if (pb) {
+              var plate = pb.textContent.trim();
+              if (plate && scrubPlates.indexOf(plate) !== -1) {
+                row.remove(); scrubCount++;
+              }
+            }
+          });
+        });
+        if (scrubCount > 0) {
+          console.log('[loadState scrub] removed ' + scrubCount + ' tombstoned rows after restore');
+        }
+      }
+    } catch(e) { console.warn('[loadState scrub] error:', e); }
+
     // ═══ v2.9.43: re-attach click handlers to restored rows ═══
     // tb.innerHTML = ... wipes ALL JS event listeners, including the
     // tr.onclick = function() { openEditFullForm(this); } that
@@ -11737,7 +11777,7 @@ document.addEventListener('keydown', function(e) {
 // ═══════════════════════════════════════════════════════════════════
 function _getCurrentVersion() {
   // Read from the visible version label in the sidebar
-  // <div ...>v2.9.76 — refreshNow tombstone ...</div>
+  // <div ...>v2.9.77 — periodic scrub ...</div>
   try {
     var nodes = document.querySelectorAll('div');
     for (var i = 0; i < nodes.length; i++) {
@@ -11877,6 +11917,51 @@ window._checkForVersionUpdate = _checkForVersionUpdate;
 
 // Periodic check every 30 seconds
 setInterval(_checkForVersionUpdate, 30 * 1000);
+
+// ═══════════════════════════════════════════════════════════════════
+// v2.9.77: PERIODIC TOMBSTONE SCRUB
+// Runs every 10 seconds to actively remove rows from any table whose
+// plate (or mobile-id) is in the local tombstone list. This is a
+// safety net: even if something bypasses upsertCaseRow's check or the
+// loadState scrub, the row will get removed within seconds. Cheap to
+// run because it only iterates table rows in the DOM.
+// ═══════════════════════════════════════════════════════════════════
+function _scrubTombstonedRows() {
+  try {
+    var dPlates = JSON.parse(localStorage.getItem('galilElyon_deletedPlates') || '[]');
+    var dIds = JSON.parse(localStorage.getItem('galilElyon_deletedIds') || '[]');
+    if (!Array.isArray(dPlates)) dPlates = [];
+    if (!Array.isArray(dIds)) dIds = [];
+    if (!dPlates.length && !dIds.length) return;
+    var removed = 0;
+    ['cases-tbody', 'dash-urgent-tbody', 'tw-tow-pending-tbody', 'tw-towed-tbody', 'tw-returned-tbody', 'towed-tbody', 'mobile-cases-tbody', 'tw-history-tbody', 'towns-cases-tbody'].forEach(function(tbId) {
+      var tbody = document.getElementById(tbId);
+      if (!tbody) return;
+      Array.prototype.slice.call(tbody.querySelectorAll('tr')).forEach(function(row) {
+        var mid = row.getAttribute('data-mobile-id');
+        if (mid && dIds.indexOf(mid) !== -1) {
+          row.remove(); removed++; return;
+        }
+        var pb = row.querySelector('.plate-badge');
+        if (pb) {
+          var plate = pb.textContent.trim();
+          if (plate && dPlates.indexOf(plate) !== -1) {
+            row.remove(); removed++;
+          }
+        }
+      });
+    });
+    if (removed > 0) {
+      console.log('[periodic scrub] removed', removed, 'tombstoned rows');
+      // Refresh counters since we removed rows
+      try { if (typeof updateAllCounters === 'function') updateAllCounters(); } catch(e){}
+    }
+  } catch(e) { /* silent */ }
+}
+window._scrubTombstonedRows = _scrubTombstonedRows;
+setInterval(_scrubTombstonedRows, 10 * 1000);
+// Also run once on load (after a short delay so DOM/Firebase have settled)
+setTimeout(_scrubTombstonedRows, 3000);
 
 // Check immediately when tab becomes visible (user comes back from another tab)
 document.addEventListener('visibilitychange', function() {
