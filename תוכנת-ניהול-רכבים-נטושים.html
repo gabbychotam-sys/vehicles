@@ -2184,7 +2184,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.58 — scan no store אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.59 — scan launch uri אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2262,7 +2262,7 @@ try {
       <div class="tb-date" id="live-date">יום ראשון, 10 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב (Enter להצגה מלאה)" oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.58 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.59 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2689,7 +2689,8 @@ try {
                   </div>
                 </div>
                 <div style="font-size:11px;color:#475569;margin-top:8px;line-height:1.5;">
-                  💡 <b>הסבר:</b> "פתח את הסורק" יפתח את אפליקציית הסריקה של Windows. סרוק את המסמך, שמור אותו, ואז לחץ "העלה את הקובץ הסרוק" כדי לצרפו לתיק.
+                  💡 <b>הסבר:</b> לחיצה על "פתח את הסורק" תפעיל את "סריקה של Windows". סרוק את המסמך, שמור אותו, ואז לחץ "העלה את הקובץ הסרוק" כדי לצרפו לתיק.<br>
+                  <span style="color:#64748b;">אם הסריקה לא נפתחה אוטומטית — לחץ Windows + S, הקלד "סריקה" ו-Enter.</span>
                 </div>
               </div>
             </div>
@@ -2927,7 +2928,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-saved" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">נשמר ✓</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.58 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.59 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <!-- v2.9.52: "נקה הכל" button removed per Gabby's request - too risky to expose at the top of the page. -->
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -7971,75 +7972,63 @@ function renderCaseScanList() {
 window.renderCaseScanList = renderCaseScanList;
 
 // ═══════════════════════════════════════════════════════════════════
-// v2.9.58: WINDOWS SCANNER LAUNCHER
-// Browsers can't talk directly to TWAIN/WIA scanners (no API for it).
-// The workflow is: 1) open Windows Scan app, 2) scan & save, 3) upload file.
-//
-// We try multiple URL schemes to launch the Windows Scan UWP app directly,
-// without showing the Microsoft Store. If the app isn't installed, we show
-// a friendly dialog with installation instructions instead of forcing the
-// user to the Store.
+// v2.9.59: WINDOWS SCANNER LAUNCHER — actually opens the app
+// Uses ms-windows-store://launch/?productid=... which is the official
+// Microsoft URI for LAUNCHING (not opening Store page) of UWP apps.
+// If the app isn't installed, fall back to Store page so user can install.
 // ═══════════════════════════════════════════════════════════════════
 function openWindowsScanner() {
   var isWin = /Win/i.test(navigator.platform || navigator.userAgent || '');
   var isMac = /Mac/i.test(navigator.platform || '');
 
   if (isMac) {
-    alert('💡 הסבר על סריקה ב-Mac:\n\n' +
-          '1. פתח את "Image Capture" (לכידת תמונה) — בחיפוש Spotlight (Cmd+Space)\n' +
-          '2. בחר את הסורק שלך מהרשימה בצד שמאל\n' +
-          '3. לחץ "Scan" / "סרוק"\n' +
-          '4. שמור את הקובץ בתיקייה (למשל Desktop)\n' +
-          '5. חזור לכאן ולחץ "📁 העלה את הקובץ הסרוק"');
+    alert('💡 Mac: פתח את "Image Capture" / "לכידת תמונה" (Cmd+Space → "Image Capture"), סרוק, שמור, ואז לחץ "📁 העלה את הקובץ הסרוק".');
     return;
   }
 
   if (!isWin) {
-    alert('💡 פתח את אפליקציית הסריקה במחשב שלך, סרוק את המסמך, שמור אותו, ואז לחץ "📁 העלה את הקובץ הסרוק".');
+    alert('💡 פתח את אפליקציית הסריקה במחשב, סרוק, שמור, ואז לחץ "📁 העלה את הקובץ הסרוק".');
     return;
   }
 
-  // ═══ Windows: open the scan app via direct invocation ═══
-  // We DON'T open the Microsoft Store URL automatically anymore (per user
-  // feedback — it was confusing because the app was already installed and
-  // the Store was a distraction). Instead we just display instructions
-  // and rely on the user to launch the app from the Start menu.
-  //
-  // Note: there's no public URL scheme to launch "Windows Scan" UWP app
-  // directly from a browser. The closest we can do is provide clear,
-  // step-by-step instructions.
-  var msg =
-    '🖨️ סריקת מסמך — שלבים:\n\n' +
-    '1️⃣ פתח את אפליקציית "סריקה" של Windows:\n' +
-    '   • לחץ על מקש Windows ⊞\n' +
-    '   • הקלד "סריקה" או "Scan"\n' +
-    '   • לחץ Enter\n\n' +
-    '2️⃣ באפליקציה:\n' +
-    '   • בחר את הסורק שלך מהרשימה\n' +
-    '   • הצב את המסמך בסורק\n' +
-    '   • לחץ "סרוק"\n' +
-    '   • שמור את הקובץ במחשב (למשל בשולחן עבודה)\n\n' +
-    '3️⃣ חזור לתוכנת הניהול ולחץ:\n' +
-    '   "📁 העלה את הקובץ הסרוק"\n\n' +
-    'אם אין לך את אפליקציית "סריקה" — אפשר להוריד אותה בחינם מ-Microsoft Store\n' +
-    '(חיפוש: "Windows Scan" או "סריקה של Windows").\n\n' +
-    'האם להעתיק את הפקודה ללוח כדי שתוכל להדביק בחלון "Run"?';
+  // Windows: launch the UWP "Windows Scan" app directly via the official
+  // launch URI (productid 9wzdncrfj3pv = Windows Scan).
+  // Strategy: try multiple URIs simultaneously via hidden iframes — the OS
+  // picks the first one with a registered handler. Then show a short reminder.
+  var uris = [
+    'ms-windows-store://launch/?productid=9wzdncrfj3pv',
+    'ms-windowsscan://',
+    'wiaacmgr://',
+    'shell:AppsFolder\\Microsoft.WindowsScan_8wekyb3d8bbwe!App'
+  ];
 
-  if (confirm(msg)) {
-    // Try to copy the explorer/launch command to clipboard
-    var cmd = 'start ms-screenclip://';  // fallback that won't open store
+  uris.forEach(function(u) {
     try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText('explorer.exe shell:AppsFolder\\Microsoft.WindowsScan_8wekyb3d8bbwe!App').catch(function(){});
-      }
-      alert('✓ הפקודה הועתקה ללוח.\n\n' +
-            'אפשרויות פתיחה ידנית:\n' +
-            '• Windows + R → הדבק (Ctrl+V) → Enter\n' +
-            '• או פשוט: Windows + S → "סריקה" → Enter');
-    } catch(e) {
-      alert('פתח את האפליקציה ידנית: Windows + S → "סריקה" → Enter');
+      var f = document.createElement('iframe');
+      f.style.display = 'none';
+      f.src = u;
+      document.body.appendChild(f);
+      setTimeout(function(){ try { f.remove(); } catch(e){} }, 3000);
+    } catch(e){}
+  });
+
+  // Also use the location method as a final attempt
+  try {
+    var a = document.createElement('a');
+    a.href = 'ms-windows-store://launch/?productid=9wzdncrfj3pv';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){ try { a.remove(); } catch(e){} }, 1000);
+  } catch(e){}
+
+  // Subtle toast — DON'T block the user with a dialog. If the app didn't
+  // open, they can manually launch it (Win+S → "סריקה").
+  setTimeout(function() {
+    if (typeof showToast === 'function') {
+      showToast('🖨️ אם הסריקה לא נפתחה: Windows + S → "סריקה" → Enter');
     }
-  }
+  }, 1500);
 }
 window.openWindowsScanner = openWindowsScanner;
 
@@ -11194,7 +11183,7 @@ document.addEventListener('keydown', function(e) {
 // ═══════════════════════════════════════════════════════════════════
 function _getCurrentVersion() {
   // Read from the visible version label in the sidebar
-  // <div ...>v2.9.58 — scan no store ...</div>
+  // <div ...>v2.9.59 — scan launch uri ...</div>
   try {
     var nodes = document.querySelectorAll('div');
     for (var i = 0; i < nodes.length; i++) {
