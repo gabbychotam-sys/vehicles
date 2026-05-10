@@ -2184,7 +2184,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.69 — runtime onchange אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.71 — duplicate plate check אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2262,7 +2262,7 @@ try {
       <div class="tb-date" id="live-date">יום ראשון, 10 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב (Enter להצגה מלאה)" oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.69 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.71 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2667,25 +2667,17 @@ try {
             </div>
             <div style="font-size:11px;color:var(--muted);margin-top:6px;">עד 10 תמונות, מקסימום 5MB לתמונה</div>
           </div>
-          <!-- v2.9.68: מסמכים סרוקים + זיהוי אוטומטי + diagnostics -->
+          <!-- v2.9.70: כפתור יחיד למסמך משרד הרישוי + זיהוי אוטומטי -->
           <div class="edit-section">
-            <div class="edit-section-title">📎 מסמכים סרוקים</div>
+            <div class="edit-section-title">📎 מסמך משרד הרישוי</div>
             <div id="nf-scans-area" style="margin-top:6px;">
               <div id="nf-scans-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;"></div>
-              <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                <button type="button" onclick="document.getElementById('nf-upload-input').click()" style="display:inline-flex;align-items:center;gap:8px;background:#0284c7;color:#fff;border:none;border-radius:10px;padding:11px 20px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 2px 6px rgba(2,132,199,0.25);font-family:inherit;">
-                  📎 העלה מסמך
-                </button>
-                <input type="file" id="nf-upload-input" accept="image/*,application/pdf" multiple style="display:none;" onchange="handleNewCaseScan(event)">
-
-                <button type="button" id="auto-fill-btn" onclick="_clickAutoFillBtn()" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;border:none;border-radius:10px;padding:11px 20px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 2px 6px rgba(124,58,237,0.25);font-family:inherit;" title="העלה דף 'שאילתא לרכב' של משרד הרישוי - המערכת תזהה ותמלא את הפרטים אוטומטית">
-                  ✨ זיהוי אוטומטי ממשרד הרישוי
-                </button>
-                <input type="file" id="auto-fill-input" accept="image/*,application/pdf" style="display:none;">
-              </div>
+              <button type="button" onclick="uploadMotDocument()" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;border:none;border-radius:12px;padding:16px 20px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 3px 10px rgba(124,58,237,0.3);font-family:inherit;">
+                🖨️ העלה מסמך משרד הרישוי <span style="font-size:13px;opacity:0.9;">(זיהוי אוטומטי)</span>
+              </button>
               <div id="auto-fill-status" style="display:none;font-size:12px;margin-top:10px;padding:10px 14px;border-radius:8px;line-height:1.6;"></div>
             </div>
-            <div style="font-size:11px;color:var(--muted);margin-top:8px;">PDF/JPG/PNG · עד 10 מסמכים · מקסימום 5MB · נשמר אוטומטית בארכיון התיק</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:8px;">PDF/JPG/PNG · מקסימום 5MB · הקובץ נשמר אוטומטית בארכיון התיק והפרטים מולבשים בטופס</div>
           </div>
 
           <!-- v2.9.57: תוקף רישיון -->
@@ -2919,7 +2911,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-saved" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">נשמר ✓</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.69 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.71 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <!-- v2.9.52: "נקה הכל" button removed per Gabby's request - too risky to expose at the top of the page. -->
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -8067,36 +8059,37 @@ function renderCaseScanList() {
 window.renderCaseScanList = renderCaseScanList;
 
 // ═══════════════════════════════════════════════════════════════════
-// v2.9.69: AUTO-FILL BUTTON CLICK HANDLER + RUNTIME onchange BINDING
-// The inline onchange on the file input wasn't firing reliably (likely
-// due to it being inside a hidden input that re-renders). Now we attach
-// the change listener at click time, freshly, every time. Also reset
-// the value to ensure 'change' fires even if same file is reselected.
+// v2.9.70: SINGLE-BUTTON MOT DOCUMENT UPLOAD
+// One button. User clicks → file picker opens → file selected → file is
+// (a) saved to the case archive AND (b) sent to OCR.space for parsing.
+// Form fields are auto-filled from the parsed text. The file is saved
+// even if OCR fails so it's never lost.
+//
+// Uses a DYNAMICALLY CREATED input each click (no persistent hidden input)
+// because the previous version's onchange wasn't firing reliably for
+// some users — likely an interaction with display:none + dynamic DOM.
 // ═══════════════════════════════════════════════════════════════════
-window._clickAutoFillBtn = function() {
-  console.log('[AutoFill] button clicked!');
+window.uploadMotDocument = function() {
+  console.log('[MotUpload] button clicked');
   var statusBox = document.getElementById('auto-fill-status');
   if (statusBox) {
     statusBox.style.display = 'block';
-    statusBox.innerHTML = '👆 בוחר קובץ... (אם הדיאלוג לא נפתח - בחר קובץ ונסה שוב)';
-    statusBox.style.cssText = 'display:block;color:#7c3aed;background:#f5f3ff;border:1px solid #ddd6fe;padding:10px 14px;border-radius:8px;font-size:12px;margin-top:10px;line-height:1.6;';
+    statusBox.innerHTML = '👆 בוחר קובץ...';
+    statusBox.style.cssText = 'display:block;color:#7c3aed;background:#f5f3ff;border:1px solid #ddd6fe;padding:10px 14px;border-radius:8px;font-size:12px;margin-top:10px;';
   }
-  var input = document.getElementById('auto-fill-input');
-  if (!input) {
-    if (statusBox) {
-      statusBox.innerHTML = '❌ שגיאה: לא נמצא רכיב הקובץ (auto-fill-input)';
-      statusBox.style.cssText = 'display:block;color:#b91c1c;background:#fee2e2;border:1px solid #fecaca;padding:10px 14px;border-radius:8px;font-size:12px;margin-top:10px;';
-    }
-    return;
-  }
-  // Reset value AND attach change listener fresh (replaces any prior)
-  input.value = '';
+  // Create a fresh input each time — guarantees onchange fires
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*,application/pdf';
+  input.style.display = 'none';
   input.onchange = function(e) {
-    console.log('[AutoFill] onchange FIRED ✓ — file selected:', e.target.files && e.target.files[0] ? e.target.files[0].name : 'NONE');
+    console.log('[MotUpload] onchange FIRED ✓');
+    document.body.removeChild(input);
     handleAutoFillScan(e);
   };
-  console.log('[AutoFill] opening file picker...');
+  document.body.appendChild(input);
   input.click();
+  console.log('[MotUpload] input.click() called');
 };
 
 // (Scan via Windows Scan / camera helpers removed in v2.9.62 — simple
@@ -8305,7 +8298,38 @@ function handleAutoFillScan(event) {
       var parsed = _parseMotForm(text);
       console.log('[AutoFill] parsed:', parsed);
 
-      // Also save the file as a regular scanned doc
+      // ═══ v2.9.71: DUPLICATE PLATE CHECK ═══
+      // Before applying parsed values, check if a case with this plate
+      // already exists in the system. If so, warn the user and let them
+      // decide whether to continue creating a duplicate.
+      if (parsed.plate) {
+        var existingCaseId = null;
+        try {
+          if (window.GalilSync && typeof window.GalilSync._findIdByPlate === 'function') {
+            existingCaseId = window.GalilSync._findIdByPlate(parsed.plate);
+          }
+        } catch(e) { console.warn('[AutoFill] duplicate check failed:', e); }
+
+        if (existingCaseId) {
+          console.log('[AutoFill] ⚠️ duplicate plate detected:', parsed.plate, '→ existing case ID:', existingCaseId);
+          var dupMsg = '⚠️ הרכב ' + parsed.plate + ' כבר קיים במערכת!\n\n' +
+                       'תיק עם מספר רכב זה כבר נמצא בתיקים שלך.\n\n' +
+                       'אישור = להמשיך בכל זאת וליצור תיק נוסף\n' +
+                       'ביטול = לבטל את היצירה';
+          if (!confirm(dupMsg)) {
+            // User cancelled — file NOT saved, form NOT filled
+            if (statusBox) {
+              statusBox.innerHTML = '⛔ הזיהוי הופסק — הרכב <b>' + parsed.plate + '</b> כבר קיים במערכת.<br>' +
+                                    '<span style="color:#64748b;">אם ברצונך לערוך אותו - חזור לרשימת התיקים ובחר אותו.</span>';
+              statusBox.style.cssText = 'display:block;color:#9a3412;background:#fff7ed;border:1px solid #fed7aa;padding:10px 14px;border-radius:8px;font-size:12px;margin-top:10px;line-height:1.7;';
+            }
+            return;  // STOP — don't save file, don't fill form
+          }
+          console.log('[AutoFill] user chose to continue despite duplicate');
+        }
+      }
+
+      // Save the file as a regular scanned doc (only after dup check passed)
       caseScans.push({
         dataUrl: dataUrl,
         name: file.name || 'שאילתא לרכב.pdf',
@@ -11653,7 +11677,7 @@ document.addEventListener('keydown', function(e) {
 // ═══════════════════════════════════════════════════════════════════
 function _getCurrentVersion() {
   // Read from the visible version label in the sidebar
-  // <div ...>v2.9.69 — runtime onchange ...</div>
+  // <div ...>v2.9.71 — duplicate plate check ...</div>
   try {
     var nodes = document.querySelectorAll('div');
     for (var i = 0; i < nodes.length; i++) {
