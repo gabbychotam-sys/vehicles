@@ -2184,7 +2184,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.66 — OCR.space free אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.67 — OCR diagnostics אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2262,7 +2262,7 @@ try {
       <div class="tb-date" id="live-date">יום ראשון, 10 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב (Enter להצגה מלאה)" oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.66 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.67 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2918,7 +2918,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-saved" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">נשמר ✓</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.66 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.67 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <!-- v2.9.52: "נקה הכל" button removed per Gabby's request - too risky to expose at the top of the page. -->
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -8176,11 +8176,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ═══ Auto-fill flow when user uploads MOT scan ═══
 function handleAutoFillScan(event) {
+  console.log('[AutoFill] handleAutoFillScan called');
   var files = event.target.files;
-  if (!files || !files.length) return;
+  if (!files || !files.length) {
+    console.log('[AutoFill] no files selected');
+    return;
+  }
   event.target.value = ''; // reset for next time
 
   var apiKey = _getVisionApiKey();
+  console.log('[AutoFill] apiKey present:', !!apiKey, '| length:', apiKey ? apiKey.length : 0);
+
   if (!apiKey) {
     alert('🔑 לפני שימוש בזיהוי אוטומטי - יש להגדיר מפתח OCR.space (חינם, ללא כרטיס אשראי).\n\n' +
           'עבור ל: ⚙️ הגדרות → "🔍 זיהוי אוטומטי ממסמכי משרד הרישוי" → הזן מפתח API.\n\n' +
@@ -8188,7 +8194,20 @@ function handleAutoFillScan(event) {
     return;
   }
 
+  // Detect old Google Vision keys (starts with "AIza...") and reject them
+  if (/^AIza[0-9A-Za-z_-]{30,}$/.test(apiKey)) {
+    alert('⚠️ זיהיתי שהמפתח השמור הוא של Google Vision (הישן).\n\n' +
+          'המערכת עכשיו עובדת עם OCR.space. אנא:\n' +
+          '1. עבור ל: ⚙️ הגדרות → "🔍 זיהוי אוטומטי ממסמכי משרד הרישוי"\n' +
+          '2. מחק את המפתח הישן (השאר את השדה ריק ולחץ שמור)\n' +
+          '3. הירשם ל-OCR.space (הוראות בהגדרות) וקבל מפתח חינמי\n' +
+          '4. הזן את המפתח החדש');
+    return;
+  }
+
   var file = files[0];
+  console.log('[AutoFill] file:', file.name, '| size:', file.size, '| type:', file.type);
+
   if (file.size > 5 * 1024 * 1024) {
     alert('הקובץ גדול מ-5MB');
     return;
@@ -8197,7 +8216,7 @@ function handleAutoFillScan(event) {
   var statusBox = document.getElementById('auto-fill-status');
   if (statusBox) {
     statusBox.style.display = 'block';
-    statusBox.innerHTML = '⏳ קורא את המסמך...';
+    statusBox.innerHTML = '⏳ שולח את המסמך ל-OCR.space לזיהוי טקסט... (יכול לקחת 5-15 שניות)';
     statusBox.style.cssText = 'display:block;color:#0369a1;background:#eff6ff;border:1px solid #bfdbfe;padding:10px 14px;border-radius:8px;font-size:12px;margin-top:10px;line-height:1.6;';
   }
 
@@ -8209,39 +8228,48 @@ function handleAutoFillScan(event) {
       _autoFillStatusError('לא ניתן לקרוא את הקובץ');
       return;
     }
+    console.log('[AutoFill] file read, dataUrl length:', dataUrl.length);
 
     // ═══ OCR.space API ═══
-    // Free tier: 25,000 requests/month, no credit card needed.
-    // Engine 2 supports Hebrew. Send file as multipart for best results.
     var formData = new FormData();
     formData.append('apikey', apiKey);
     formData.append('language', 'heb');
     formData.append('OCREngine', '2');
     formData.append('isOverlayRequired', 'false');
-    formData.append('scale', 'true');           // upscale small images
+    formData.append('scale', 'true');
     formData.append('detectOrientation', 'true');
     formData.append('file', file);
+
+    console.log('[AutoFill] sending to OCR.space...');
 
     fetch('https://api.ocr.space/parse/image', {
       method: 'POST',
       body: formData
     })
-    .then(function(r) { return r.json(); })
+    .then(function(r) {
+      console.log('[AutoFill] OCR.space response status:', r.status);
+      return r.json();
+    })
     .then(function(data) {
+      console.log('[AutoFill] OCR.space response:', data);
+
       if (data.IsErroredOnProcessing) {
         var err = Array.isArray(data.ErrorMessage) ? data.ErrorMessage.join(', ') : (data.ErrorMessage || 'שגיאה לא ידועה');
-        throw new Error(err);
+        throw new Error('OCR.space: ' + err);
       }
       var text = '';
       if (data.ParsedResults && data.ParsedResults.length > 0) {
         text = data.ParsedResults[0].ParsedText || '';
+        console.log('[AutoFill] OCR text length:', text.length);
+        console.log('[AutoFill] OCR text preview:', text.substring(0, 300));
       }
       if (!text || text.length < 20) {
-        throw new Error('לא זוהה טקסט במסמך. ודא שהסריקה ברורה ולא מטושטשת.');
+        throw new Error('לא זוהה טקסט במסמך (אורך: ' + text.length + '). ודא שהסריקה ברורה ולא מטושטשת.');
       }
 
       // Parse the recognized text
       var parsed = _parseMotForm(text);
+      console.log('[AutoFill] parsed:', parsed);
 
       // Also save the file as a regular scanned doc
       caseScans.push({
@@ -8265,12 +8293,18 @@ function handleAutoFillScan(event) {
             '<span style="color:#64748b;">בדוק את הפרטים ולחץ "💾 שמור שינויים"</span>';
           statusBox.style.cssText = 'display:block;color:#166534;background:#f0fdf4;border:1px solid #bbf7d0;padding:10px 14px;border-radius:8px;font-size:12px;margin-top:10px;line-height:1.7;';
         } else {
-          statusBox.innerHTML = '⚠️ לא זוהו שדות במסמך. ודא שזה דף "שאילתא לרכב" של משרד הרישוי.';
+          // Show the OCR text to the user so they can see what was detected
+          var preview = text.length > 200 ? text.substring(0, 200) + '...' : text;
+          statusBox.innerHTML = '⚠️ הטקסט זוהה אך לא מצאתי שדות במבנה של "שאילתא לרכב".<br><br>' +
+            '<details><summary style="cursor:pointer;font-weight:600;">📄 הצג את הטקסט שזוהה</summary>' +
+            '<pre style="background:#fff;padding:8px;border-radius:4px;font-size:11px;overflow-x:auto;direction:ltr;text-align:right;white-space:pre-wrap;margin-top:6px;">' +
+            preview.replace(/</g,'&lt;') + '</pre></details>';
           statusBox.style.cssText = 'display:block;color:#9a3412;background:#fff7ed;border:1px solid #fed7aa;padding:10px 14px;border-radius:8px;font-size:12px;margin-top:10px;';
         }
       }
     })
     .catch(function(err) {
+      console.error('[AutoFill] error:', err);
       _autoFillStatusError(err.message || String(err));
     });
   };
@@ -11585,7 +11619,7 @@ document.addEventListener('keydown', function(e) {
 // ═══════════════════════════════════════════════════════════════════
 function _getCurrentVersion() {
   // Read from the visible version label in the sidebar
-  // <div ...>v2.9.66 — OCR.space free ...</div>
+  // <div ...>v2.9.67 — OCR diagnostics ...</div>
   try {
     var nodes = document.querySelectorAll('div');
     for (var i = 0; i < nodes.length; i++) {
