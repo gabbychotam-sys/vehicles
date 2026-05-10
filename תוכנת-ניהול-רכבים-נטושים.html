@@ -2184,7 +2184,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.75 — server tombstone respect אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.76 — refreshNow tombstone אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2262,7 +2262,7 @@ try {
       <div class="tb-date" id="live-date">יום ראשון, 10 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב (Enter להצגה מלאה)" oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.75 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.76 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2911,7 +2911,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-saved" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">נשמר ✓</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.75 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.76 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <!-- v2.9.52: "נקה הכל" button removed per Gabby's request - too risky to expose at the top of the page. -->
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -6245,6 +6245,22 @@ if (document.readyState === 'loading') {
 function upsertCaseRow(oldPlate, c, fullData) {
   var tbody = document.getElementById('cases-tbody');
   if (!tbody) return;
+
+  // ═══ v2.9.76: PLATE-LEVEL TOMBSTONE CHECK ═══
+  // upsertCaseRow is the ultimate "add a row to the cases table" function,
+  // called from many code paths (Firebase listeners, refreshNow, manual
+  // edits, file imports). If any of those try to (re-)add a deleted plate,
+  // bail out here so the deletion is honored everywhere.
+  try {
+    var newPlate = String((c && c.plate) || '').trim();
+    if (newPlate) {
+      var deletedPlatesUS = JSON.parse(localStorage.getItem('galilElyon_deletedPlates') || '[]');
+      if (Array.isArray(deletedPlatesUS) && deletedPlatesUS.indexOf(newPlate) !== -1) {
+        console.log('[upsertCaseRow] ✗ skipped (tombstoned by plate):', newPlate);
+        return;
+      }
+    }
+  } catch(e) { /* ignore parse errors */ }
 
   // ═══ v2.9.43: ensure click delegation is installed (idempotent) ═══
   try { if (typeof _reattachCaseRowClicks === 'function') _reattachCaseRowClicks(); } catch(e){}
@@ -11721,7 +11737,7 @@ document.addEventListener('keydown', function(e) {
 // ═══════════════════════════════════════════════════════════════════
 function _getCurrentVersion() {
   // Read from the visible version label in the sidebar
-  // <div ...>v2.9.75 — server tombstone respect ...</div>
+  // <div ...>v2.9.76 — refreshNow tombstone ...</div>
   try {
     var nodes = document.querySelectorAll('div');
     for (var i = 0; i < nodes.length; i++) {
@@ -12923,10 +12939,13 @@ if (document.readyState === 'loading') {
         var skipped = 0;
         // ═══ Read tombstone list to filter out deleted cases ═══
         var deletedIds = [];
+        var deletedPlates = [];  // ═══ v2.9.76: also read plate-level tombstones
         var resetAt = 0;
         try {
           deletedIds = JSON.parse(localStorage.getItem('galilElyon_deletedIds') || '[]');
           if (!Array.isArray(deletedIds)) deletedIds = [];
+          deletedPlates = JSON.parse(localStorage.getItem('galilElyon_deletedPlates') || '[]');
+          if (!Array.isArray(deletedPlates)) deletedPlates = [];
           resetAt = parseInt(localStorage.getItem('galilElyon_resetAt') || '0', 10) || 0;
         } catch(e){}
 
@@ -12983,6 +13002,25 @@ if (document.readyState === 'loading') {
           // ═══ Track this plate as "seen in Firebase" ═══
           var plate = (c.plate || (c.fullData && c.fullData.plate) || '').trim();
           if (plate) firebasePlates[plate] = true;
+
+          // ═══ v2.9.76: PLATE-LEVEL TOMBSTONE CHECK ═══
+          // Without this, refreshNow happily re-adds rows for plates the user
+          // already deleted (because executeDeleteCase only had `_deleted=true`
+          // pushed to Firebase if it could find the case's id). Now we honor
+          // the local plate-tombstone too, AND we push _deleted back to
+          // Firebase so the deletion finally sticks for everyone.
+          if (plate && deletedPlates.indexOf(plate) !== -1) {
+            console.log('[refreshNow] ✗ skipped (tombstoned by plate):', id, plate);
+            skipped++;
+            try {
+              fbDb.ref('cases/' + id).update({
+                _deleted: true,
+                _deletedAt: Date.now(),
+                _deletedBy: 'plate-tombstone'
+              }).catch(function(){});
+            } catch(e){}
+            return;
+          }
 
           if (c.source === 'mobile') {
             // Mobile-app case → handled by the dedicated mobile row updater
