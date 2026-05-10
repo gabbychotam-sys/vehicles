@@ -2184,7 +2184,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.71 — duplicate plate check אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.72 — local proxy server אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2262,7 +2262,7 @@ try {
       <div class="tb-date" id="live-date">יום ראשון, 10 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב (Enter להצגה מלאה)" oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.71 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.72 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2911,7 +2911,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-saved" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">נשמר ✓</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.71 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.72 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <!-- v2.9.52: "נקה הכל" button removed per Gabby's request - too risky to expose at the top of the page. -->
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -8159,10 +8159,15 @@ function testVisionApiKey() {
   formData.append('language', 'eng');
   formData.append('base64Image', tinyPng);
 
-  fetch('https://api.ocr.space/parse/image', {
-    method: 'POST',
-    body: formData
-  })
+  // Try proxy first, fall back to direct (works without proxy if browser allows)
+  fetch('http://localhost:8765/ping', { method: 'GET' })
+    .then(function(r){ return r.text(); })
+    .then(function(txt){
+      var url = (txt && txt.trim() === 'pong') ? 'http://localhost:8765/ocr' : 'https://api.ocr.space/parse/image';
+      console.log('[testVisionApiKey] using:', url);
+      return fetch(url, { method: 'POST', body: formData });
+    })
+    .catch(function(){ return fetch('https://api.ocr.space/parse/image', { method: 'POST', body: formData }); })
   .then(function(r) { return r.json(); })
   .then(function(data) {
     if (data.IsErroredOnProcessing) {
@@ -8257,7 +8262,10 @@ function handleAutoFillScan(event) {
     }
     console.log('[AutoFill] file read, dataUrl length:', dataUrl.length);
 
-    // ═══ OCR.space API ═══
+    // ═══ OCR.space API via local proxy ═══
+    // We POST to http://localhost:8765/ocr (GalilOcrProxy.exe), which
+    // forwards to api.ocr.space using WinHTTP (bypasses any browser
+    // CORS / network policy issues). Engine 2 supports Hebrew.
     var formData = new FormData();
     formData.append('apikey', apiKey);
     formData.append('language', 'heb');
@@ -8267,16 +8275,30 @@ function handleAutoFillScan(event) {
     formData.append('detectOrientation', 'true');
     formData.append('file', file);
 
-    console.log('[AutoFill] sending to OCR.space...');
+    console.log('[AutoFill] checking GalilOcrProxy availability...');
 
-    fetch('https://api.ocr.space/parse/image', {
-      method: 'POST',
-      body: formData
-    })
-    .then(function(r) {
-      console.log('[AutoFill] OCR.space response status:', r.status);
-      return r.json();
-    })
+    // First, check if the proxy is running locally
+    var proxyUrl = 'http://localhost:8765/ocr';
+    var directUrl = 'https://api.ocr.space/parse/image';
+
+    fetch('http://localhost:8765/ping', { method: 'GET' })
+      .then(function(r) { return r.text(); })
+      .then(function(txt) {
+        var proxyOk = (txt && txt.trim() === 'pong');
+        console.log('[AutoFill] proxy available:', proxyOk);
+        var targetUrl = proxyOk ? proxyUrl : directUrl;
+        console.log('[AutoFill] sending to:', targetUrl);
+        return fetch(targetUrl, { method: 'POST', body: formData });
+      })
+      .catch(function() {
+        // Proxy not running — fall back to direct call
+        console.log('[AutoFill] proxy not running, trying direct call to OCR.space');
+        return fetch(directUrl, { method: 'POST', body: formData });
+      })
+      .then(function(r) {
+        console.log('[AutoFill] OCR response status:', r.status);
+        return r.json();
+      })
     .then(function(data) {
       console.log('[AutoFill] OCR.space response:', data);
 
@@ -11677,7 +11699,7 @@ document.addEventListener('keydown', function(e) {
 // ═══════════════════════════════════════════════════════════════════
 function _getCurrentVersion() {
   // Read from the visible version label in the sidebar
-  // <div ...>v2.9.71 — duplicate plate check ...</div>
+  // <div ...>v2.9.72 — local proxy server ...</div>
   try {
     var nodes = document.querySelectorAll('div');
     for (var i = 0; i < nodes.length; i++) {
