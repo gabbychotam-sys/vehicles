@@ -2184,7 +2184,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.63 — auto-fill MOT אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.64 — view scanned docs אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2262,7 +2262,7 @@ try {
       <div class="tb-date" id="live-date">יום ראשון, 10 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב (Enter להצגה מלאה)" oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.63 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.64 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2918,7 +2918,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-saved" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">נשמר ✓</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.63 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.64 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <!-- v2.9.52: "נקה הכל" button removed per Gabby's request - too risky to expose at the top of the page. -->
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -4761,6 +4761,53 @@ function viewArchivedDoc(safePlate, key) {
   if (!doc) { alert('לא נמצא המסמך'); return; }
   var w = window.open('', '_blank', 'width=900,height=1100');
   if (!w) { alert('הדפדפן חוסם חלונות נפתחים. אפשר חלונות נפתחים לאתר זה.'); return; }
+
+  // ═══ v2.9.64: scanned binary docs (PDF/JPG/PNG uploaded via "מסמכים סרוקים") ═══
+  // are stored with isBinary:true and html=dataUrl (e.g. "data:application/pdf;base64,...")
+  // Render them in <embed>/<img> instead of injecting raw base64 into the HTML.
+  var isBinary = doc.isBinary === true || doc.type === 'scanned_doc' ||
+                 (typeof doc.html === 'string' && /^data:(application\/pdf|image\/)/i.test(doc.html));
+
+  if (isBinary && doc.html) {
+    var fileType = doc.fileType || '';
+    if (!fileType) {
+      var match = String(doc.html).match(/^data:([^;]+);/);
+      if (match) fileType = match[1];
+    }
+    var isPdf   = /pdf/i.test(fileType);
+    var isImage = /^image\//i.test(fileType);
+    var fileName = doc.fileName || doc.title || 'מסמך';
+
+    w.document.write('<!DOCTYPE html><html dir="rtl" lang="he"><head><meta charset="UTF-8"><title>' +
+      _escapeHtml(fileName) + '</title>' +
+      '<style>html,body{margin:0;padding:0;height:100%;background:#1e293b;font-family:"Heebo",Arial,sans-serif;}' +
+      '.toolbar{background:#0f172a;color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;}' +
+      '.toolbar a{color:#60a5fa;text-decoration:none;font-size:13px;font-weight:600;}' +
+      '.toolbar a:hover{text-decoration:underline;}' +
+      '.scan-frame{width:100%;height:calc(100vh - 44px);border:0;}' +
+      '.img-wrap{display:flex;align-items:center;justify-content:center;height:calc(100vh - 44px);overflow:auto;}' +
+      '.img-wrap img{max-width:100%;max-height:100%;background:#fff;}</style></head><body>' +
+      '<div class="toolbar"><span>📎 ' + _escapeHtml(fileName) + '</span>' +
+      '<a href="' + doc.html + '" download="' + _escapeHtml(fileName) + '">⬇ הורד</a></div>');
+
+    if (isPdf) {
+      w.document.write('<embed class="scan-frame" src="' + doc.html + '" type="application/pdf">');
+    } else if (isImage) {
+      w.document.write('<div class="img-wrap"><img src="' + doc.html + '" alt="' + _escapeHtml(fileName) + '"></div>');
+    } else {
+      // Unknown binary type — offer download
+      w.document.write('<div style="color:#fff;text-align:center;padding:60px 20px;">' +
+        '<div style="font-size:64px;margin-bottom:20px;">📄</div>' +
+        '<div style="font-size:16px;margin-bottom:20px;">לא ניתן להציג את סוג הקובץ הזה בדפדפן</div>' +
+        '<a href="' + doc.html + '" download="' + _escapeHtml(fileName) + '" ' +
+        'style="display:inline-block;background:#10b981;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;">⬇ הורד את הקובץ</a></div>');
+    }
+    w.document.write('</body></html>');
+    w.document.close();
+    return;
+  }
+
+  // Regular HTML document (auto-generated letters, stickers, etc)
   w.document.write('<!DOCTYPE html><html dir="rtl" lang="he"><head><meta charset="UTF-8"><title>' + (doc.title || 'מסמך') + '</title>' +
     '<style>body{font-family:"Heebo",Arial,sans-serif;background:#f5f5f5;padding:20px;margin:0;}' +
     '.ml-header{display:flex;align-items:center;gap:12px;border-bottom:2px solid #1a237e;padding-bottom:8px;margin-bottom:10px;}' +
@@ -4778,6 +4825,13 @@ function viewArchivedDoc(safePlate, key) {
   w.document.close();
 }
 
+// Helper for safe HTML escaping
+function _escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 function printArchivedDoc(safePlate, key) {
   var doc = _getArchivedDoc(safePlate, key);
   if (!doc) { alert('לא נמצא המסמך'); return; }
@@ -4793,6 +4847,21 @@ function printArchivedDoc(safePlate, key) {
 function downloadArchivedDoc(safePlate, key) {
   var doc = _getArchivedDoc(safePlate, key);
   if (!doc) { alert('לא נמצא המסמך'); return; }
+
+  // ═══ v2.9.64: For binary scanned docs (PDF/JPG), download the original ═══
+  // file directly — don't wrap it in HTML.
+  var isBinary = doc.isBinary === true || doc.type === 'scanned_doc' ||
+                 (typeof doc.html === 'string' && /^data:(application\/pdf|image\/)/i.test(doc.html));
+  if (isBinary && doc.html) {
+    var a1 = document.createElement('a');
+    a1.href = doc.html;
+    a1.download = doc.fileName || (doc.title || 'scan') + '.pdf';
+    document.body.appendChild(a1);
+    a1.click();
+    document.body.removeChild(a1);
+    return;
+  }
+
   var fullHtml = '<!DOCTYPE html><html dir="rtl" lang="he"><head><meta charset="UTF-8"><title>' +
     (doc.title || 'מסמך') + '</title>' +
     '<style>body{font-family:Arial,sans-serif;padding:20px;}' +
@@ -11497,7 +11566,7 @@ document.addEventListener('keydown', function(e) {
 // ═══════════════════════════════════════════════════════════════════
 function _getCurrentVersion() {
   // Read from the visible version label in the sidebar
-  // <div ...>v2.9.63 — auto-fill MOT ...</div>
+  // <div ...>v2.9.64 — view scanned docs ...</div>
   try {
     var nodes = document.querySelectorAll('div');
     for (var i = 0; i < nodes.length; i++) {
