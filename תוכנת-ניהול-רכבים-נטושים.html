@@ -2184,7 +2184,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.83 — remove diagnostics from settings אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.84 — smart login fallback אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2295,7 +2295,7 @@ try {
       <div class="tb-date" id="live-date">יום ראשון, 10 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב (Enter להצגה מלאה)" oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.83 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.84 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2952,7 +2952,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-saved" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">נשמר ✓</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.83 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.84 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <!-- v2.9.52: "נקה הכל" button removed per Gabby's request - too risky to expose at the top of the page. -->
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -11870,7 +11870,7 @@ document.addEventListener('keydown', function(e) {
 // ═══════════════════════════════════════════════════════════════════
 function _getCurrentVersion() {
   // Read from the visible version label in the sidebar
-  // <div ...>v2.9.83 — remove diagnostics from settings ...</div>
+  // <div ...>v2.9.84 — smart login fallback ...</div>
   try {
     var nodes = document.querySelectorAll('div');
     for (var i = 0; i < nodes.length; i++) {
@@ -12522,12 +12522,57 @@ window.getActiveUserName = function() {
   }
 })();
 
-// Force-hide the legacy login overlay forever
-(function suppressLoginOverlay() {
-  setInterval(function() {
-    var ov = document.getElementById('auth-overlay');
-    if (ov && ov.style.display !== 'none') ov.style.display = 'none';
-  }, 300);
+// ═══════════════════════════════════════════════════════════════════
+// v2.9.84: SMART LOGIN FALLBACK
+// If auto-login succeeds → no UI shown.
+// If auto-login fails (wrong password, blocked account, etc.) → after
+// 5 seconds we show the login overlay so the user can sign in manually.
+// This is critical because without auth, Firebase rules deny access to
+// /archives/* and the user sees "permission_denied" errors.
+// ═══════════════════════════════════════════════════════════════════
+(function smartLoginFallback() {
+  var checkAuthInterval = setInterval(function() {
+    if (!window.fbAuth) return;
+    if (window.fbAuth.currentUser) {
+      // Auth working — keep overlay hidden
+      var ov = document.getElementById('auth-overlay');
+      if (ov) ov.style.display = 'none';
+      // Show "connected" indicator next to the user name
+      var dot = document.querySelector('.sb-bottom .sb-user');
+      if (dot && !dot.querySelector('.auth-status-dot')) {
+        var d = document.createElement('div');
+        d.className = 'auth-status-dot';
+        d.title = 'מחובר ל-Firebase';
+        d.style.cssText = 'width:8px;height:8px;border-radius:50%;background:#16a34a;flex-shrink:0;';
+        dot.appendChild(d);
+      }
+    }
+  }, 1000);
+  
+  // After 6 seconds: if STILL not logged in, show the login overlay
+  setTimeout(function() {
+    if (!window.fbAuth || !window.fbAuth.currentUser) {
+      console.warn('[v2.9.84] auto-login did not complete in 6s — showing manual login');
+      var ov = document.getElementById('auth-overlay');
+      if (ov) {
+        ov.style.display = 'flex';
+        var errEl = document.getElementById('auth-error');
+        if (errEl) {
+          errEl.style.display = 'block';
+          errEl.textContent = 'התחברות אוטומטית נכשלה — אנא התחבר ידנית';
+        }
+        // Pre-fill the email field with the stored user
+        var stored = '';
+        try { stored = localStorage.getItem('galilElyon_activeUser') || 'gabbyc@galil-elion.org.il'; } catch(e){}
+        var emailField = document.getElementById('auth-email');
+        if (emailField) emailField.value = stored;
+        // Pre-select in the dropdown
+        var select = document.getElementById('auth-name-select');
+        if (select) select.value = stored;
+      }
+    }
+    clearInterval(checkAuthInterval);
+  }, 6000);
 })();
 
 // ═══════════════════════════════════════════════════════════════════
