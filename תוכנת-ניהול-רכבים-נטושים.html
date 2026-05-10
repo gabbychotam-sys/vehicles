@@ -2184,7 +2184,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.60 — scan instructions אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.61 — scan one click אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2262,7 +2262,7 @@ try {
       <div class="tb-date" id="live-date">יום ראשון, 10 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב (Enter להצגה מלאה)" oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.60 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.61 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2673,37 +2673,23 @@ try {
             <div id="nf-scans-area" style="margin-top:6px;">
               <div id="nf-scans-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;"></div>
               <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:14px;margin-bottom:10px;">
-                <div style="font-weight:700;color:#0369a1;font-size:13px;margin-bottom:10px;">🖨️ סריקת מסמך — שני שלבים פשוטים:</div>
+                <div style="font-weight:700;color:#0369a1;font-size:14px;margin-bottom:10px;">🖨️ סריקה והעלאה אוטומטית:</div>
 
-                <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-bottom:8px;">
-                  <div style="flex:1;min-width:240px;background:#fff;border:1px solid #e0e7ff;border-radius:10px;padding:12px;">
-                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-                      <span style="background:#0284c7;color:#fff;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">1</span>
-                      <span style="font-weight:700;color:#0c4a6e;font-size:13px;">פתח את הסורק</span>
-                    </div>
-                    <div style="font-size:12px;color:#475569;line-height:1.7;">
-                      הקש <kbd style="background:#1e293b;color:#fff;padding:2px 8px;border-radius:4px;font-family:monospace;font-size:11px;">⊞ Win</kbd> →
-                      הקלד <b>"סריקה"</b> →
-                      <kbd style="background:#1e293b;color:#fff;padding:2px 8px;border-radius:4px;font-family:monospace;font-size:11px;">Enter</kbd>
-                    </div>
-                    <button type="button" onclick="openWindowsScanner()" style="margin-top:8px;background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;">❓ הוראות מפורטות</button>
-                  </div>
+                <button type="button" onclick="document.getElementById('scan-and-upload-input').click(); window._showScanHint && window._showScanHint();" style="width:100%;background:linear-gradient(135deg,#0284c7,#0369a1);color:#fff;border:none;border-radius:10px;padding:14px 18px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px;">
+                  🖨️ סרוק מסמך והעלה לתיק
+                </button>
+                <input type="file" id="scan-and-upload-input" accept="image/*,application/pdf" multiple style="display:none;" onchange="handleNewCaseScan(event)">
 
-                  <div style="font-size:22px;color:#94a3b8;align-self:center;">→</div>
+                <div id="scan-step-hint" style="display:none;font-size:12px;color:#0c4a6e;background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:10px 12px;margin-top:6px;line-height:1.6;">
+                  <b>📋 שלבים מהירים:</b><br>
+                  1️⃣ <b>חלון בחירת קובץ נפתח</b> — השאר אותו פתוח<br>
+                  2️⃣ הקש <kbd style="background:#1e293b;color:#fff;padding:2px 6px;border-radius:3px;font-size:11px;">⊞ Win + S</kbd>, הקלד <b>"סריקה"</b>, Enter<br>
+                  3️⃣ סרוק ושמור את המסמך (למשל בשולחן עבודה)<br>
+                  4️⃣ חזור לחלון בחירת הקובץ ובחר את הקובץ
+                </div>
 
-                  <div style="flex:1;min-width:240px;background:#fff;border:1px solid #d1fae5;border-radius:10px;padding:12px;">
-                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-                      <span style="background:#10b981;color:#fff;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">2</span>
-                      <span style="font-weight:700;color:#064e3b;font-size:13px;">העלה את הקובץ הסרוק</span>
-                    </div>
-                    <div style="font-size:12px;color:#475569;line-height:1.7;margin-bottom:8px;">
-                      אחרי שסרקת ושמרת את הקובץ — לחץ כאן:
-                    </div>
-                    <label style="display:inline-flex;align-items:center;gap:6px;background:#10b981;color:#fff;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">
-                      📁 בחר קובץ
-                      <input type="file" accept="image/*,application/pdf" multiple style="display:none;" onchange="handleNewCaseScan(event)">
-                    </label>
-                  </div>
+                <div style="font-size:11px;color:#64748b;margin-top:8px;line-height:1.5;">
+                  💡 הכפתור פותח את חלון בחירת הקובץ. סרוק במקביל עם אפליקציית "סריקה" של Windows ובחר את הקובץ שיצרת.
                 </div>
               </div>
             </div>
@@ -2941,7 +2927,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-saved" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">נשמר ✓</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.60 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.61 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <!-- v2.9.52: "נקה הכל" button removed per Gabby's request - too risky to expose at the top of the page. -->
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -7985,6 +7971,23 @@ function renderCaseScanList() {
 window.renderCaseScanList = renderCaseScanList;
 
 // ═══════════════════════════════════════════════════════════════════
+// v2.9.61: SCAN HINT — show step-by-step hints when the user clicks
+// "Scan & Upload". The file picker opens IN THE SAME CLICK (browser
+// security requires that), and the hint reminds them to launch
+// Windows Scan in parallel.
+// ═══════════════════════════════════════════════════════════════════
+window._showScanHint = function() {
+  var hint = document.getElementById('scan-step-hint');
+  if (hint) {
+    hint.style.display = 'block';
+    // Auto-hide after 30 seconds
+    setTimeout(function() {
+      if (hint) hint.style.display = 'none';
+    }, 30000);
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════════
 // v2.9.60: WINDOWS SCANNER LAUNCHER — short instruction only
 // Browsers cannot launch UWP apps directly — every URL we try (ms-windows-
 // store://, ms-windowsscan://, etc) ends up opening Microsoft Store's home
@@ -11157,7 +11160,7 @@ document.addEventListener('keydown', function(e) {
 // ═══════════════════════════════════════════════════════════════════
 function _getCurrentVersion() {
   // Read from the visible version label in the sidebar
-  // <div ...>v2.9.60 — scan instructions ...</div>
+  // <div ...>v2.9.61 — scan one click ...</div>
   try {
     var nodes = document.querySelectorAll('div');
     for (var i = 0; i < nodes.length; i++) {
