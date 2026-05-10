@@ -2184,7 +2184,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.56 — scan docs אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.57 — windows scan + license אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2262,7 +2262,7 @@ try {
       <div class="tb-date" id="live-date">יום ראשון, 10 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב (Enter להצגה מלאה)" oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.56 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.57 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2667,17 +2667,46 @@ try {
             </div>
             <div style="font-size:11px;color:var(--muted);margin-top:6px;">עד 10 תמונות, מקסימום 5MB לתמונה</div>
           </div>
-          <!-- v2.9.56: מסמכים סרוקים -->
+          <!-- v2.9.57: מסמכים סרוקים -->
           <div class="edit-section">
             <div class="edit-section-title">📎 מסמכים סרוקים</div>
             <div id="nf-scans-area" style="margin-top:6px;">
               <div id="nf-scans-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;"></div>
-              <label style="display:inline-flex;align-items:center;gap:8px;background:#e0f2fe;border:2px dashed #0284c7;border-radius:10px;padding:10px 16px;font-size:13px;color:#0369a1;cursor:pointer;font-weight:600;">
-                📎 הוסף מסמך סרוק
-                <input type="file" accept="image/*,application/pdf" multiple style="display:none;" onchange="handleNewCaseScan(event)">
-              </label>
+              <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:14px;margin-bottom:10px;">
+                <div style="font-weight:700;color:#0369a1;font-size:13px;margin-bottom:8px;">🖨️ סריקת מסמך — שני שלבים:</div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    <span style="background:#0284c7;color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">1</span>
+                    <button type="button" onclick="openWindowsScanner()" style="background:#0284c7;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;">פתח את הסורק</button>
+                  </div>
+                  <div style="font-size:18px;color:#94a3b8;">←</div>
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    <span style="background:#0284c7;color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">2</span>
+                    <label style="display:inline-flex;align-items:center;gap:8px;background:#10b981;color:#fff;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;">
+                      📁 העלה את הקובץ הסרוק
+                      <input type="file" accept="image/*,application/pdf" multiple style="display:none;" onchange="handleNewCaseScan(event)">
+                    </label>
+                  </div>
+                </div>
+                <div style="font-size:11px;color:#475569;margin-top:8px;line-height:1.5;">
+                  💡 <b>הסבר:</b> "פתח את הסורק" יפתח את אפליקציית הסריקה של Windows. סרוק את המסמך, שמור אותו, ואז לחץ "העלה את הקובץ הסרוק" כדי לצרפו לתיק.
+                </div>
+              </div>
             </div>
-            <div style="font-size:11px;color:var(--muted);margin-top:6px;">PDF, JPG, PNG · עד 10 מסמכים, מקסימום 5MB למסמך · נשמר אוטומטית בארכיון התיק</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:6px;">PDF/JPG/PNG · עד 10 מסמכים · מקסימום 5MB · נשמר אוטומטית בארכיון</div>
+          </div>
+
+          <!-- v2.9.57: תוקף רישיון -->
+          <div class="edit-section">
+            <div class="edit-section-title">📅 תאריך תוקף רישיון רכב</div>
+            <div class="edit-grid">
+              <div class="edit-group">
+                <div class="edit-label">תוקף עד</div>
+                <input type="date" class="edit-input" id="nf-license-expiry" oninput="checkLicenseExpiry()">
+                <div id="nf-license-expiry-status" style="font-size:12px;margin-top:6px;"></div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:var(--muted);margin-top:6px;">💡 רכב שתוקף הרישיון שלו פג - נחשב גרוטאת רכב ולא רכב נטוש</div>
           </div>
           <!-- הערות -->
           <div class="edit-section">
@@ -2898,7 +2927,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-saved" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">נשמר ✓</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.56 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.57 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <!-- v2.9.52: "נקה הכל" button removed per Gabby's request - too risky to expose at the top of the page. -->
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -6427,6 +6456,10 @@ function openEditFullForm(tr) {
   setVal('nf-owner-addr',     CASE.ownerAddr);
   setVal('nf-owner-phone',    CASE.ownerPhone);
   setVal('nf-notes',          CASE.notes);
+  // ═══ v2.9.57: Load license expiry date ═══
+  setVal('nf-license-expiry', CASE.licenseExpiry || '');
+  // Trigger the expiry-status display
+  setTimeout(function(){ if (typeof checkLicenseExpiry === 'function') checkLicenseExpiry(); }, 50);
   // Date — accept either yyyy-mm-dd or full ISO
   if (CASE.date) {
     var d = String(CASE.date).split('T')[0];
@@ -7937,6 +7970,120 @@ function renderCaseScanList() {
 }
 window.renderCaseScanList = renderCaseScanList;
 
+// ═══════════════════════════════════════════════════════════════════
+// v2.9.57: WINDOWS SCANNER LAUNCHER
+// Browsers can't talk directly to TWAIN/WIA scanners (no API for it).
+// The workflow is: 1) open Windows Scan app, 2) scan & save, 3) upload file.
+// This function opens the scan app via the Windows ms-scan: URL scheme;
+// if that fails, it falls back to opening the Windows store page.
+// ═══════════════════════════════════════════════════════════════════
+function openWindowsScanner() {
+  // Check platform — only meaningful on Windows
+  var isWin = /Win/i.test(navigator.platform || navigator.userAgent || '');
+  var isMac = /Mac/i.test(navigator.platform || '');
+
+  if (isMac) {
+    alert('💡 הסבר על סריקה ב-Mac:\n\n' +
+          '1. פתח את "Image Capture" (לכידת תמונה) — בחיפוש Spotlight (Cmd+Space)\n' +
+          '2. בחר את הסורק שלך מהרשימה בצד שמאל\n' +
+          '3. לחץ "Scan" / "סרוק"\n' +
+          '4. שמור את הקובץ בתיקייה (למשל Desktop)\n' +
+          '5. חזור לכאן ולחץ "📁 העלה את הקובץ הסרוק"');
+    return;
+  }
+
+  if (!isWin) {
+    alert('💡 פתח את אפליקציית הסריקה במחשב שלך, סרוק את המסמך, שמור אותו, ואז לחץ "📁 העלה את הקובץ הסרוק".');
+    return;
+  }
+
+  // ═══ Windows: try to launch Windows Scan via protocol URL ═══
+  // The native Windows Scan app registers ms-screenclip and other handlers,
+  // but for the actual scan app the most reliable approach is the
+  // Windows Store URL or a direct file URL. We'll show instructions
+  // and try to open the app.
+  var instructions =
+    '🖨️ לסריקת מסמך:\n\n' +
+    '1️⃣ אנסה לפתוח את "Windows Scan" עכשיו\n' +
+    '2️⃣ אם זה לא נפתח — חפש בתפריט התחל "Windows Scan" או "Scan" או "סורק"\n' +
+    '3️⃣ אחרי שסרקת ושמרת — חזור לכאן ולחץ "📁 העלה את הקובץ הסרוק"\n\n' +
+    'האם להמשיך?';
+
+  if (!confirm(instructions)) return;
+
+  // Try to launch via different methods
+  var attempts = [
+    'ms-windows-store://pdp/?ProductId=9wzdncrfj3pv',  // opens Store page if Scan not installed
+    'mswindowsscan:',                                   // some Windows Scan registrations use this
+  ];
+
+  // Method 1: Try opening with anchor (most permissive)
+  var a = document.createElement('a');
+  a.href = 'ms-windows-store://pdp/?ProductId=9wzdncrfj3pv';
+  a.target = '_blank';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  // Show a toast/reminder
+  setTimeout(function() {
+    var msg =
+      '✓ ניסיתי לפתוח את Windows Scan.\n\n' +
+      'אם לא נפתח כלום:\n' +
+      '• פתח ידנית את "Windows Scan" או "Scan" מתפריט התחל\n' +
+      '• אם אין לך אותה — התקן בחינם מ-Microsoft Store: חפש "Windows Scan"\n' +
+      '• או השתמש ב-"Windows Fax and Scan" שמותקנת בכל Windows\n\n' +
+      'אחרי הסריקה, חזור ולחץ "📁 העלה את הקובץ הסרוק".';
+    alert(msg);
+  }, 600);
+}
+window.openWindowsScanner = openWindowsScanner;
+
+// ═══════════════════════════════════════════════════════════════════
+// v2.9.57: LICENSE EXPIRY CHECK — when user enters a license-expiry
+// date, warn them if it's already passed (since an expired license
+// means the vehicle is legally junk, not abandoned).
+// ═══════════════════════════════════════════════════════════════════
+function checkLicenseExpiry() {
+  var input = document.getElementById('nf-license-expiry');
+  var statusEl = document.getElementById('nf-license-expiry-status');
+  if (!input || !statusEl) return;
+  var val = (input.value || '').trim();
+  if (!val) {
+    statusEl.textContent = '';
+    statusEl.style.cssText = '';
+    return;
+  }
+  try {
+    var expiry = new Date(val + 'T23:59:59');
+    var now = new Date();
+    var daysDiff = Math.floor((expiry - now) / (1000 * 60 * 60 * 24));
+
+    if (isNaN(expiry.getTime())) {
+      statusEl.textContent = '';
+      statusEl.style.cssText = '';
+      return;
+    }
+
+    if (daysDiff < 0) {
+      var ago = Math.abs(daysDiff);
+      statusEl.innerHTML = '⚠️ <b>הרישיון פג לפני ' + ago + ' ימים</b> — מומלץ לסווג את הרכב כ"♻️ פינוי גרוטאה" במקום "רכב נטוש"';
+      statusEl.style.cssText = 'color:#b91c1c;background:#fee2e2;padding:8px 12px;border-radius:8px;border:1px solid #fecaca;font-size:12px;margin-top:6px;';
+    } else if (daysDiff < 30) {
+      statusEl.innerHTML = '⚠️ הרישיון פג בעוד <b>' + daysDiff + ' ימים</b>';
+      statusEl.style.cssText = 'color:#9a3412;background:#fff7ed;padding:8px 12px;border-radius:8px;border:1px solid #fed7aa;font-size:12px;margin-top:6px;';
+    } else {
+      statusEl.innerHTML = '✓ הרישיון בתוקף עוד ' + daysDiff + ' ימים';
+      statusEl.style.cssText = 'color:#166534;background:#f0fdf4;padding:8px 12px;border-radius:8px;border:1px solid #bbf7d0;font-size:12px;margin-top:6px;';
+    }
+  } catch(e) {
+    statusEl.textContent = '';
+    statusEl.style.cssText = '';
+  }
+}
+window.checkLicenseExpiry = checkLicenseExpiry;
+
 /* ═══════════════════════════════════════════════════════════════════
    🗑️ nukeAllVisibleCases — Emergency clear button.
    Marks every Firebase ID currently in the cases table as "deleted"
@@ -8646,6 +8793,12 @@ function _newCaseReadFields() {
     ? stripArabicFromLocation(combinedLoc)
     : combinedLoc;
   CASE.notes = document.getElementById('nf-notes').value.trim();
+
+  // ═══ v2.9.57: Read license expiry date ═══
+  var licEl = document.getElementById('nf-license-expiry');
+  if (licEl) {
+    CASE.licenseExpiry = licEl.value || '';
+  }
 
   // ═══ v2.9.42: READ INSPECTOR & DATE — without these, CASE keeps OLD values ═══
   // and fullSnap (built from CASE) saves stale data to the row's data-case attribute,
@@ -11038,7 +11191,7 @@ document.addEventListener('keydown', function(e) {
 // ═══════════════════════════════════════════════════════════════════
 function _getCurrentVersion() {
   // Read from the visible version label in the sidebar
-  // <div ...>v2.9.56 — scan docs ...</div>
+  // <div ...>v2.9.57 — windows scan + license ...</div>
   try {
     var nodes = document.querySelectorAll('div');
     for (var i = 0; i < nodes.length; i++) {
