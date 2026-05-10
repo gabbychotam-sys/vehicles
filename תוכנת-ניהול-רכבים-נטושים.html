@@ -2184,7 +2184,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.64 — view scanned docs אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.65 — auto-scrap on expiry אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2262,7 +2262,7 @@ try {
       <div class="tb-date" id="live-date">יום ראשון, 10 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב (Enter להצגה מלאה)" oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.64 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.65 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2918,7 +2918,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-saved" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">נשמר ✓</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.64 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.65 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <!-- v2.9.52: "נקה הכל" button removed per Gabby's request - too risky to expose at the top of the page. -->
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -8416,9 +8416,10 @@ function _applyParsedToForm(parsed) {
 
 
 // ═══════════════════════════════════════════════════════════════════
-// v2.9.57: LICENSE EXPIRY CHECK — when user enters a license-expiry
-// date, warn them if it's already passed (since an expired license
-// means the vehicle is legally junk, not abandoned).
+// v2.9.65: LICENSE EXPIRY → AUTO-CLASSIFY AS SCRAP
+// When the license has already expired, the vehicle is legally junk —
+// not abandoned. Automatically flip the case type to "♻️ פינוי גרוטאה"
+// and visually mark it. The user can manually un-flip if needed.
 // ═══════════════════════════════════════════════════════════════════
 function checkLicenseExpiry() {
   var input = document.getElementById('nf-license-expiry');
@@ -8443,8 +8444,24 @@ function checkLicenseExpiry() {
 
     if (daysDiff < 0) {
       var ago = Math.abs(daysDiff);
-      statusEl.innerHTML = '⚠️ <b>הרישיון פג לפני ' + ago + ' ימים</b> — מומלץ לסווג את הרכב כ"♻️ פינוי גרוטאה" במקום "רכב נטוש"';
+      // Auto-classify as scrap (גרוטאה)
+      var alreadyScrap = (typeof newCaseType !== 'undefined' && newCaseType === 'scrap');
+      var autoMsg = alreadyScrap ? '' :
+        '<br><span style="color:#166534;font-weight:600;">✓ סווג אוטומטית כ-"♻️ פינוי גרוטאה"</span>';
+
+      statusEl.innerHTML = '⚠️ <b>הרישיון פג לפני ' + ago + ' ימים</b> — נחשב גרוטאת רכב' + autoMsg;
       statusEl.style.cssText = 'color:#b91c1c;background:#fee2e2;padding:8px 12px;border-radius:8px;border:1px solid #fecaca;font-size:12px;margin-top:6px;';
+
+      // Switch to scrap type
+      try {
+        var scrapCard = document.querySelector('.nf-type-card[onclick*="\'scrap\'"]');
+        if (scrapCard && typeof selectCaseType === 'function') {
+          selectCaseType(scrapCard, 'scrap');
+        } else {
+          window.newCaseType = 'scrap';
+        }
+      } catch(e) { console.warn('[v2.9.65] auto-classify scrap failed:', e); }
+
     } else if (daysDiff < 30) {
       statusEl.innerHTML = '⚠️ הרישיון פג בעוד <b>' + daysDiff + ' ימים</b>';
       statusEl.style.cssText = 'color:#9a3412;background:#fff7ed;padding:8px 12px;border-radius:8px;border:1px solid #fed7aa;font-size:12px;margin-top:6px;';
@@ -11566,7 +11583,7 @@ document.addEventListener('keydown', function(e) {
 // ═══════════════════════════════════════════════════════════════════
 function _getCurrentVersion() {
   // Read from the visible version label in the sidebar
-  // <div ...>v2.9.64 — view scanned docs ...</div>
+  // <div ...>v2.9.65 — auto-scrap on expiry ...</div>
   try {
     var nodes = document.querySelectorAll('div');
     for (var i = 0; i < nodes.length; i++) {
