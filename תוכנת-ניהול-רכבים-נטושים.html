@@ -2184,7 +2184,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.84 — smart login fallback אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.87 — simplified (no tombstones) אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2235,47 +2235,14 @@ try {
     </div>
   </div>
 
-  <div class="sb-bottom" style="position:relative;">
-    <div class="sb-user" onclick="toggleUserDropdown()" style="cursor:pointer;">
-      <div class="sb-avatar" id="active-user-avatar" style="background: linear-gradient(135deg, rgb(26, 188, 156), rgb(14, 102, 85)); color: rgb(255, 255, 255);">ג</div>
-      <div style="flex:1;min-width:0;">
-        <div class="sb-uname" id="active-user-name">גבי חותם</div>
-        <div class="sb-urole" id="active-user-role">מנהל פיקוח</div>
+  <div class="sb-bottom">
+    <div class="sb-user">
+      <div class="sb-avatar" style="background: linear-gradient(135deg, rgb(26, 188, 156), rgb(14, 102, 85)); color: rgb(255, 255, 255);">ג</div>
+      <div>
+        <div class="sb-uname">גבי חותם</div>
+        <div class="sb-urole">מנהל פיקוח</div>
       </div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.5);">▼</div>
-    </div>
-    <div id="user-dropdown-menu" style="display:none;position:absolute;bottom:100%;left:8px;right:8px;background:#fff;border:1px solid #ddd;border-radius:10px;margin-bottom:8px;box-shadow:0 4px 16px rgba(0,0,0,0.2);z-index:1000;direction:rtl;overflow:hidden;">
-      <div style="padding:10px 14px;background:#f5f7fa;font-size:11px;color:#666;font-weight:600;border-bottom:1px solid #e5e7eb;">החלף משתמש פעיל:</div>
-      <div onclick="setActiveUser('gabbyc@galil-elion.org.il')" class="user-opt" style="padding:11px 14px;cursor:pointer;font-size:13px;color:#0f172a;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:10px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''">
-        <span style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#1abc9c,#0e6655);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">ג</span>
-        <span style="flex:1;">גבי חותם<br><span style="font-size:11px;color:#888;">מנהל פיקוח</span></span>
-        <span style="font-size:9px;background:#16a34a;color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;">ADMIN</span>
-      </div>
-      <div onclick="setActiveUser('moranl@galil-elion.org.il')" class="user-opt" style="padding:11px 14px;cursor:pointer;font-size:13px;color:#0f172a;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:10px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''">
-        <span style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#e91e63,#ad1457);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">מ</span>
-        <span style="flex:1;">מורן לוז<br><span style="font-size:11px;color:#888;">מזכירה</span></span>
-        <span style="font-size:9px;background:#16a34a;color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;">ADMIN</span>
-      </div>
-      <div onclick="setActiveUser('shimi@galil-elion.org.il')" class="user-opt" style="padding:11px 14px;cursor:pointer;font-size:13px;color:#0f172a;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:10px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''">
-        <span style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#3498db,#1f3a5f);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">ש</span>
-        <span style="flex:1;">שימי רוזנברג<br><span style="font-size:11px;color:#888;">פקח</span></span>
-        <span style="font-size:9px;background:#94a3b8;color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;">צפייה</span>
-      </div>
-      <div onclick="setActiveUser('francis@galil-elion.org.il')" class="user-opt" style="padding:11px 14px;cursor:pointer;font-size:13px;color:#0f172a;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:10px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''">
-        <span style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#f39c12,#b9770e);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">פ</span>
-        <span style="flex:1;">פרנסיס ברוטמן<br><span style="font-size:11px;color:#888;">פקח</span></span>
-        <span style="font-size:9px;background:#94a3b8;color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;">צפייה</span>
-      </div>
-      <div onclick="setActiveUser('eyal@galil-elion.org.il')" class="user-opt" style="padding:11px 14px;cursor:pointer;font-size:13px;color:#0f172a;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;gap:10px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''">
-        <span style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#9b59b6,#6c3483);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">א</span>
-        <span style="flex:1;">אייל ארצי<br><span style="font-size:11px;color:#888;">פקח</span></span>
-        <span style="font-size:9px;background:#94a3b8;color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;">צפייה</span>
-      </div>
-      <div onclick="setActiveUser('mayag@galil-elion.org.il')" class="user-opt" style="padding:11px 14px;cursor:pointer;font-size:13px;color:#0f172a;display:flex;align-items:center;gap:10px;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background=''">
-        <span style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#16a085,#0e6655);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">מ</span>
-        <span style="flex:1;">מאיה גורדון<br><span style="font-size:11px;color:#888;">מנהלת אגף</span></span>
-        <span style="font-size:9px;background:#94a3b8;color:#fff;padding:2px 6px;border-radius:4px;font-weight:700;">צפייה</span>
-      </div>
+      <div class="sb-dot"></div>
     </div>
   </div>
 </div>
@@ -2295,7 +2262,7 @@ try {
       <div class="tb-date" id="live-date">יום ראשון, 10 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב (Enter להצגה מלאה)" oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.84 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.85 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2952,7 +2919,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-saved" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">נשמר ✓</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.84 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.85 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <!-- v2.9.52: "נקה הכל" button removed per Gabby's request - too risky to expose at the top of the page. -->
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -6016,7 +5983,17 @@ function saveCase() {
             _updatedByName: (typeof window.getActiveUserName === 'function') ? window.getActiveUserName() : 'משתמש',
             fullData: fullCaseSnapshot
           };
-          if (fbId) {
+          // ═══ v2.9.85: Block update if plate is tombstoned ═══
+          var savePlate = String(rowData.plate || '').trim();
+          var isTombstoned = false;
+          try {
+            var lt = JSON.parse(localStorage.getItem('galilElyon_deletedPlates') || '[]');
+            if (Array.isArray(lt) && lt.indexOf(savePlate) !== -1) isTombstoned = true;
+          } catch(e){}
+          if (isTombstoned) {
+            console.warn('[saveCase] BLOCKED — plate is tombstoned:', savePlate);
+            if (typeof showToast === 'function') showToast('⚠️ התיק הזה נמחק - לא ניתן לערוך אותו');
+          } else if (fbId) {
             // Existing Firebase record — update it
             dbForEdit.ref('cases/' + fbId).update(rowData)
               .then(function() { console.log('[saveCase] ✓ synced edit to Firebase:', fbId); })
@@ -6290,22 +6267,6 @@ if (document.readyState === 'loading') {
 function upsertCaseRow(oldPlate, c, fullData) {
   var tbody = document.getElementById('cases-tbody');
   if (!tbody) return;
-
-  // ═══ v2.9.76: PLATE-LEVEL TOMBSTONE CHECK ═══
-  // upsertCaseRow is the ultimate "add a row to the cases table" function,
-  // called from many code paths (Firebase listeners, refreshNow, manual
-  // edits, file imports). If any of those try to (re-)add a deleted plate,
-  // bail out here so the deletion is honored everywhere.
-  try {
-    var newPlate = String((c && c.plate) || '').trim();
-    if (newPlate) {
-      var deletedPlatesUS = JSON.parse(localStorage.getItem('galilElyon_deletedPlates') || '[]');
-      if (Array.isArray(deletedPlatesUS) && deletedPlatesUS.indexOf(newPlate) !== -1) {
-        console.log('[upsertCaseRow] ✗ skipped (tombstoned by plate):', newPlate);
-        return;
-      }
-    }
-  } catch(e) { /* ignore parse errors */ }
 
   // ═══ v2.9.43: ensure click delegation is installed (idempotent) ═══
   try { if (typeof _reattachCaseRowClicks === 'function') _reattachCaseRowClicks(); } catch(e){}
@@ -9229,9 +9190,21 @@ function saveNewCase() {
             _updatedByName: (typeof window.getActiveUserName === 'function') ? window.getActiveUserName() : 'משתמש',
             fullData:    fullSnap     // entire CASE object as a single field
           };
+          // ═══ v2.9.85: Block update if plate is tombstoned ═══
+          var editPlate = String(CASE.plate || '').trim();
+          var editTombstoned = false;
+          try {
+            var lt2 = JSON.parse(localStorage.getItem('galilElyon_deletedPlates') || '[]');
+            if (Array.isArray(lt2) && lt2.indexOf(editPlate) !== -1) editTombstoned = true;
+          } catch(e){}
+          if (editTombstoned) {
+            console.warn('[saveNewCase EDIT] BLOCKED — plate is tombstoned:', editPlate);
+            if (typeof showToast === 'function') showToast('⚠️ התיק הזה נמחק - לא ניתן לערוך אותו');
+          } else {
           dbForUpdate.ref('cases/' + existingId).update(payload)
             .then(function(){ console.log('[saveNewCase EDIT] ✓ pushed update to Firebase:', existingId, 'ownerAddr=', CASE.ownerAddr); })
             .catch(function(err){ console.warn('[saveNewCase EDIT] FB update failed:', err); });
+          }
         }
 
         // Save state to localStorage so changes persist
@@ -10361,7 +10334,82 @@ function closeDeleteModal() {
 function executeDeleteCase() {
   closeDeleteModal();
 
-  // ═══ v2.9.79: SYNC TOMBSTONE THROUGH FIREBASE ═══
+  // ═══ v2.9.87: SIMPLIFIED — no tombstones, just remove() ═══
+  if (!deletingPlate) return;
+  var deletePlate = String(deletingPlate).trim();
+
+  // Remove from DOM (cases list)
+  var rows = document.querySelectorAll('#cases-tbody tr');
+  for (var r = 0; r < rows.length; r++) {
+    var pb = rows[r].querySelector('.plate-badge');
+    if (pb && pb.textContent.trim() === deletePlate) {
+      rows[r].remove();
+      break;
+    }
+  }
+  // Remove from dashboard urgent table
+  var dashRows = document.querySelectorAll('#view-dashboard .tbl tbody tr');
+  for (var d = 0; d < dashRows.length; d++) {
+    var dpb = dashRows[d].querySelector('.plate-badge');
+    if (dpb && dpb.textContent.trim() === deletePlate) {
+      dashRows[d].remove();
+      break;
+    }
+  }
+  // Remove from map
+  for (var m = MAP_CASES.length - 1; m >= 0; m--) {
+    if (MAP_CASES[m].plate === deletePlate) {
+      MAP_CASES.splice(m, 1);
+      break;
+    }
+  }
+
+  // Remove from Firebase — hard delete every record with this plate
+  if (window.fbReady && window.fbDb) {
+    fbDb.ref('cases').once('value').then(function(snap) {
+      var allCases = snap.val() || {};
+      Object.keys(allCases).forEach(function(fid) {
+        var c = allCases[fid];
+        if (!c) return;
+        var p1 = String(c.plate || '').trim();
+        var p2 = String((c.fullData && c.fullData.plate) || '').trim();
+        if (p1 === deletePlate || p2 === deletePlate) {
+          fbDb.ref('cases/' + fid).remove()
+            .then(function() { console.log('[deleteCase] ✓ removed', fid); })
+            .catch(function(err) { console.warn('[deleteCase] failed:', err); });
+        }
+      });
+    }).catch(function(err) { console.warn('[deleteCase] scan failed:', err); });
+
+    // Remove the archive folder
+    try {
+      if (typeof safePlateKey === 'function') {
+        var safe = safePlateKey(deletePlate);
+        fbDb.ref('archives/' + safe).remove().catch(function(){});
+      }
+    } catch(e) {}
+  }
+
+  // Remove activity entries about this plate
+  if (typeof activityFeed !== 'undefined' && Array.isArray(activityFeed)) {
+    activityFeed = activityFeed.filter(function(a) {
+      return String(a.plate || '').trim() !== deletePlate;
+    });
+    if (typeof saveActivityFeed === 'function') saveActivityFeed();
+    if (typeof renderActivityFeed === 'function') renderActivityFeed();
+  }
+
+  // Update counters and refresh
+  updateAllCounters();
+  if (typeof syncDashboardWithCases === 'function') syncDashboardWithCases();
+  if (typeof refreshDashboardPanels === 'function') refreshDashboardPanels();
+
+  showView('cases-list');
+  showToast('🗑️ התיק ' + deletePlate + ' נמחק');
+
+  // Auto-save
+  try { if (typeof saveState === 'function') saveState(); } catch(e){}
+}
   // The tombstone-by-plate is stored in localStorage on the device that
   // performed the delete. But the manager works on multiple machines (Mac
   // at home, Windows at the office, plus other staff have the app open).
@@ -11209,46 +11257,6 @@ function loadState() {
       });
     }
 
-    // ═══════════════════════════════════════════════════════════════════
-    // v2.9.77: SCRUB TOMBSTONED PLATES AFTER LOAD
-    // loadState writes table HTML directly (`tb.innerHTML = ...`), which
-    // BYPASSES upsertCaseRow and its tombstone check. So if autosave ever
-    // captured a snapshot with a since-deleted row, that row would be
-    // restored on every page load. Now we scrub them out right after the
-    // restore — by plate AND by mobile-id.
-    // ═══════════════════════════════════════════════════════════════════
-    try {
-      var scrubPlates = JSON.parse(localStorage.getItem('galilElyon_deletedPlates') || '[]');
-      var scrubIds = JSON.parse(localStorage.getItem('galilElyon_deletedIds') || '[]');
-      if (!Array.isArray(scrubPlates)) scrubPlates = [];
-      if (!Array.isArray(scrubIds)) scrubIds = [];
-      if (scrubPlates.length || scrubIds.length) {
-        var scrubCount = 0;
-        ['cases-tbody', 'dash-urgent-tbody', 'tw-tow-pending-tbody', 'tw-towed-tbody', 'tw-returned-tbody', 'towed-tbody', 'mobile-cases-tbody', 'tw-history-tbody', 'towns-cases-tbody'].forEach(function(tbId) {
-          var tbody = document.getElementById(tbId);
-          if (!tbody) return;
-          Array.prototype.slice.call(tbody.querySelectorAll('tr')).forEach(function(row) {
-            // Check by mobile-id first
-            var mid = row.getAttribute('data-mobile-id');
-            if (mid && scrubIds.indexOf(mid) !== -1) {
-              row.remove(); scrubCount++; return;
-            }
-            // Then by plate
-            var pb = row.querySelector('.plate-badge');
-            if (pb) {
-              var plate = pb.textContent.trim();
-              if (plate && scrubPlates.indexOf(plate) !== -1) {
-                row.remove(); scrubCount++;
-              }
-            }
-          });
-        });
-        if (scrubCount > 0) {
-          console.log('[loadState scrub] removed ' + scrubCount + ' tombstoned rows after restore');
-        }
-      }
-    } catch(e) { console.warn('[loadState scrub] error:', e); }
-
     // ═══ v2.9.43: re-attach click handlers to restored rows ═══
     // tb.innerHTML = ... wipes ALL JS event listeners, including the
     // tr.onclick = function() { openEditFullForm(this); } that
@@ -11870,7 +11878,7 @@ document.addEventListener('keydown', function(e) {
 // ═══════════════════════════════════════════════════════════════════
 function _getCurrentVersion() {
   // Read from the visible version label in the sidebar
-  // <div ...>v2.9.84 — smart login fallback ...</div>
+  // <div ...>v2.9.87 — simplified (no tombstones) ...</div>
   try {
     var nodes = document.querySelectorAll('div');
     for (var i = 0; i < nodes.length; i++) {
@@ -12610,9 +12618,9 @@ function _scrubTombstonedRows() {
   } catch(e) { /* silent */ }
 }
 window._scrubTombstonedRows = _scrubTombstonedRows;
-setInterval(_scrubTombstonedRows, 10 * 1000);
+/* v2.9.87: tombstones disabled */
 // Also run once on load (after a short delay so DOM/Firebase have settled)
-setTimeout(_scrubTombstonedRows, 3000);
+/* v2.9.87: tombstones disabled */
 
 // Check immediately when tab becomes visible (user comes back from another tab)
 document.addEventListener('visibilitychange', function() {
@@ -13157,6 +13165,17 @@ if (document.readyState === 'loading') {
         console.warn('[GalilSync._pushManualCase] skipped — missing plate');
         return Promise.resolve(null);
       }
+      // ═══ DISABLED v2.9.85: TOMBSTONE GUARD — never push a case whose plate is
+      // in the local OR Firebase tombstone list. This prevents the bug where
+      // another manager (or an old cache) re-pushes a deleted case.
+      var pushPlate = String(rowData.plate || '').trim();
+      try {
+        var localTombs = JSON.parse(localStorage.getItem('galilElyon_deletedPlates') || '[]');
+        if (Array.isArray(localTombs) && localTombs.indexOf(pushPlate) !== -1) {
+          console.warn('[GalilSync._pushManualCase] BLOCKED — plate is in local tombstone:', pushPlate);
+          return Promise.resolve(null);
+        }
+      } catch(e){}
       var id = existingId || ('manual_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8));
       var payload = {
         id:         id,
@@ -13173,16 +13192,31 @@ if (document.readyState === 'loading') {
         _updatedByName: (typeof window.getActiveUserName === 'function') ? window.getActiveUserName() : 'משתמש',
         fullData:   fullData || null
       };
-      console.log('[GalilSync._pushManualCase] pushing to Firebase:', id, rowData.plate);
-      return fbDb.ref('cases/' + id).set(payload)
-        .then(function() {
-          console.log('[GalilSync._pushManualCase] ✓ pushed:', id);
-          return id;
-        })
-        .catch(function(err) {
-          console.error('[GalilSync._pushManualCase] ✗ FAILED for ' + id + ':', err);
+      // ═══ v2.9.85: also check Firebase _tombstones (cross-device protection) ═══
+      return fbDb.ref('_tombstones/' + pushPlate.replace(/[.#$\[\]\/]/g, '_')).once('value').then(function(snap) {
+        if (snap.val()) {
+          console.warn('[GalilSync._pushManualCase] BLOCKED — plate is in Firebase tombstone:', pushPlate);
+          // Add it to local tombstone so future checks are instant
+          try {
+            var lt = JSON.parse(localStorage.getItem('galilElyon_deletedPlates') || '[]');
+            if (lt.indexOf(pushPlate) === -1) {
+              lt.push(pushPlate);
+              localStorage.setItem('galilElyon_deletedPlates', JSON.stringify(lt));
+            }
+          } catch(e){}
           return null;
-        });
+        }
+        console.log('[GalilSync._pushManualCase] pushing to Firebase:', id, rowData.plate);
+        return fbDb.ref('cases/' + id).set(payload)
+          .then(function() {
+            console.log('[GalilSync._pushManualCase] ✓ pushed:', id);
+            return id;
+          })
+          .catch(function(err) {
+            console.error('[GalilSync._pushManualCase] ✗ FAILED for ' + id + ':', err);
+            return null;
+          });
+      });
     },
     // ═══ NEW: One-time backfill — pushes all locally-stored cases (rows with
     // data-case but no data-mobile-id) to Firebase. Used so existing data
@@ -13742,25 +13776,6 @@ if (document.readyState === 'loading') {
           var plate = (c.plate || (c.fullData && c.fullData.plate) || '').trim();
           if (plate) firebasePlates[plate] = true;
 
-          // ═══ v2.9.76: PLATE-LEVEL TOMBSTONE CHECK ═══
-          // Without this, refreshNow happily re-adds rows for plates the user
-          // already deleted (because executeDeleteCase only had `_deleted=true`
-          // pushed to Firebase if it could find the case's id). Now we honor
-          // the local plate-tombstone too, AND we push _deleted back to
-          // Firebase so the deletion finally sticks for everyone.
-          if (plate && deletedPlates.indexOf(plate) !== -1) {
-            console.log('[refreshNow] ✗ skipped (tombstoned by plate):', id, plate);
-            skipped++;
-            try {
-              fbDb.ref('cases/' + id).update({
-                _deleted: true,
-                _deletedAt: Date.now(),
-                _deletedBy: 'plate-tombstone'
-              }).catch(function(){});
-            } catch(e){}
-            return;
-          }
-
           if (c.source === 'mobile') {
             // Mobile-app case → handled by the dedicated mobile row updater
             mobileCasesCache[id] = c;
@@ -14003,7 +14018,7 @@ if (document.readyState === 'loading') {
   function startListener() {
     if (!fbReady || !fbDb || listenerRef) return;
 
-    // ═══ v2.9.79: SYNC FIREBASE TOMBSTONES TO LOCAL ═══
+    // ═══ DISABLED v2.9.87: tombstone sync removed for simplicity
     // Pull ALL plate-tombstones from Firebase into local localStorage on
     // startup. Then keep them in sync via a continuous listener. This way:
     //   • iMac at home deletes → Firebase tombstone → office Mac sees it
@@ -14256,7 +14271,6 @@ if (document.readyState === 'loading') {
       var deletedPlates = JSON.parse(localStorage.getItem('galilElyon_deletedPlates') || '[]');
       var cp = String(c.plate || '').trim();
       if (Array.isArray(deletedPlates) && cp && deletedPlates.indexOf(cp) !== -1) {
-        console.log('[addOrUpdateManualRow] ✗ skipped (tombstoned by plate):', c.id, cp);
         // Also push _deleted=true to Firebase so other devices stop seeing it
         try {
           if (c.id && fbDb) {
@@ -14360,12 +14374,6 @@ if (document.readyState === 'loading') {
       var deletedPlates = JSON.parse(localStorage.getItem('galilElyon_deletedPlates') || '[]');
       var cp = String(c.plate || '').trim();
       if (Array.isArray(deletedPlates) && cp && deletedPlates.indexOf(cp) !== -1) {
-        console.log('[addOrUpdateMobileRow] ✗ skipped (tombstoned by plate):', c.id, cp);
-        try {
-          if (c.id && fbDb) {
-            fbDb.ref('cases/' + c.id).update({ _deleted: true, _deletedAt: Date.now() }).catch(function(){});
-          }
-        } catch(e){}
         return;
       }
     } catch(e){}
