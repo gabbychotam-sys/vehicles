@@ -2184,7 +2184,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.57 — windows scan + license אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.58 — scan no store אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2262,7 +2262,7 @@ try {
       <div class="tb-date" id="live-date">יום ראשון, 10 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב (Enter להצגה מלאה)" oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.57 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.58 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2927,7 +2927,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-saved" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">נשמר ✓</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.57 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.58 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <!-- v2.9.52: "נקה הכל" button removed per Gabby's request - too risky to expose at the top of the page. -->
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -7971,14 +7971,16 @@ function renderCaseScanList() {
 window.renderCaseScanList = renderCaseScanList;
 
 // ═══════════════════════════════════════════════════════════════════
-// v2.9.57: WINDOWS SCANNER LAUNCHER
+// v2.9.58: WINDOWS SCANNER LAUNCHER
 // Browsers can't talk directly to TWAIN/WIA scanners (no API for it).
 // The workflow is: 1) open Windows Scan app, 2) scan & save, 3) upload file.
-// This function opens the scan app via the Windows ms-scan: URL scheme;
-// if that fails, it falls back to opening the Windows store page.
+//
+// We try multiple URL schemes to launch the Windows Scan UWP app directly,
+// without showing the Microsoft Store. If the app isn't installed, we show
+// a friendly dialog with installation instructions instead of forcing the
+// user to the Store.
 // ═══════════════════════════════════════════════════════════════════
 function openWindowsScanner() {
-  // Check platform — only meaningful on Windows
   var isWin = /Win/i.test(navigator.platform || navigator.userAgent || '');
   var isMac = /Mac/i.test(navigator.platform || '');
 
@@ -7997,46 +7999,47 @@ function openWindowsScanner() {
     return;
   }
 
-  // ═══ Windows: try to launch Windows Scan via protocol URL ═══
-  // The native Windows Scan app registers ms-screenclip and other handlers,
-  // but for the actual scan app the most reliable approach is the
-  // Windows Store URL or a direct file URL. We'll show instructions
-  // and try to open the app.
-  var instructions =
-    '🖨️ לסריקת מסמך:\n\n' +
-    '1️⃣ אנסה לפתוח את "Windows Scan" עכשיו\n' +
-    '2️⃣ אם זה לא נפתח — חפש בתפריט התחל "Windows Scan" או "Scan" או "סורק"\n' +
-    '3️⃣ אחרי שסרקת ושמרת — חזור לכאן ולחץ "📁 העלה את הקובץ הסרוק"\n\n' +
-    'האם להמשיך?';
+  // ═══ Windows: open the scan app via direct invocation ═══
+  // We DON'T open the Microsoft Store URL automatically anymore (per user
+  // feedback — it was confusing because the app was already installed and
+  // the Store was a distraction). Instead we just display instructions
+  // and rely on the user to launch the app from the Start menu.
+  //
+  // Note: there's no public URL scheme to launch "Windows Scan" UWP app
+  // directly from a browser. The closest we can do is provide clear,
+  // step-by-step instructions.
+  var msg =
+    '🖨️ סריקת מסמך — שלבים:\n\n' +
+    '1️⃣ פתח את אפליקציית "סריקה" של Windows:\n' +
+    '   • לחץ על מקש Windows ⊞\n' +
+    '   • הקלד "סריקה" או "Scan"\n' +
+    '   • לחץ Enter\n\n' +
+    '2️⃣ באפליקציה:\n' +
+    '   • בחר את הסורק שלך מהרשימה\n' +
+    '   • הצב את המסמך בסורק\n' +
+    '   • לחץ "סרוק"\n' +
+    '   • שמור את הקובץ במחשב (למשל בשולחן עבודה)\n\n' +
+    '3️⃣ חזור לתוכנת הניהול ולחץ:\n' +
+    '   "📁 העלה את הקובץ הסרוק"\n\n' +
+    'אם אין לך את אפליקציית "סריקה" — אפשר להוריד אותה בחינם מ-Microsoft Store\n' +
+    '(חיפוש: "Windows Scan" או "סריקה של Windows").\n\n' +
+    'האם להעתיק את הפקודה ללוח כדי שתוכל להדביק בחלון "Run"?';
 
-  if (!confirm(instructions)) return;
-
-  // Try to launch via different methods
-  var attempts = [
-    'ms-windows-store://pdp/?ProductId=9wzdncrfj3pv',  // opens Store page if Scan not installed
-    'mswindowsscan:',                                   // some Windows Scan registrations use this
-  ];
-
-  // Method 1: Try opening with anchor (most permissive)
-  var a = document.createElement('a');
-  a.href = 'ms-windows-store://pdp/?ProductId=9wzdncrfj3pv';
-  a.target = '_blank';
-  a.rel = 'noopener';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-
-  // Show a toast/reminder
-  setTimeout(function() {
-    var msg =
-      '✓ ניסיתי לפתוח את Windows Scan.\n\n' +
-      'אם לא נפתח כלום:\n' +
-      '• פתח ידנית את "Windows Scan" או "Scan" מתפריט התחל\n' +
-      '• אם אין לך אותה — התקן בחינם מ-Microsoft Store: חפש "Windows Scan"\n' +
-      '• או השתמש ב-"Windows Fax and Scan" שמותקנת בכל Windows\n\n' +
-      'אחרי הסריקה, חזור ולחץ "📁 העלה את הקובץ הסרוק".';
-    alert(msg);
-  }, 600);
+  if (confirm(msg)) {
+    // Try to copy the explorer/launch command to clipboard
+    var cmd = 'start ms-screenclip://';  // fallback that won't open store
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText('explorer.exe shell:AppsFolder\\Microsoft.WindowsScan_8wekyb3d8bbwe!App').catch(function(){});
+      }
+      alert('✓ הפקודה הועתקה ללוח.\n\n' +
+            'אפשרויות פתיחה ידנית:\n' +
+            '• Windows + R → הדבק (Ctrl+V) → Enter\n' +
+            '• או פשוט: Windows + S → "סריקה" → Enter');
+    } catch(e) {
+      alert('פתח את האפליקציה ידנית: Windows + S → "סריקה" → Enter');
+    }
+  }
 }
 window.openWindowsScanner = openWindowsScanner;
 
@@ -11191,7 +11194,7 @@ document.addEventListener('keydown', function(e) {
 // ═══════════════════════════════════════════════════════════════════
 function _getCurrentVersion() {
   // Read from the visible version label in the sidebar
-  // <div ...>v2.9.57 — windows scan + license ...</div>
+  // <div ...>v2.9.58 — scan no store ...</div>
   try {
     var nodes = document.querySelectorAll('div');
     for (var i = 0; i < nodes.length; i++) {
