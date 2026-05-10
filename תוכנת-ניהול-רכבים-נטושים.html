@@ -2184,7 +2184,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.59 — scan launch uri אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.60 — scan instructions אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2262,7 +2262,7 @@ try {
       <div class="tb-date" id="live-date">יום ראשון, 10 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב (Enter להצגה מלאה)" oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.59 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.60 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2673,24 +2673,37 @@ try {
             <div id="nf-scans-area" style="margin-top:6px;">
               <div id="nf-scans-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;"></div>
               <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:14px;margin-bottom:10px;">
-                <div style="font-weight:700;color:#0369a1;font-size:13px;margin-bottom:8px;">🖨️ סריקת מסמך — שני שלבים:</div>
-                <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-                  <div style="display:flex;align-items:center;gap:6px;">
-                    <span style="background:#0284c7;color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">1</span>
-                    <button type="button" onclick="openWindowsScanner()" style="background:#0284c7;color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;">פתח את הסורק</button>
+                <div style="font-weight:700;color:#0369a1;font-size:13px;margin-bottom:10px;">🖨️ סריקת מסמך — שני שלבים פשוטים:</div>
+
+                <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-bottom:8px;">
+                  <div style="flex:1;min-width:240px;background:#fff;border:1px solid #e0e7ff;border-radius:10px;padding:12px;">
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                      <span style="background:#0284c7;color:#fff;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">1</span>
+                      <span style="font-weight:700;color:#0c4a6e;font-size:13px;">פתח את הסורק</span>
+                    </div>
+                    <div style="font-size:12px;color:#475569;line-height:1.7;">
+                      הקש <kbd style="background:#1e293b;color:#fff;padding:2px 8px;border-radius:4px;font-family:monospace;font-size:11px;">⊞ Win</kbd> →
+                      הקלד <b>"סריקה"</b> →
+                      <kbd style="background:#1e293b;color:#fff;padding:2px 8px;border-radius:4px;font-family:monospace;font-size:11px;">Enter</kbd>
+                    </div>
+                    <button type="button" onclick="openWindowsScanner()" style="margin-top:8px;background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;">❓ הוראות מפורטות</button>
                   </div>
-                  <div style="font-size:18px;color:#94a3b8;">←</div>
-                  <div style="display:flex;align-items:center;gap:6px;">
-                    <span style="background:#0284c7;color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">2</span>
-                    <label style="display:inline-flex;align-items:center;gap:8px;background:#10b981;color:#fff;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;">
-                      📁 העלה את הקובץ הסרוק
+
+                  <div style="font-size:22px;color:#94a3b8;align-self:center;">→</div>
+
+                  <div style="flex:1;min-width:240px;background:#fff;border:1px solid #d1fae5;border-radius:10px;padding:12px;">
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                      <span style="background:#10b981;color:#fff;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">2</span>
+                      <span style="font-weight:700;color:#064e3b;font-size:13px;">העלה את הקובץ הסרוק</span>
+                    </div>
+                    <div style="font-size:12px;color:#475569;line-height:1.7;margin-bottom:8px;">
+                      אחרי שסרקת ושמרת את הקובץ — לחץ כאן:
+                    </div>
+                    <label style="display:inline-flex;align-items:center;gap:6px;background:#10b981;color:#fff;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;">
+                      📁 בחר קובץ
                       <input type="file" accept="image/*,application/pdf" multiple style="display:none;" onchange="handleNewCaseScan(event)">
                     </label>
                   </div>
-                </div>
-                <div style="font-size:11px;color:#475569;margin-top:8px;line-height:1.5;">
-                  💡 <b>הסבר:</b> לחיצה על "פתח את הסורק" תפעיל את "סריקה של Windows". סרוק את המסמך, שמור אותו, ואז לחץ "העלה את הקובץ הסרוק" כדי לצרפו לתיק.<br>
-                  <span style="color:#64748b;">אם הסריקה לא נפתחה אוטומטית — לחץ Windows + S, הקלד "סריקה" ו-Enter.</span>
                 </div>
               </div>
             </div>
@@ -2928,7 +2941,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-saved" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">נשמר ✓</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.59 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.60 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <!-- v2.9.52: "נקה הכל" button removed per Gabby's request - too risky to expose at the top of the page. -->
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -7972,63 +7985,24 @@ function renderCaseScanList() {
 window.renderCaseScanList = renderCaseScanList;
 
 // ═══════════════════════════════════════════════════════════════════
-// v2.9.59: WINDOWS SCANNER LAUNCHER — actually opens the app
-// Uses ms-windows-store://launch/?productid=... which is the official
-// Microsoft URI for LAUNCHING (not opening Store page) of UWP apps.
-// If the app isn't installed, fall back to Store page so user can install.
+// v2.9.60: WINDOWS SCANNER LAUNCHER — short instruction only
+// Browsers cannot launch UWP apps directly — every URL we try (ms-windows-
+// store://, ms-windowsscan://, etc) ends up opening Microsoft Store's home
+// page instead of the actual scanner app. So we abandon auto-launch entirely
+// and just show a clean, short reminder of how to open it manually.
 // ═══════════════════════════════════════════════════════════════════
 function openWindowsScanner() {
-  var isWin = /Win/i.test(navigator.platform || navigator.userAgent || '');
   var isMac = /Mac/i.test(navigator.platform || '');
-
   if (isMac) {
-    alert('💡 Mac: פתח את "Image Capture" / "לכידת תמונה" (Cmd+Space → "Image Capture"), סרוק, שמור, ואז לחץ "📁 העלה את הקובץ הסרוק".');
+    alert('💡 Mac: Cmd+Space → "Image Capture" / "לכידת תמונה" → סרוק → שמור → "📁 העלה את הקובץ הסרוק"');
     return;
   }
-
-  if (!isWin) {
-    alert('💡 פתח את אפליקציית הסריקה במחשב, סרוק, שמור, ואז לחץ "📁 העלה את הקובץ הסרוק".');
-    return;
-  }
-
-  // Windows: launch the UWP "Windows Scan" app directly via the official
-  // launch URI (productid 9wzdncrfj3pv = Windows Scan).
-  // Strategy: try multiple URIs simultaneously via hidden iframes — the OS
-  // picks the first one with a registered handler. Then show a short reminder.
-  var uris = [
-    'ms-windows-store://launch/?productid=9wzdncrfj3pv',
-    'ms-windowsscan://',
-    'wiaacmgr://',
-    'shell:AppsFolder\\Microsoft.WindowsScan_8wekyb3d8bbwe!App'
-  ];
-
-  uris.forEach(function(u) {
-    try {
-      var f = document.createElement('iframe');
-      f.style.display = 'none';
-      f.src = u;
-      document.body.appendChild(f);
-      setTimeout(function(){ try { f.remove(); } catch(e){} }, 3000);
-    } catch(e){}
-  });
-
-  // Also use the location method as a final attempt
-  try {
-    var a = document.createElement('a');
-    a.href = 'ms-windows-store://launch/?productid=9wzdncrfj3pv';
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(function(){ try { a.remove(); } catch(e){} }, 1000);
-  } catch(e){}
-
-  // Subtle toast — DON'T block the user with a dialog. If the app didn't
-  // open, they can manually launch it (Win+S → "סריקה").
-  setTimeout(function() {
-    if (typeof showToast === 'function') {
-      showToast('🖨️ אם הסריקה לא נפתחה: Windows + S → "סריקה" → Enter');
-    }
-  }, 1500);
+  alert('🖨️ לפתיחת אפליקציית הסריקה:\n\n' +
+        '1️⃣  הקש על מקש Windows ⊞\n' +
+        '2️⃣  הקלד: סריקה  (או Scan)\n' +
+        '3️⃣  לחץ Enter\n\n' +
+        '4️⃣  סרוק את המסמך באפליקציה ושמור אותו\n' +
+        '5️⃣  חזור לכאן ולחץ "📁 העלה את הקובץ הסרוק"');
 }
 window.openWindowsScanner = openWindowsScanner;
 
@@ -11183,7 +11157,7 @@ document.addEventListener('keydown', function(e) {
 // ═══════════════════════════════════════════════════════════════════
 function _getCurrentVersion() {
   // Read from the visible version label in the sidebar
-  // <div ...>v2.9.59 — scan launch uri ...</div>
+  // <div ...>v2.9.60 — scan instructions ...</div>
   try {
     var nodes = document.querySelectorAll('div');
     for (var i = 0; i < nodes.length; i++) {
