@@ -2184,7 +2184,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.65 — auto-scrap on expiry אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.66 — OCR.space free אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2262,7 +2262,7 @@ try {
       <div class="tb-date" id="live-date">יום ראשון, 10 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב (Enter להצגה מלאה)" oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.65 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.66 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2918,7 +2918,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-saved" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">נשמר ✓</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.65 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.66 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <!-- v2.9.52: "נקה הכל" button removed per Gabby's request - too risky to expose at the top of the page. -->
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -3365,31 +3365,37 @@ try {
       <button onclick="resetBgPreset()" style="margin-top:16px;background:transparent;border:1px solid var(--border);color:var(--muted);padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;">↩️ אפס לברירת מחדל</button>
     </div>
 
-    <!-- ═══ v2.9.63: Google Vision API (auto-fill from MOT scan) ═══ -->
+    <!-- ═══ v2.9.66: OCR.space (auto-fill from MOT scan) ═══ -->
     <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-top:20px;">
       <div style="font-size:16px;font-weight:700;margin-bottom:6px;color:var(--text);">🔍 זיהוי אוטומטי ממסמכי משרד הרישוי</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6;">כשמעלים סריקה של "שאילתא לרכב" (משרד הרישוי) — המערכת תקרא את הקובץ אוטומטית ותמלא את שדות התיק (שם, ת.ז, כתובת, מספר רכב וכו').<br>השירות חינמי עד 1,000 סריקות בחודש דרך Google Cloud Vision.</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6;">כשמעלים סריקה של "שאילתא לרכב" (משרד הרישוי) — המערכת תקרא את הקובץ אוטומטית ותמלא את שדות התיק (שם, ת.ז, כתובת, מספר רכב וכו').<br>השירות חינמי לחלוטין דרך <b>OCR.space</b> - 25,000 סריקות בחודש (ללא כרטיס אשראי).</div>
 
-      <label style="display:block;font-size:13px;color:var(--text);font-weight:600;margin-bottom:6px;">מפתח Google Cloud Vision API:</label>
+      <label style="display:block;font-size:13px;color:var(--text);font-weight:600;margin-bottom:6px;">מפתח OCR.space API:</label>
       <div style="display:flex;gap:8px;align-items:stretch;">
-        <input type="password" id="gvision-api-key" placeholder="AIzaSyA..." style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;direction:ltr;text-align:left;font-family:monospace;background:var(--card2);color:var(--text);">
+        <input type="password" id="gvision-api-key" placeholder="K81234567890..." style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;direction:ltr;text-align:left;font-family:monospace;background:var(--card2);color:var(--text);">
         <button type="button" onclick="saveVisionApiKey()" style="background:#0284c7;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">💾 שמור</button>
         <button type="button" onclick="testVisionApiKey()" style="background:#10b981;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">🧪 בדוק</button>
       </div>
       <div id="gvision-status" style="font-size:12px;margin-top:8px;"></div>
 
       <details style="margin-top:14px;font-size:12px;color:var(--muted);">
-        <summary style="cursor:pointer;font-weight:600;color:#0369a1;">❓ איך מקבלים מפתח API? (פעם אחת בלבד)</summary>
+        <summary style="cursor:pointer;font-weight:600;color:#0369a1;">❓ איך מקבלים מפתח API חינם? (פעם אחת בלבד, 2 דקות)</summary>
         <ol style="margin-top:10px;line-height:1.9;padding-right:20px;">
-          <li>היכנס ל-<a href="https://console.cloud.google.com" target="_blank" style="color:#0284c7;">Google Cloud Console</a></li>
-          <li>צור פרויקט חדש (לדוגמה: "galil-vehicles")</li>
-          <li>בתפריט: <b>APIs & Services → Library</b> → חפש "Cloud Vision API" → <b>Enable</b></li>
-          <li>בתפריט: <b>APIs & Services → Credentials</b> → <b>Create Credentials → API Key</b></li>
-          <li>העתק את המפתח שנוצר (מתחיל ב-<code>AIzaSy...</code>)</li>
-          <li>חזור לכאן, הדבק את המפתח, ולחץ "💾 שמור" + "🧪 בדוק"</li>
+          <li>היכנס ל-<a href="https://ocr.space/ocrapi/freekey" target="_blank" style="color:#0284c7;font-weight:700;">https://ocr.space/ocrapi/freekey</a></li>
+          <li>מלא את הטופס:
+            <ul style="margin-top:4px;line-height:1.8;">
+              <li><b>Email Address</b>: כתובת המייל שלך</li>
+              <li><b>First Name</b>: שמך הפרטי</li>
+              <li><b>Last Name</b>: שם המשפחה</li>
+              <li>סמן את ה-CAPTCHA (Robot)</li>
+            </ul>
+          </li>
+          <li>לחץ <b>"Subscribe to list"</b></li>
+          <li>בדוק במייל שלך - תקבל מייל מ-OCR.space עם <b>"OCR API Key"</b> (מתחיל ב-K8 או K9)</li>
+          <li>העתק את המפתח, הדבק כאן, ולחץ <b>"💾 שמור"</b> + <b>"🧪 בדוק"</b></li>
         </ol>
-        <div style="background:#fef3c7;border:1px solid #fde68a;color:#78350f;padding:10px 12px;border-radius:8px;margin-top:10px;line-height:1.6;">
-          <b>⚠️ חשוב לאבטחה:</b> ב-Google Cloud Console, לחץ על המפתח שיצרת והגביל אותו רק ל-<b>Cloud Vision API</b>, וגם הגביל אותו לדומיינים שלך (<code>gabbychotam-sys.github.io</code>) — אחרת מישהו יוכל להשתמש בו.
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;padding:10px 12px;border-radius:8px;margin-top:10px;line-height:1.6;">
+          <b>✓ למה זה טוב:</b> 100% חינמי · ללא כרטיס אשראי · 25,000 סריקות בחודש (פי 25 מהמכסה החינמית של גוגל).
         </div>
       </details>
     </div>
@@ -8089,8 +8095,9 @@ function saveVisionApiKey() {
     status.style.cssText = 'color:#64748b;font-size:12px;margin-top:8px;';
     return;
   }
-  if (!/^AIza[0-9A-Za-z_-]{30,}$/.test(key)) {
-    status.innerHTML = '⚠️ המפתח לא בפורמט הנכון (אמור להתחיל ב-AIzaSy...)';
+  // OCR.space keys typically start with K (uppercase) followed by digits/letters
+  if (key.length < 8) {
+    status.innerHTML = '⚠️ המפתח קצר מדי. ודא שהעתקת את המפתח המלא מהמייל של OCR.space.';
     status.style.cssText = 'color:#b91c1c;font-size:12px;margin-top:8px;';
     return;
   }
@@ -8116,33 +8123,36 @@ function testVisionApiKey() {
   status.innerHTML = '⏳ בודק את המפתח...';
   status.style.cssText = 'color:#0369a1;font-size:12px;margin-top:8px;';
 
-  // Send a tiny 1x1 pixel image to Vision API to verify the key
-  var tinyPng = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
-  fetch('https://vision.googleapis.com/v1/images:annotate?key=' + encodeURIComponent(key), {
+  // OCR.space test: send a tiny base64 image
+  // 1x1 white png base64
+  var tinyPng = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
+
+  var formData = new FormData();
+  formData.append('apikey', key);
+  formData.append('language', 'eng');
+  formData.append('base64Image', tinyPng);
+
+  fetch('https://api.ocr.space/parse/image', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      requests: [{
-        image: { content: tinyPng },
-        features: [{ type: 'TEXT_DETECTION' }]
-      }]
-    })
+    body: formData
   })
   .then(function(r) { return r.json(); })
   .then(function(data) {
-    if (data.error) {
-      status.innerHTML = '❌ שגיאה: ' + (data.error.message || 'לא ידוע') + '<br>בדוק שה-Vision API מופעל בפרויקט שלך.';
-      status.style.cssText = 'color:#b91c1c;background:#fee2e2;padding:10px;border-radius:6px;font-size:12px;margin-top:8px;';
-    } else if (data.responses && data.responses[0]) {
-      if (data.responses[0].error) {
-        status.innerHTML = '❌ ' + data.responses[0].error.message;
-        status.style.cssText = 'color:#b91c1c;background:#fee2e2;padding:10px;border-radius:6px;font-size:12px;margin-top:8px;';
-      } else {
-        status.innerHTML = '✅ המפתח עובד! Vision API מוכן לשימוש.';
+    if (data.IsErroredOnProcessing) {
+      var err = Array.isArray(data.ErrorMessage) ? data.ErrorMessage.join(', ') : (data.ErrorMessage || 'שגיאה לא ידועה');
+      // Even "no text found" is OK for the test — it means the API key works
+      if (/no text|empty/i.test(err)) {
+        status.innerHTML = '✅ המפתח עובד! OCR.space מוכן לשימוש.';
         status.style.cssText = 'color:#166534;background:#f0fdf4;padding:10px;border-radius:6px;font-size:12px;margin-top:8px;';
+      } else {
+        status.innerHTML = '❌ ' + err;
+        status.style.cssText = 'color:#b91c1c;background:#fee2e2;padding:10px;border-radius:6px;font-size:12px;margin-top:8px;';
       }
+    } else if (data.OCRExitCode === 1 || data.OCRExitCode === 2 || data.ParsedResults) {
+      status.innerHTML = '✅ המפתח עובד! OCR.space מוכן לשימוש.';
+      status.style.cssText = 'color:#166534;background:#f0fdf4;padding:10px;border-radius:6px;font-size:12px;margin-top:8px;';
     } else {
-      status.innerHTML = '⚠️ תגובה לא צפויה מ-Google';
+      status.innerHTML = '⚠️ תגובה לא צפויה מ-OCR.space';
       status.style.cssText = 'color:#9a3412;font-size:12px;margin-top:8px;';
     }
   })
@@ -8172,9 +8182,9 @@ function handleAutoFillScan(event) {
 
   var apiKey = _getVisionApiKey();
   if (!apiKey) {
-    alert('🔑 לפני שימוש בזיהוי אוטומטי - יש להגדיר מפתח Google Vision API.\n\n' +
+    alert('🔑 לפני שימוש בזיהוי אוטומטי - יש להגדיר מפתח OCR.space (חינם, ללא כרטיס אשראי).\n\n' +
           'עבור ל: ⚙️ הגדרות → "🔍 זיהוי אוטומטי ממסמכי משרד הרישוי" → הזן מפתח API.\n\n' +
-          'הוראות מפורטות בהגדרות.');
+          'הוראות מפורטות בהגדרות (לחץ "❓ איך מקבלים מפתח API חינם?").');
     return;
   }
 
@@ -8191,54 +8201,46 @@ function handleAutoFillScan(event) {
     statusBox.style.cssText = 'display:block;color:#0369a1;background:#eff6ff;border:1px solid #bfdbfe;padding:10px 14px;border-radius:8px;font-size:12px;margin-top:10px;line-height:1.6;';
   }
 
-  // Read file as base64
+  // Read file as data URL (we need both base64 for OCR and to save the file to archive)
   var reader = new FileReader();
   reader.onload = function(e) {
     var dataUrl = e.target.result;
-    var base64 = String(dataUrl).split(',')[1];
-    if (!base64) {
+    if (!dataUrl) {
       _autoFillStatusError('לא ניתן לקרוא את הקובץ');
       return;
     }
 
-    // For PDFs, we need to send to Vision differently — but Vision can
-    // also accept PDFs via the documentTextDetection feature with proper
-    // MIME type. For simplicity, we always use TEXT_DETECTION which works
-    // for both images and the first page of PDFs (after Vision converts).
-    var requestBody = {
-      requests: [{
-        image: { content: base64 },
-        features: [{ type: 'DOCUMENT_TEXT_DETECTION' }],
-        imageContext: { languageHints: ['he', 'en'] }
-      }]
-    };
+    // ═══ OCR.space API ═══
+    // Free tier: 25,000 requests/month, no credit card needed.
+    // Engine 2 supports Hebrew. Send file as multipart for best results.
+    var formData = new FormData();
+    formData.append('apikey', apiKey);
+    formData.append('language', 'heb');
+    formData.append('OCREngine', '2');
+    formData.append('isOverlayRequired', 'false');
+    formData.append('scale', 'true');           // upscale small images
+    formData.append('detectOrientation', 'true');
+    formData.append('file', file);
 
-    // PDFs need a different API path — but Vision's images:annotate accepts
-    // PDFs only up to 5MB AND only via gcsSource. For simplicity, recommend
-    // converting PDFs to images first. We'll still try the request and let
-    // Vision return a clear error if it fails.
-
-    fetch('https://vision.googleapis.com/v1/images:annotate?key=' + encodeURIComponent(apiKey), {
+    fetch('https://api.ocr.space/parse/image', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody)
+      body: formData
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      if (data.error) throw new Error(data.error.message || 'שגיאה לא ידועה');
-      if (!data.responses || !data.responses[0]) throw new Error('תגובה ריקה מ-Google');
-      var resp = data.responses[0];
-      if (resp.error) throw new Error(resp.error.message);
-
-      var text = (resp.fullTextAnnotation && resp.fullTextAnnotation.text) ||
-                 (resp.textAnnotations && resp.textAnnotations[0] && resp.textAnnotations[0].description) ||
-                 '';
-
+      if (data.IsErroredOnProcessing) {
+        var err = Array.isArray(data.ErrorMessage) ? data.ErrorMessage.join(', ') : (data.ErrorMessage || 'שגיאה לא ידועה');
+        throw new Error(err);
+      }
+      var text = '';
+      if (data.ParsedResults && data.ParsedResults.length > 0) {
+        text = data.ParsedResults[0].ParsedText || '';
+      }
       if (!text || text.length < 20) {
         throw new Error('לא זוהה טקסט במסמך. ודא שהסריקה ברורה ולא מטושטשת.');
       }
 
-      // Parse the text
+      // Parse the recognized text
       var parsed = _parseMotForm(text);
 
       // Also save the file as a regular scanned doc
@@ -11583,7 +11585,7 @@ document.addEventListener('keydown', function(e) {
 // ═══════════════════════════════════════════════════════════════════
 function _getCurrentVersion() {
   // Read from the visible version label in the sidebar
-  // <div ...>v2.9.65 — auto-scrap on expiry ...</div>
+  // <div ...>v2.9.66 — OCR.space free ...</div>
   try {
     var nodes = document.querySelectorAll('div');
     for (var i = 0; i < nodes.length; i++) {
