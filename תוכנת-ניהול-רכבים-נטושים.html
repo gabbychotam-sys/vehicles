@@ -2184,11 +2184,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-<<<<<<< HEAD
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.55 — login fix אמיר→עמיר</div>
-=======
       <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.87 — simplified (no tombstones) אמיר→עמיר</div>
->>>>>>> 233caa107bbaaee8d34deb0d1411c3810837b455
     </div>
   </div>
 
@@ -2266,11 +2262,7 @@ try {
       <div class="tb-date" id="live-date">יום ראשון, 10 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב (Enter להצגה מלאה)" oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-<<<<<<< HEAD
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.55 ✓</span>
-=======
       <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.87 ✓</span>
->>>>>>> 233caa107bbaaee8d34deb0d1411c3810837b455
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2902,11 +2894,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-saved" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">נשמר ✓</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-<<<<<<< HEAD
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.55 ✓</span>
-=======
       <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.87 ✓</span>
->>>>>>> 233caa107bbaaee8d34deb0d1411c3810837b455
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <!-- v2.9.52: "נקה הכל" button removed per Gabby's request - too risky to expose at the top of the page. -->
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -9511,8 +9499,6 @@ function closeDeleteModal() {
 function executeDeleteCase() {
   closeDeleteModal();
 
-<<<<<<< HEAD
-=======
   // ═══ v2.9.87: SIMPLIFIED — no tombstones, just remove() ═══
   if (!deletingPlate) return;
   var deletePlate = String(deletingPlate).trim();
@@ -9588,177 +9574,6 @@ function executeDeleteCase() {
 
   // Auto-save
   try { if (typeof saveState === 'function') saveState(); } catch(e){}
-}
-  // The tombstone-by-plate is stored in localStorage on the device that
-  // performed the delete. But the manager works on multiple machines (Mac
-  // at home, Windows at the office, plus other staff have the app open).
-  // Each machine has its own localStorage — so a deletion on the iMac is
-  // invisible to the office Windows machine, and the case "comes back".
-  //
-  // Fix: Also write the tombstone to Firebase under `_tombstones/{plate}`.
-  // On startup, every machine reads ALL Firebase tombstones into its local
-  // tombstone list, so the deletion is honored everywhere.
-  if (deletingPlate) {
-    var trimPlate = String(deletingPlate).trim();
-
-    // Local tombstone (immediate effect)
-    try {
-      var dPlates = JSON.parse(localStorage.getItem('galilElyon_deletedPlates') || '[]');
-      if (!Array.isArray(dPlates)) dPlates = [];
-      if (trimPlate && dPlates.indexOf(trimPlate) === -1) {
-        dPlates.push(trimPlate);
-        if (dPlates.length > 500) dPlates = dPlates.slice(-500);
-        localStorage.setItem('galilElyon_deletedPlates', JSON.stringify(dPlates));
-        console.log('[executeDeleteCase] ✓ added plate to local tombstone:', trimPlate);
-      }
-    } catch(e) { console.warn('[executeDeleteCase] local tombstone failed:', e); }
-
-    // Firebase tombstone (cross-device sync)
-    try {
-      if (window.fbReady && window.fbDb && trimPlate) {
-        var safeKey = trimPlate.replace(/[.#$\[\]\/]/g, '_');
-        fbDb.ref('_tombstones/' + safeKey).set({
-          plate: trimPlate,
-          deletedAt: Date.now(),
-          deletedBy: (typeof currentUser !== 'undefined' && currentUser && currentUser.email) || 'unknown'
-        }).then(function() {
-          console.log('[executeDeleteCase] ✓ wrote Firebase tombstone for plate:', trimPlate);
-        }).catch(function(err) {
-          console.warn('[executeDeleteCase] Firebase tombstone failed:', err);
-        });
-      }
-    } catch(e) { console.warn('[executeDeleteCase] Firebase tombstone exception:', e); }
-  }
-
->>>>>>> 233caa107bbaaee8d34deb0d1411c3810837b455
-  // Try to find the row's mobile-id BEFORE deleting, so we can also remove from Firebase
-  var mobileIdToDelete = null;
-
-  // Remove from cases list table
-  if (deletingPlate) {
-    var rows = document.querySelectorAll('#cases-tbody tr');
-    for (var r = 0; r < rows.length; r++) {
-      var pb = rows[r].querySelector('.plate-badge');
-      if (pb && pb.textContent.trim() === deletingPlate) {
-        // Save mobile-id (if any) before removing
-        mobileIdToDelete = rows[r].getAttribute('data-mobile-id');
-        rows[r].remove();
-        break;
-      }
-    }
-    // Remove from dashboard urgent table
-    var dashRows = document.querySelectorAll('#view-dashboard .tbl tbody tr');
-    for (var d = 0; d < dashRows.length; d++) {
-      var dpb = dashRows[d].querySelector('.plate-badge');
-      if (dpb && dpb.textContent.trim() === deletingPlate) {
-        dashRows[d].remove();
-        break;
-      }
-    }
-    // Remove from map
-    for (var m = MAP_CASES.length - 1; m >= 0; m--) {
-      if (MAP_CASES[m].plate === deletingPlate) {
-        MAP_CASES.splice(m, 1);
-        break;
-      }
-    }
-
-    // ═══ NEW: Remove from Firebase (so it doesn't come back on reload) ═══
-    if (window.GalilSync && window.GalilSync.isReady && window.GalilSync.isReady()) {
-      // ═══ v2.9.78: AGGRESSIVE PLATE-LEVEL FIREBASE DELETE ═══
-      // The previous approach (find idToFlag → update _deleted=true) only
-      // worked when we could identify the case's Firebase id. If the lookup
-      // failed (mobileCasesCache not warmed up, or id-mismatch between local
-      // and remote), the case stayed in Firebase, and the next sync brought
-      // it back to the screen.
-      //
-      // New approach: scan ALL Firebase cases and HARD-REMOVE every record
-      // that has this plate, regardless of source/id. Belt and suspenders.
-      if (deletingPlate && fbDb) {
-        var hardDeletePlate = deletingPlate;
-        console.log('[deleteCase] ▶ scanning Firebase for ALL cases with plate:', hardDeletePlate);
-        fbDb.ref('cases').once('value').then(function(snap) {
-          var allCases = snap.val() || {};
-          var matched = [];
-          Object.keys(allCases).forEach(function(fid) {
-            var c = allCases[fid];
-            if (!c) return;
-            var p1 = String(c.plate || '').trim();
-            var p2 = String((c.fullData && c.fullData.plate) || '').trim();
-            if (p1 === hardDeletePlate || p2 === hardDeletePlate) {
-              matched.push(fid);
-            }
-          });
-          console.log('[deleteCase] found', matched.length, 'Firebase records matching plate', hardDeletePlate);
-          matched.forEach(function(fid) {
-            // Hard remove (not flag) — leave nothing to resurrect
-            fbDb.ref('cases/' + fid).remove()
-              .then(function() { console.log('[deleteCase] ✓ HARD-REMOVED', fid); })
-              .catch(function(err) {
-                // If remove fails (permissions?), fall back to _deleted flag
-                console.warn('[deleteCase] hard remove failed for ' + fid + ', trying _deleted flag:', err);
-                fbDb.ref('cases/' + fid).update({ _deleted: true, _deletedAt: Date.now() }).catch(function(){});
-              });
-          });
-        }).catch(function(err) {
-          console.warn('[deleteCase] scan failed:', err);
-        });
-      }
-
-      // ═══ v2.9.21: ALSO mark the located id as _deleted for sticky-delete ═══
-      var idToFlag = mobileIdToDelete;
-      if (!idToFlag && window.GalilSync._findIdByPlate) {
-        idToFlag = window.GalilSync._findIdByPlate(deletingPlate);
-      }
-      if (idToFlag && fbDb) {
-        if (window.GalilSync._markDeleted) window.GalilSync._markDeleted(idToFlag);
-      }
-
-      // ═══ v2.9.22: ALSO delete the case's archive folder ═══
-      try {
-        if (deletingPlate && typeof safePlateKey === 'function') {
-          var safe = safePlateKey(deletingPlate);
-          fbDb.ref('archives/' + safe).remove()
-            .then(function() {
-              console.log('[deleteCase] ✓ removed archives/' + safe);
-            })
-            .catch(function(err) {
-              console.warn('[deleteCase] archive remove failed:', err);
-            });
-        }
-      } catch(e) { console.warn('[deleteCase] archive cleanup error:', e); }
-    }
-
-    // ═══ NEW: Remove all activity entries about this plate ═══
-    if (typeof activityFeed !== 'undefined' && Array.isArray(activityFeed)) {
-      activityFeed = activityFeed.filter(function(a) {
-        return String(a.plate || '').trim() !== String(deletingPlate).trim();
-      });
-      if (typeof saveActivityFeed === 'function') saveActivityFeed();
-      if (typeof renderActivityFeed === 'function') renderActivityFeed();
-    }
-  }
-
-  // Update all counters
-  updateAllCounters();
-  // Full reconciliation: remove any leftover orphans from dashboard / map / towns
-  if (typeof syncDashboardWithCases === 'function') syncDashboardWithCases();
-  // ═══ NEW: Refresh staff cards so the inspector's count goes down ═══
-  if (typeof refreshDashboardPanels === 'function') refreshDashboardPanels();
-
-  // Navigate back to cases list
-  showView('cases-list');
-  showToast('🗑️ התיק ' + deletingPlate + ' נמחק בהצלחה');
-
-  // ═══ NEW: Auto-save so the deletion persists across reloads ═══
-  try {
-    if (typeof saveState === 'function') {
-      saveState();
-      console.log('[deleteCase] ✓ auto-saved after delete');
-    }
-  } catch(e) { console.warn('[deleteCase] auto-save failed:', e); }
-
-  deletingPlate = '';
 }
 
 function confirmDeleteFromList(plateText, event) {
@@ -11058,11 +10873,7 @@ document.addEventListener('keydown', function(e) {
 // ═══════════════════════════════════════════════════════════════════
 function _getCurrentVersion() {
   // Read from the visible version label in the sidebar
-<<<<<<< HEAD
-  // <div ...>v2.9.55 — login fix ...</div>
-=======
   // <div ...>v2.9.87 — simplified (no tombstones) ...</div>
->>>>>>> 233caa107bbaaee8d34deb0d1411c3810837b455
   try {
     var nodes = document.querySelectorAll('div');
     for (var i = 0; i < nodes.length; i++) {
@@ -11139,8 +10950,6 @@ function _checkForVersionUpdate() {
 }
 window._checkForVersionUpdate = _checkForVersionUpdate;
 
-<<<<<<< HEAD
-=======
 // Periodic check every 30 seconds
 setInterval(_checkForVersionUpdate, 30 * 1000);
 
@@ -11754,7 +11563,6 @@ document.addEventListener('visibilitychange', function() {
   }
 });
 
->>>>>>> 233caa107bbaaee8d34deb0d1411c3810837b455
 // Restore on page load (run after all DOM + scripts are ready)
 function _bootSequence() {
   injectSaveButtons();
@@ -13387,9 +13195,6 @@ if (document.readyState === 'loading') {
     try {
       var deletedIds = JSON.parse(localStorage.getItem('galilElyon_deletedIds') || '[]');
       if (Array.isArray(deletedIds) && deletedIds.indexOf(c.id) !== -1) {
-<<<<<<< HEAD
-        console.log('[addOrUpdateManualRow] ✗ skipped (tombstoned):', c.id, c.plate);
-=======
         console.log('[addOrUpdateManualRow] ✗ skipped (tombstoned by id):', c.id, c.plate);
         return;
       }
@@ -13406,7 +13211,6 @@ if (document.readyState === 'loading') {
             fbDb.ref('cases/' + c.id).update({ _deleted: true, _deletedAt: Date.now() }).catch(function(){});
           }
         } catch(e){}
->>>>>>> 233caa107bbaaee8d34deb0d1411c3810837b455
         return;
       }
     } catch(e){}
@@ -13499,8 +13303,6 @@ if (document.readyState === 'loading') {
       }
     } catch(e){}
 
-<<<<<<< HEAD
-=======
     // ═══ v2.9.74: PLATE-LEVEL TOMBSTONE CHECK ═══
     try {
       var deletedPlates = JSON.parse(localStorage.getItem('galilElyon_deletedPlates') || '[]');
@@ -13510,7 +13312,6 @@ if (document.readyState === 'loading') {
       }
     } catch(e){}
 
->>>>>>> 233caa107bbaaee8d34deb0d1411c3810837b455
     // ═══ Also respect resetAt timestamp ═══
     try {
       var resetAt = parseInt(localStorage.getItem('galilElyon_resetAt') || '0', 10) || 0;
