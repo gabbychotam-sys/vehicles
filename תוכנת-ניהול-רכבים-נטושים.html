@@ -10318,6 +10318,15 @@ function loadState() {
       });
     }
 
+    // ═══ v2.9.88: SCRUB AFTER LOAD — critical! ═══
+    // tb.innerHTML above BYPASSES upsertCaseRow's tombstone checks. If autosave
+    // ever captured a snapshot containing a since-deleted row (e.g., race
+    // condition: Firebase listener re-added it just before saveState ran), it
+    // would resurrect on every reload. Scrub right now to filter them out.
+    try {
+      if (typeof _scrubTombstonedRows === 'function') _scrubTombstonedRows();
+    } catch(e) { console.warn('[loadState] scrub failed:', e); }
+
     // ═══ v2.9.43: re-attach click handlers to restored rows ═══
     // tb.innerHTML = ... wipes ALL JS event listeners, including the
     // tr.onclick = function() { openEditFullForm(this); } that
@@ -11618,9 +11627,10 @@ function _scrubTombstonedRows() {
   } catch(e) { /* silent */ }
 }
 window._scrubTombstonedRows = _scrubTombstonedRows;
-/* v2.9.87: tombstones disabled */
+// v2.9.88: RE-ENABLED — periodic scrub every 10 seconds (safety net)
+setInterval(_scrubTombstonedRows, 10 * 1000);
 // Also run once on load (after a short delay so DOM/Firebase have settled)
-/* v2.9.87: tombstones disabled */
+setTimeout(_scrubTombstonedRows, 3000);
 
 // Check immediately when tab becomes visible (user comes back from another tab)
 document.addEventListener('visibilitychange', function() {
