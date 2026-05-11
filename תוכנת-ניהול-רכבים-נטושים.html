@@ -2184,7 +2184,7 @@ try {
     <div class="sb-brand-text">
       <div class="sb-brand-name">ניהול רכבים נטושים</div>
       <div class="sb-brand-sub">מועצה אזורית הגליל העליון</div>
-      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.74 — plate tombstone אמיר→עמיר</div>
+      <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;font-family:monospace;letter-spacing:0.5px;">v2.9.55 — login fix אמיר→עמיר</div>
     </div>
   </div>
 
@@ -2262,7 +2262,7 @@ try {
       <div class="tb-date" id="live-date">יום ראשון, 10 מאי 2026</div>
       <input class="tb-search" id="dash-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב (Enter להצגה מלאה)" oninput="filterDashboardTable()">
       <button onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.74 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.55 ✓</span>
       <button class="tb-new-case">＋ פתח תיק חדש</button>
     </div>
   </div>
@@ -2667,31 +2667,6 @@ try {
             </div>
             <div style="font-size:11px;color:var(--muted);margin-top:6px;">עד 10 תמונות, מקסימום 5MB לתמונה</div>
           </div>
-          <!-- v2.9.70: כפתור יחיד למסמך משרד הרישוי + זיהוי אוטומטי -->
-          <div class="edit-section">
-            <div class="edit-section-title">📎 מסמך משרד הרישוי</div>
-            <div id="nf-scans-area" style="margin-top:6px;">
-              <div id="nf-scans-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;"></div>
-              <button type="button" onclick="uploadMotDocument()" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;border:none;border-radius:12px;padding:16px 20px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 3px 10px rgba(124,58,237,0.3);font-family:inherit;">
-                🖨️ העלה מסמך משרד הרישוי <span style="font-size:13px;opacity:0.9;">(זיהוי אוטומטי)</span>
-              </button>
-              <div id="auto-fill-status" style="display:none;font-size:12px;margin-top:10px;padding:10px 14px;border-radius:8px;line-height:1.6;"></div>
-            </div>
-            <div style="font-size:11px;color:var(--muted);margin-top:8px;">PDF/JPG/PNG · מקסימום 5MB · הקובץ נשמר אוטומטית בארכיון התיק והפרטים מולבשים בטופס</div>
-          </div>
-
-          <!-- v2.9.57: תוקף רישיון -->
-          <div class="edit-section">
-            <div class="edit-section-title">📅 תאריך תוקף רישיון רכב</div>
-            <div class="edit-grid">
-              <div class="edit-group">
-                <div class="edit-label">תוקף עד</div>
-                <input type="date" class="edit-input" id="nf-license-expiry" oninput="checkLicenseExpiry()">
-                <div id="nf-license-expiry-status" style="font-size:12px;margin-top:6px;"></div>
-              </div>
-            </div>
-            <div style="font-size:11px;color:var(--muted);margin-top:6px;">💡 רכב שתוקף הרישיון שלו פג - נחשב גרוטאת רכב ולא רכב נטוש</div>
-          </div>
           <!-- הערות -->
           <div class="edit-section">
             <div class="edit-section-title">📝 הערות</div>
@@ -2911,7 +2886,7 @@ try {
     <div class="topbar-right"><div class="fb-sync-indicator" id="fb-sync-indicator" title="סטטוס סנכרון" style="width: 10px; height: 10px; border-radius: 50%; background: rgb(119, 119, 119); margin-left: 6px; flex-shrink: 0; cursor: help;"></div>
       <div class="save-fab-wrap"><div class="save-fab save-fab-saved" onclick="window.toggleSaveMenu&amp;&amp;window.toggleSaveMenu(this);event.stopPropagation();" role="button" title="שמור שינויים (Ctrl+S)"><span class="save-fab-text">נשמר ✓</span><span class="save-fab-caret">▾</span></div></div>
       <input class="tb-search" id="cases-search" type="text" placeholder="🔍  חיפוש לפי לוחית / שם / יישוב..." oninput="filterCasesList()">
-      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.74 ✓</span>
+      <span style="background:#10b981;color:#fff;padding:6px 10px;border-radius:6px;font-size:11px;font-weight:700;font-family:monospace;letter-spacing:0.5px;">v2.9.55 ✓</span>
       <button class="tb-new-case" onclick="window.GalilSync &amp;&amp; window.GalilSync.refreshNow &amp;&amp; (function(){ var b=event.target; var orig=b.textContent; b.textContent='⏳ מסנכרן...'; b.disabled=true; window.GalilSync.refreshNow(); setTimeout(function(){ b.textContent=orig; b.disabled=false; }, 3000); })();" style="background:#fff;color:#2563eb;border:1.5px solid #3b82f6;font-weight:700;" title="טוען מחדש את כל התיקים מהענן">🔄 סנכרן תיקים מהענן</button>
       <!-- v2.9.52: "נקה הכל" button removed per Gabby's request - too risky to expose at the top of the page. -->
       <button class="tb-new-case" onclick="openNewCase()">＋ פתח תיק חדש</button>
@@ -3356,41 +3331,6 @@ try {
       </div>
 
       <button onclick="resetBgPreset()" style="margin-top:16px;background:transparent;border:1px solid var(--border);color:var(--muted);padding:7px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;">↩️ אפס לברירת מחדל</button>
-    </div>
-
-    <!-- ═══ v2.9.66: OCR.space (auto-fill from MOT scan) ═══ -->
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-top:20px;">
-      <div style="font-size:16px;font-weight:700;margin-bottom:6px;color:var(--text);">🔍 זיהוי אוטומטי ממסמכי משרד הרישוי</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6;">כשמעלים סריקה של "שאילתא לרכב" (משרד הרישוי) — המערכת תקרא את הקובץ אוטומטית ותמלא את שדות התיק (שם, ת.ז, כתובת, מספר רכב וכו').<br>השירות חינמי לחלוטין דרך <b>OCR.space</b> - 25,000 סריקות בחודש (ללא כרטיס אשראי).</div>
-
-      <label style="display:block;font-size:13px;color:var(--text);font-weight:600;margin-bottom:6px;">מפתח OCR.space API:</label>
-      <div style="display:flex;gap:8px;align-items:stretch;">
-        <input type="password" id="gvision-api-key" placeholder="K81234567890..." style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;direction:ltr;text-align:left;font-family:monospace;background:var(--card2);color:var(--text);">
-        <button type="button" onclick="saveVisionApiKey()" style="background:#0284c7;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">💾 שמור</button>
-        <button type="button" onclick="testVisionApiKey()" style="background:#10b981;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">🧪 בדוק</button>
-      </div>
-      <div id="gvision-status" style="font-size:12px;margin-top:8px;"></div>
-
-      <details style="margin-top:14px;font-size:12px;color:var(--muted);">
-        <summary style="cursor:pointer;font-weight:600;color:#0369a1;">❓ איך מקבלים מפתח API חינם? (פעם אחת בלבד, 2 דקות)</summary>
-        <ol style="margin-top:10px;line-height:1.9;padding-right:20px;">
-          <li>היכנס ל-<a href="https://ocr.space/ocrapi/freekey" target="_blank" style="color:#0284c7;font-weight:700;">https://ocr.space/ocrapi/freekey</a></li>
-          <li>מלא את הטופס:
-            <ul style="margin-top:4px;line-height:1.8;">
-              <li><b>Email Address</b>: כתובת המייל שלך</li>
-              <li><b>First Name</b>: שמך הפרטי</li>
-              <li><b>Last Name</b>: שם המשפחה</li>
-              <li>סמן את ה-CAPTCHA (Robot)</li>
-            </ul>
-          </li>
-          <li>לחץ <b>"Subscribe to list"</b></li>
-          <li>בדוק במייל שלך - תקבל מייל מ-OCR.space עם <b>"OCR API Key"</b> (מתחיל ב-K8 או K9)</li>
-          <li>העתק את המפתח, הדבק כאן, ולחץ <b>"💾 שמור"</b> + <b>"🧪 בדוק"</b></li>
-        </ol>
-        <div style="background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;padding:10px 12px;border-radius:8px;margin-top:10px;line-height:1.6;">
-          <b>✓ למה זה טוב:</b> 100% חינמי · ללא כרטיס אשראי · 25,000 סריקות בחודש (פי 25 מהמכסה החינמית של גוגל).
-        </div>
-      </details>
     </div>
 
   </div>
@@ -4760,53 +4700,6 @@ function viewArchivedDoc(safePlate, key) {
   if (!doc) { alert('לא נמצא המסמך'); return; }
   var w = window.open('', '_blank', 'width=900,height=1100');
   if (!w) { alert('הדפדפן חוסם חלונות נפתחים. אפשר חלונות נפתחים לאתר זה.'); return; }
-
-  // ═══ v2.9.64: scanned binary docs (PDF/JPG/PNG uploaded via "מסמכים סרוקים") ═══
-  // are stored with isBinary:true and html=dataUrl (e.g. "data:application/pdf;base64,...")
-  // Render them in <embed>/<img> instead of injecting raw base64 into the HTML.
-  var isBinary = doc.isBinary === true || doc.type === 'scanned_doc' ||
-                 (typeof doc.html === 'string' && /^data:(application\/pdf|image\/)/i.test(doc.html));
-
-  if (isBinary && doc.html) {
-    var fileType = doc.fileType || '';
-    if (!fileType) {
-      var match = String(doc.html).match(/^data:([^;]+);/);
-      if (match) fileType = match[1];
-    }
-    var isPdf   = /pdf/i.test(fileType);
-    var isImage = /^image\//i.test(fileType);
-    var fileName = doc.fileName || doc.title || 'מסמך';
-
-    w.document.write('<!DOCTYPE html><html dir="rtl" lang="he"><head><meta charset="UTF-8"><title>' +
-      _escapeHtml(fileName) + '</title>' +
-      '<style>html,body{margin:0;padding:0;height:100%;background:#1e293b;font-family:"Heebo",Arial,sans-serif;}' +
-      '.toolbar{background:#0f172a;color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;}' +
-      '.toolbar a{color:#60a5fa;text-decoration:none;font-size:13px;font-weight:600;}' +
-      '.toolbar a:hover{text-decoration:underline;}' +
-      '.scan-frame{width:100%;height:calc(100vh - 44px);border:0;}' +
-      '.img-wrap{display:flex;align-items:center;justify-content:center;height:calc(100vh - 44px);overflow:auto;}' +
-      '.img-wrap img{max-width:100%;max-height:100%;background:#fff;}</style></head><body>' +
-      '<div class="toolbar"><span>📎 ' + _escapeHtml(fileName) + '</span>' +
-      '<a href="' + doc.html + '" download="' + _escapeHtml(fileName) + '">⬇ הורד</a></div>');
-
-    if (isPdf) {
-      w.document.write('<embed class="scan-frame" src="' + doc.html + '" type="application/pdf">');
-    } else if (isImage) {
-      w.document.write('<div class="img-wrap"><img src="' + doc.html + '" alt="' + _escapeHtml(fileName) + '"></div>');
-    } else {
-      // Unknown binary type — offer download
-      w.document.write('<div style="color:#fff;text-align:center;padding:60px 20px;">' +
-        '<div style="font-size:64px;margin-bottom:20px;">📄</div>' +
-        '<div style="font-size:16px;margin-bottom:20px;">לא ניתן להציג את סוג הקובץ הזה בדפדפן</div>' +
-        '<a href="' + doc.html + '" download="' + _escapeHtml(fileName) + '" ' +
-        'style="display:inline-block;background:#10b981;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;">⬇ הורד את הקובץ</a></div>');
-    }
-    w.document.write('</body></html>');
-    w.document.close();
-    return;
-  }
-
-  // Regular HTML document (auto-generated letters, stickers, etc)
   w.document.write('<!DOCTYPE html><html dir="rtl" lang="he"><head><meta charset="UTF-8"><title>' + (doc.title || 'מסמך') + '</title>' +
     '<style>body{font-family:"Heebo",Arial,sans-serif;background:#f5f5f5;padding:20px;margin:0;}' +
     '.ml-header{display:flex;align-items:center;gap:12px;border-bottom:2px solid #1a237e;padding-bottom:8px;margin-bottom:10px;}' +
@@ -4824,13 +4717,6 @@ function viewArchivedDoc(safePlate, key) {
   w.document.close();
 }
 
-// Helper for safe HTML escaping
-function _escapeHtml(s) {
-  return String(s == null ? '' : s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-
 function printArchivedDoc(safePlate, key) {
   var doc = _getArchivedDoc(safePlate, key);
   if (!doc) { alert('לא נמצא המסמך'); return; }
@@ -4846,21 +4732,6 @@ function printArchivedDoc(safePlate, key) {
 function downloadArchivedDoc(safePlate, key) {
   var doc = _getArchivedDoc(safePlate, key);
   if (!doc) { alert('לא נמצא המסמך'); return; }
-
-  // ═══ v2.9.64: For binary scanned docs (PDF/JPG), download the original ═══
-  // file directly — don't wrap it in HTML.
-  var isBinary = doc.isBinary === true || doc.type === 'scanned_doc' ||
-                 (typeof doc.html === 'string' && /^data:(application\/pdf|image\/)/i.test(doc.html));
-  if (isBinary && doc.html) {
-    var a1 = document.createElement('a');
-    a1.href = doc.html;
-    a1.download = doc.fileName || (doc.title || 'scan') + '.pdf';
-    document.body.appendChild(a1);
-    a1.click();
-    document.body.removeChild(a1);
-    return;
-  }
-
   var fullHtml = '<!DOCTYPE html><html dir="rtl" lang="he"><head><meta charset="UTF-8"><title>' +
     (doc.title || 'מסמך') + '</title>' +
     '<style>body{font-family:Arial,sans-serif;padding:20px;}' +
@@ -6544,10 +6415,6 @@ function openEditFullForm(tr) {
   setVal('nf-owner-addr',     CASE.ownerAddr);
   setVal('nf-owner-phone',    CASE.ownerPhone);
   setVal('nf-notes',          CASE.notes);
-  // ═══ v2.9.57: Load license expiry date ═══
-  setVal('nf-license-expiry', CASE.licenseExpiry || '');
-  // Trigger the expiry-status display
-  setTimeout(function(){ if (typeof checkLicenseExpiry === 'function') checkLicenseExpiry(); }, 50);
   // Date — accept either yyyy-mm-dd or full ISO
   if (CASE.date) {
     var d = String(CASE.date).split('T')[0];
@@ -6776,25 +6643,6 @@ function populateCaseView(c) {
   }
   if (typeof renderCasePhotos === 'function') {
     try { renderCasePhotos(); } catch(e) {}
-  }
-
-  // ═══ v2.9.56: Load scanned documents (PDF/images) attached to the case ═══
-  if (Array.isArray(c.scans)) {
-    caseScans = c.scans.map(function(s) {
-      if (!s || !s.dataUrl) return null;
-      return {
-        dataUrl: s.dataUrl,
-        name: s.name || 'document',
-        type: s.type || 'application/octet-stream',
-        size: s.size || 0,
-        addedAt: s.addedAt || new Date().toISOString()
-      };
-    }).filter(function(s) { return s !== null; });
-  } else {
-    caseScans = [];
-  }
-  if (typeof renderCaseScanList === 'function') {
-    try { renderCaseScanList(); } catch(e){}
   }
 
   // Timeline (uses SENT which we already reset)
@@ -7950,648 +7798,6 @@ function renderNewCasePhotoThumbs() {
   if (addLabel) addLabel.style.display = newCasePhotos.length >= 10 ? 'none' : '';
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// v2.9.56: SCANNED DOCUMENTS — file uploads (PDF/JPG/PNG) attached to a case
-// Each document is stored as { dataUrl, name, type, addedAt } in caseScans[]
-// and is auto-archived to the case's document archive on save.
-// ═══════════════════════════════════════════════════════════════════
-var caseScans = []; // array of { dataUrl, name, type, size, addedAt }
-
-function handleNewCaseScan(event) {
-  var files = event.target.files;
-  if (!files || !files.length) return;
-  for (var i = 0; i < files.length; i++) {
-    if (caseScans.length >= 10) {
-      alert('ניתן לצרף עד 10 מסמכים לתיק');
-      break;
-    }
-    var file = files[i];
-    if (file.size > 5 * 1024 * 1024) {
-      alert('הקובץ "' + file.name + '" גדול מ-5MB');
-      continue;
-    }
-    (function(f) {
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        caseScans.push({
-          dataUrl: e.target.result,
-          name: f.name,
-          type: f.type || 'application/octet-stream',
-          size: f.size,
-          addedAt: new Date().toISOString()
-        });
-        renderCaseScanList();
-      };
-      reader.onerror = function() {
-        alert('שגיאה בקריאת הקובץ: ' + f.name);
-      };
-      reader.readAsDataURL(f);
-    })(files[i]);
-  }
-  event.target.value = '';
-}
-window.handleNewCaseScan = handleNewCaseScan;
-
-function removeCaseScan(idx) {
-  if (!confirm('להסיר את המסמך?')) return;
-  caseScans.splice(idx, 1);
-  renderCaseScanList();
-}
-window.removeCaseScan = removeCaseScan;
-
-function viewCaseScan(idx) {
-  var s = caseScans[idx];
-  if (!s) return;
-  // Open in a new tab
-  var w = window.open('', '_blank');
-  if (!w) {
-    alert('הדפדפן חוסם פתיחת חלון. אנא אפשר חלונות קופצים.');
-    return;
-  }
-  if (s.type === 'application/pdf') {
-    w.document.write('<html><head><title>' + s.name + '</title></head><body style="margin:0;"><embed src="' + s.dataUrl + '" type="application/pdf" width="100%" height="100%" style="height:100vh;"></body></html>');
-  } else {
-    w.document.write('<html><head><title>' + s.name + '</title></head><body style="margin:0;background:#222;display:flex;align-items:center;justify-content:center;min-height:100vh;"><img src="' + s.dataUrl + '" alt="' + s.name + '" style="max-width:100%;max-height:100vh;"></body></html>');
-  }
-  w.document.close();
-}
-window.viewCaseScan = viewCaseScan;
-
-function downloadCaseScan(idx) {
-  var s = caseScans[idx];
-  if (!s) return;
-  var a = document.createElement('a');
-  a.href = s.dataUrl;
-  a.download = s.name;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
-window.downloadCaseScan = downloadCaseScan;
-
-function renderCaseScanList() {
-  var container = document.getElementById('nf-scans-list');
-  if (!container) return;
-  container.innerHTML = '';
-  if (caseScans.length === 0) return;
-  caseScans.forEach(function(scan, idx) {
-    var icon = scan.type === 'application/pdf' ? '📄' : '🖼️';
-    var sizeKb = Math.round(scan.size / 1024);
-    var sizeStr = sizeKb >= 1024 ? (sizeKb / 1024).toFixed(1) + ' MB' : sizeKb + ' KB';
-    var addedDate = '';
-    try {
-      addedDate = new Date(scan.addedAt).toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    } catch(e) { addedDate = ''; }
-    var div = document.createElement('div');
-    div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;';
-    div.innerHTML =
-      '<div style="font-size:24px;">' + icon + '</div>' +
-      '<div style="flex:1;min-width:0;">' +
-        '<div style="font-size:13px;font-weight:600;color:#1e293b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + scan.name + '</div>' +
-        '<div style="font-size:11px;color:#64748b;">' + sizeStr + (addedDate ? ' · נוסף ' + addedDate : '') + '</div>' +
-      '</div>' +
-      '<button type="button" onclick="viewCaseScan(' + idx + ')" style="background:#0284c7;color:#fff;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:600;">👁️ צפה</button>' +
-      '<button type="button" onclick="downloadCaseScan(' + idx + ')" style="background:#10b981;color:#fff;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:600;">⬇️ הורד</button>' +
-      '<button type="button" onclick="removeCaseScan(' + idx + ')" style="background:#ef4444;color:#fff;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:600;">✕</button>';
-    container.appendChild(div);
-  });
-}
-window.renderCaseScanList = renderCaseScanList;
-
-// ═══════════════════════════════════════════════════════════════════
-// v2.9.70: SINGLE-BUTTON MOT DOCUMENT UPLOAD
-// One button. User clicks → file picker opens → file selected → file is
-// (a) saved to the case archive AND (b) sent to OCR.space for parsing.
-// Form fields are auto-filled from the parsed text. The file is saved
-// even if OCR fails so it's never lost.
-//
-// Uses a DYNAMICALLY CREATED input each click (no persistent hidden input)
-// because the previous version's onchange wasn't firing reliably for
-// some users — likely an interaction with display:none + dynamic DOM.
-// ═══════════════════════════════════════════════════════════════════
-window.uploadMotDocument = function() {
-  console.log('[MotUpload] button clicked');
-  var statusBox = document.getElementById('auto-fill-status');
-  if (statusBox) {
-    statusBox.style.display = 'block';
-    statusBox.innerHTML = '👆 בוחר קובץ...';
-    statusBox.style.cssText = 'display:block;color:#7c3aed;background:#f5f3ff;border:1px solid #ddd6fe;padding:10px 14px;border-radius:8px;font-size:12px;margin-top:10px;';
-  }
-  // Create a fresh input each time — guarantees onchange fires
-  var input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/*,application/pdf';
-  input.style.display = 'none';
-  input.onchange = function(e) {
-    console.log('[MotUpload] onchange FIRED ✓');
-    document.body.removeChild(input);
-    handleAutoFillScan(e);
-  };
-  document.body.appendChild(input);
-  input.click();
-  console.log('[MotUpload] input.click() called');
-};
-
-// (Scan via Windows Scan / camera helpers removed in v2.9.62 — simple
-//  upload-only flow per user feedback. The user opens Windows Scan
-//  manually via Win+S, scans, saves the file, then clicks "📎 העלה מסמך"
-//  in the case to attach it.)
-
-// ═══════════════════════════════════════════════════════════════════
-// v2.9.63: GOOGLE VISION OCR + AUTO-FILL FROM MOT SCAN
-//
-// When the user uploads a "שאילתא לרכב" form from the Israeli Ministry
-// of Transport, send it to Google Cloud Vision API for OCR, then parse
-// the recognized text to auto-fill the case form fields:
-//   - מספר רכב, יצרן, צבע, סוג רכב
-//   - ת.ז, שם משפחה, שם פרטי, רחוב, ישוב
-//   - תאריך תוקף רישיון
-//
-// API key is stored in localStorage. User must obtain it from Google
-// Cloud Console (free tier: 1,000 requests/month).
-// ═══════════════════════════════════════════════════════════════════
-
-function saveVisionApiKey() {
-  var input = document.getElementById('gvision-api-key');
-  var status = document.getElementById('gvision-status');
-  if (!input || !status) return;
-  var key = (input.value || '').trim();
-  if (!key) {
-    localStorage.removeItem('galilElyon_visionApiKey');
-    status.innerHTML = '🗑️ המפתח נמחק';
-    status.style.cssText = 'color:#64748b;font-size:12px;margin-top:8px;';
-    return;
-  }
-  // OCR.space keys typically start with K (uppercase) followed by digits/letters
-  if (key.length < 8) {
-    status.innerHTML = '⚠️ המפתח קצר מדי. ודא שהעתקת את המפתח המלא מהמייל של OCR.space.';
-    status.style.cssText = 'color:#b91c1c;font-size:12px;margin-top:8px;';
-    return;
-  }
-  localStorage.setItem('galilElyon_visionApiKey', key);
-  status.innerHTML = '✓ המפתח נשמר. לחץ "🧪 בדוק" כדי לוודא שהוא עובד.';
-  status.style.cssText = 'color:#166534;font-size:12px;margin-top:8px;';
-}
-window.saveVisionApiKey = saveVisionApiKey;
-
-function _getVisionApiKey() {
-  return localStorage.getItem('galilElyon_visionApiKey') || '';
-}
-
-function testVisionApiKey() {
-  var status = document.getElementById('gvision-status');
-  if (!status) return;
-  var key = (document.getElementById('gvision-api-key').value || '').trim() || _getVisionApiKey();
-  if (!key) {
-    status.innerHTML = '⚠️ הזן מפתח קודם';
-    status.style.cssText = 'color:#b91c1c;font-size:12px;margin-top:8px;';
-    return;
-  }
-  status.innerHTML = '⏳ בודק את המפתח...';
-  status.style.cssText = 'color:#0369a1;font-size:12px;margin-top:8px;';
-
-  // OCR.space test: send a tiny base64 image
-  // 1x1 white png base64
-  var tinyPng = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
-
-  var formData = new FormData();
-  formData.append('apikey', key);
-  formData.append('language', 'eng');
-  formData.append('base64Image', tinyPng);
-
-  // Try proxy first, fall back to direct (works without proxy if browser allows)
-  fetch('http://localhost:8765/ping', { method: 'GET' })
-    .then(function(r){ return r.text(); })
-    .then(function(txt){
-      var url = (txt && txt.trim() === 'pong') ? 'http://localhost:8765/ocr' : 'https://api.ocr.space/parse/image';
-      console.log('[testVisionApiKey] using:', url);
-      return fetch(url, { method: 'POST', body: formData });
-    })
-    .catch(function(){ return fetch('https://api.ocr.space/parse/image', { method: 'POST', body: formData }); })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    if (data.IsErroredOnProcessing) {
-      var err = Array.isArray(data.ErrorMessage) ? data.ErrorMessage.join(', ') : (data.ErrorMessage || 'שגיאה לא ידועה');
-      // Even "no text found" is OK for the test — it means the API key works
-      if (/no text|empty/i.test(err)) {
-        status.innerHTML = '✅ המפתח עובד! OCR.space מוכן לשימוש.';
-        status.style.cssText = 'color:#166534;background:#f0fdf4;padding:10px;border-radius:6px;font-size:12px;margin-top:8px;';
-      } else {
-        status.innerHTML = '❌ ' + err;
-        status.style.cssText = 'color:#b91c1c;background:#fee2e2;padding:10px;border-radius:6px;font-size:12px;margin-top:8px;';
-      }
-    } else if (data.OCRExitCode === 1 || data.OCRExitCode === 2 || data.ParsedResults) {
-      status.innerHTML = '✅ המפתח עובד! OCR.space מוכן לשימוש.';
-      status.style.cssText = 'color:#166534;background:#f0fdf4;padding:10px;border-radius:6px;font-size:12px;margin-top:8px;';
-    } else {
-      status.innerHTML = '⚠️ תגובה לא צפויה מ-OCR.space';
-      status.style.cssText = 'color:#9a3412;font-size:12px;margin-top:8px;';
-    }
-  })
-  .catch(function(err) {
-    status.innerHTML = '❌ שגיאת רשת: ' + err.message;
-    status.style.cssText = 'color:#b91c1c;font-size:12px;margin-top:8px;';
-  });
-}
-window.testVisionApiKey = testVisionApiKey;
-
-// Load saved key when settings view opens
-document.addEventListener('DOMContentLoaded', function() {
-  setTimeout(function() {
-    var input = document.getElementById('gvision-api-key');
-    if (input) {
-      var saved = _getVisionApiKey();
-      if (saved) input.value = saved;
-    }
-  }, 500);
-});
-
-// ═══ Auto-fill flow when user uploads MOT scan ═══
-function handleAutoFillScan(event) {
-  console.log('[AutoFill] handleAutoFillScan called');
-  var files = event.target.files;
-  if (!files || !files.length) {
-    console.log('[AutoFill] no files selected');
-    return;
-  }
-  event.target.value = ''; // reset for next time
-
-  var apiKey = _getVisionApiKey();
-  console.log('[AutoFill] apiKey present:', !!apiKey, '| length:', apiKey ? apiKey.length : 0);
-
-  if (!apiKey) {
-    alert('🔑 לפני שימוש בזיהוי אוטומטי - יש להגדיר מפתח OCR.space (חינם, ללא כרטיס אשראי).\n\n' +
-          'עבור ל: ⚙️ הגדרות → "🔍 זיהוי אוטומטי ממסמכי משרד הרישוי" → הזן מפתח API.\n\n' +
-          'הוראות מפורטות בהגדרות (לחץ "❓ איך מקבלים מפתח API חינם?").');
-    return;
-  }
-
-  // Detect old Google Vision keys (starts with "AIza...") and reject them
-  if (/^AIza[0-9A-Za-z_-]{30,}$/.test(apiKey)) {
-    alert('⚠️ זיהיתי שהמפתח השמור הוא של Google Vision (הישן).\n\n' +
-          'המערכת עכשיו עובדת עם OCR.space. אנא:\n' +
-          '1. עבור ל: ⚙️ הגדרות → "🔍 זיהוי אוטומטי ממסמכי משרד הרישוי"\n' +
-          '2. מחק את המפתח הישן (השאר את השדה ריק ולחץ שמור)\n' +
-          '3. הירשם ל-OCR.space (הוראות בהגדרות) וקבל מפתח חינמי\n' +
-          '4. הזן את המפתח החדש');
-    return;
-  }
-
-  var file = files[0];
-  console.log('[AutoFill] file:', file.name, '| size:', file.size, '| type:', file.type);
-
-  if (file.size > 5 * 1024 * 1024) {
-    alert('הקובץ גדול מ-5MB');
-    return;
-  }
-
-  var statusBox = document.getElementById('auto-fill-status');
-  if (statusBox) {
-    statusBox.style.display = 'block';
-    statusBox.innerHTML = '⏳ שולח את המסמך ל-OCR.space לזיהוי טקסט... (יכול לקחת 5-15 שניות)';
-    statusBox.style.cssText = 'display:block;color:#0369a1;background:#eff6ff;border:1px solid #bfdbfe;padding:10px 14px;border-radius:8px;font-size:12px;margin-top:10px;line-height:1.6;';
-  }
-
-  // Read file as data URL (we need both base64 for OCR and to save the file to archive)
-  var reader = new FileReader();
-  reader.onload = function(e) {
-    var dataUrl = e.target.result;
-    if (!dataUrl) {
-      _autoFillStatusError('לא ניתן לקרוא את הקובץ');
-      return;
-    }
-    console.log('[AutoFill] file read, dataUrl length:', dataUrl.length);
-
-    // ═══ OCR.space API via local proxy ═══
-    // We POST to http://localhost:8765/ocr (GalilOcrProxy.exe), which
-    // forwards to api.ocr.space using WinHTTP (bypasses any browser
-    // CORS / network policy issues). Engine 2 supports Hebrew.
-    var formData = new FormData();
-    formData.append('apikey', apiKey);
-    formData.append('language', 'heb');
-    formData.append('OCREngine', '2');
-    formData.append('isOverlayRequired', 'false');
-    formData.append('scale', 'true');
-    formData.append('detectOrientation', 'true');
-    formData.append('file', file);
-
-    console.log('[AutoFill] checking GalilOcrProxy availability...');
-
-    // First, check if the proxy is running locally
-    var proxyUrl = 'http://localhost:8765/ocr';
-    var directUrl = 'https://api.ocr.space/parse/image';
-
-    fetch('http://localhost:8765/ping', { method: 'GET' })
-      .then(function(r) { return r.text(); })
-      .then(function(txt) {
-        var proxyOk = (txt && txt.trim() === 'pong');
-        console.log('[AutoFill] proxy available:', proxyOk);
-        var targetUrl = proxyOk ? proxyUrl : directUrl;
-        console.log('[AutoFill] sending to:', targetUrl);
-        return fetch(targetUrl, { method: 'POST', body: formData });
-      })
-      .catch(function() {
-        // Proxy not running — fall back to direct call
-        console.log('[AutoFill] proxy not running, trying direct call to OCR.space');
-        return fetch(directUrl, { method: 'POST', body: formData });
-      })
-      .then(function(r) {
-        console.log('[AutoFill] OCR response status:', r.status);
-        return r.json();
-      })
-    .then(function(data) {
-      console.log('[AutoFill] OCR.space response:', data);
-
-      if (data.IsErroredOnProcessing) {
-        var err = Array.isArray(data.ErrorMessage) ? data.ErrorMessage.join(', ') : (data.ErrorMessage || 'שגיאה לא ידועה');
-        throw new Error('OCR.space: ' + err);
-      }
-      var text = '';
-      if (data.ParsedResults && data.ParsedResults.length > 0) {
-        text = data.ParsedResults[0].ParsedText || '';
-        console.log('[AutoFill] OCR text length:', text.length);
-        console.log('[AutoFill] OCR text preview:', text.substring(0, 300));
-      }
-      if (!text || text.length < 20) {
-        throw new Error('לא זוהה טקסט במסמך (אורך: ' + text.length + '). ודא שהסריקה ברורה ולא מטושטשת.');
-      }
-
-      // Parse the recognized text
-      var parsed = _parseMotForm(text);
-      console.log('[AutoFill] parsed:', parsed);
-
-      // ═══ v2.9.71: DUPLICATE PLATE CHECK ═══
-      // Before applying parsed values, check if a case with this plate
-      // already exists in the system. If so, warn the user and let them
-      // decide whether to continue creating a duplicate.
-      if (parsed.plate) {
-        var existingCaseId = null;
-        try {
-          if (window.GalilSync && typeof window.GalilSync._findIdByPlate === 'function') {
-            existingCaseId = window.GalilSync._findIdByPlate(parsed.plate);
-          }
-        } catch(e) { console.warn('[AutoFill] duplicate check failed:', e); }
-
-        if (existingCaseId) {
-          console.log('[AutoFill] ⚠️ duplicate plate detected:', parsed.plate, '→ existing case ID:', existingCaseId);
-          var dupMsg = '⚠️ הרכב ' + parsed.plate + ' כבר קיים במערכת!\n\n' +
-                       'תיק עם מספר רכב זה כבר נמצא בתיקים שלך.\n\n' +
-                       'אישור = להמשיך בכל זאת וליצור תיק נוסף\n' +
-                       'ביטול = לבטל את היצירה';
-          if (!confirm(dupMsg)) {
-            // User cancelled — file NOT saved, form NOT filled
-            if (statusBox) {
-              statusBox.innerHTML = '⛔ הזיהוי הופסק — הרכב <b>' + parsed.plate + '</b> כבר קיים במערכת.<br>' +
-                                    '<span style="color:#64748b;">אם ברצונך לערוך אותו - חזור לרשימת התיקים ובחר אותו.</span>';
-              statusBox.style.cssText = 'display:block;color:#9a3412;background:#fff7ed;border:1px solid #fed7aa;padding:10px 14px;border-radius:8px;font-size:12px;margin-top:10px;line-height:1.7;';
-            }
-            return;  // STOP — don't save file, don't fill form
-          }
-          console.log('[AutoFill] user chose to continue despite duplicate');
-        }
-      }
-
-      // Save the file as a regular scanned doc (only after dup check passed)
-      caseScans.push({
-        dataUrl: dataUrl,
-        name: file.name || 'שאילתא לרכב.pdf',
-        type: file.type || 'application/octet-stream',
-        size: file.size,
-        addedAt: new Date().toISOString()
-      });
-      renderCaseScanList();
-
-      // Apply parsed values to the form
-      _applyParsedToForm(parsed);
-
-      // Show summary
-      var found = Object.keys(parsed).filter(function(k){ return parsed[k]; });
-      if (statusBox) {
-        if (found.length > 0) {
-          statusBox.innerHTML = '✅ זוהו ' + found.length + ' שדות ומולאו אוטומטית:<br>' +
-            '<b>' + found.map(function(k){ return _fieldLabels[k] || k; }).join(' · ') + '</b><br>' +
-            '<span style="color:#64748b;">בדוק את הפרטים ולחץ "💾 שמור שינויים"</span>';
-          statusBox.style.cssText = 'display:block;color:#166534;background:#f0fdf4;border:1px solid #bbf7d0;padding:10px 14px;border-radius:8px;font-size:12px;margin-top:10px;line-height:1.7;';
-        } else {
-          // Show the OCR text to the user so they can see what was detected
-          var preview = text.length > 200 ? text.substring(0, 200) + '...' : text;
-          statusBox.innerHTML = '⚠️ הטקסט זוהה אך לא מצאתי שדות במבנה של "שאילתא לרכב".<br><br>' +
-            '<details><summary style="cursor:pointer;font-weight:600;">📄 הצג את הטקסט שזוהה</summary>' +
-            '<pre style="background:#fff;padding:8px;border-radius:4px;font-size:11px;overflow-x:auto;direction:ltr;text-align:right;white-space:pre-wrap;margin-top:6px;">' +
-            preview.replace(/</g,'&lt;') + '</pre></details>';
-          statusBox.style.cssText = 'display:block;color:#9a3412;background:#fff7ed;border:1px solid #fed7aa;padding:10px 14px;border-radius:8px;font-size:12px;margin-top:10px;';
-        }
-      }
-    })
-    .catch(function(err) {
-      console.error('[AutoFill] error:', err);
-      _autoFillStatusError(err.message || String(err));
-    });
-  };
-  reader.onerror = function() {
-    _autoFillStatusError('שגיאה בקריאת הקובץ');
-  };
-  reader.readAsDataURL(file);
-}
-window.handleAutoFillScan = handleAutoFillScan;
-
-function _autoFillStatusError(msg) {
-  var statusBox = document.getElementById('auto-fill-status');
-  if (statusBox) {
-    statusBox.innerHTML = '❌ ' + msg;
-    statusBox.style.cssText = 'display:block;color:#b91c1c;background:#fee2e2;border:1px solid #fecaca;padding:10px 14px;border-radius:8px;font-size:12px;margin-top:10px;';
-  }
-}
-
-var _fieldLabels = {
-  plate:        'מספר רכב',
-  vehicleType:  'סוג רכב',
-  manufacturer: 'יצרן',
-  color:        'צבע',
-  ownerId:      'ת.ז',
-  ownerName:    'שם בעל הרכב',
-  ownerAddr:    'כתובת',
-  city:         'יישוב',
-  licenseExpiry:'תוקף רישיון'
-};
-
-// Parse the OCR text from a MOT "שאילתא לרכב" form
-function _parseMotForm(text) {
-  var out = {};
-
-  // Clean up text — remove duplicate whitespace, normalize quotes
-  var t = text.replace(/[\u200E\u200F]/g, '').replace(/[''`]/g, "'").replace(/[""]/g, '"');
-
-  // Helper to extract a value after a label, until end of line or next known field
-  function find(patterns) {
-    for (var i = 0; i < patterns.length; i++) {
-      var m = t.match(patterns[i]);
-      if (m && m[1]) return m[1].trim();
-    }
-    return '';
-  }
-
-  // ═══ פרטי הרכב ═══
-  // Plate number — appears at top "מספר רכב: 3551379" and again "מס' רכב: 3551379"
-  out.plate = find([
-    /מספר\s*רכב\s*[:\-]\s*(\d{5,8})/,
-    /מס['"]?\s*רכב\s*[:\-]\s*(\d{5,8})/
-  ]);
-
-  // Vehicle type — could be multi-line ("משא סגור\nאחוד")
-  var typeMatch = t.match(/סוג\s*רכב\s*[:\-]?\s*\n?([^\n]+(?:\n(?!יצרן|צבע|ת\.ז|ה\.השכרה|סוג\s*בעלות)[^\n]+)?)/);
-  if (typeMatch) {
-    out.vehicleType = typeMatch[1].replace(/\s+/g, ' ').trim();
-  }
-
-  // Manufacturer
-  out.manufacturer = find([
-    /יצרן\s*רכב\s*[:\-]?\s*([^\n]+)/,
-    /יצרן\s*[:\-]?\s*([^\n]+)/
-  ]);
-
-  // Color
-  out.color = find([
-    /צבע\s*רכב\s*[:\-]?\s*([^\n]+)/,
-    /צבע\s*[:\-]?\s*([^\n]+)/
-  ]);
-
-  // ═══ פרטי בעל הרכב ═══
-  out.ownerId = find([
-    /ת\.?\s*ז\s*[:\-]?\s*(\d{5,9})/,
-    /ת['"]?ז\s*[:\-]?\s*(\d{5,9})/
-  ]);
-
-  var lastName = find([/שם\s*משפחה\s*[:\-]?\s*([^\n]+)/]);
-  var firstName = find([/שם\s*פרטי\s*[:\-]?\s*([^\n]+)/]);
-  if (lastName || firstName) {
-    out.ownerName = (firstName + ' ' + lastName).trim();
-  }
-
-  // Address — combine רחוב + מס' רחוב + דירה
-  var street = find([/רחוב\s*[:\-]?\s*([^\n]+)/]);
-  var streetNum = find([/מס['"]?\s*רחוב\s*[:\-]?\s*(\d+)/]);
-  var apt = find([/דירה\s*[:\-]?\s*(\d+)/]);
-  if (street) {
-    out.ownerAddr = street + (streetNum ? ' ' + streetNum : '') + (apt ? ' דירה ' + apt : '');
-  }
-
-  // City
-  out.city = find([
-    /שם\s*ישוב\s*[:\-]?\s*([^\n]+)/,
-    /יישוב\s*[:\-]?\s*([^\n]+)/,
-    /יישו?ב\s*[:\-]?\s*([^\n]+)/
-  ]);
-
-  // License expiry
-  var expiry = find([/ת\.?\s*תוקף\s*[:\-]?\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/]);
-  if (expiry) {
-    // Convert dd/mm/yyyy to yyyy-mm-dd for the date input
-    var parts = expiry.split(/[\/\-]/);
-    if (parts.length === 3) {
-      var dd = parts[0].padStart(2, '0');
-      var mm = parts[1].padStart(2, '0');
-      var yyyy = parts[2].length === 2 ? '20' + parts[2] : parts[2];
-      out.licenseExpiry = yyyy + '-' + mm + '-' + dd;
-    }
-  }
-
-  // Clean up: remove obvious garbage values
-  Object.keys(out).forEach(function(k) {
-    if (out[k] === 'לא' || out[k] === '0' || out[k] === '-') out[k] = '';
-  });
-
-  return out;
-}
-window._parseMotForm = _parseMotForm;
-
-function _applyParsedToForm(parsed) {
-  function setField(id, val) {
-    if (!val) return;
-    var el = document.getElementById(id);
-    if (el && !el.value) {  // only fill empty fields, don't overwrite existing
-      el.value = val;
-      // Trigger change event so any listeners run
-      try { el.dispatchEvent(new Event('input', {bubbles:true})); } catch(e){}
-    }
-  }
-  setField('nf-plate',           parsed.plate);
-  setField('nf-vehicle-type',    parsed.vehicleType);
-  setField('nf-color',           parsed.color);
-  setField('nf-owner-id',        parsed.ownerId);
-  setField('nf-owner-name',      parsed.ownerName);
-  setField('nf-owner-addr',      parsed.ownerAddr);
-  setField('nf-location-city',   parsed.city);
-  setField('nf-license-expiry',  parsed.licenseExpiry);
-
-  // Trigger license expiry status update
-  if (parsed.licenseExpiry && typeof checkLicenseExpiry === 'function') {
-    setTimeout(checkLicenseExpiry, 100);
-  }
-}
-
-
-// ═══════════════════════════════════════════════════════════════════
-// v2.9.65: LICENSE EXPIRY → AUTO-CLASSIFY AS SCRAP
-// When the license has already expired, the vehicle is legally junk —
-// not abandoned. Automatically flip the case type to "♻️ פינוי גרוטאה"
-// and visually mark it. The user can manually un-flip if needed.
-// ═══════════════════════════════════════════════════════════════════
-function checkLicenseExpiry() {
-  var input = document.getElementById('nf-license-expiry');
-  var statusEl = document.getElementById('nf-license-expiry-status');
-  if (!input || !statusEl) return;
-  var val = (input.value || '').trim();
-  if (!val) {
-    statusEl.textContent = '';
-    statusEl.style.cssText = '';
-    return;
-  }
-  try {
-    var expiry = new Date(val + 'T23:59:59');
-    var now = new Date();
-    var daysDiff = Math.floor((expiry - now) / (1000 * 60 * 60 * 24));
-
-    if (isNaN(expiry.getTime())) {
-      statusEl.textContent = '';
-      statusEl.style.cssText = '';
-      return;
-    }
-
-    if (daysDiff < 0) {
-      var ago = Math.abs(daysDiff);
-      // Auto-classify as scrap (גרוטאה)
-      var alreadyScrap = (typeof newCaseType !== 'undefined' && newCaseType === 'scrap');
-      var autoMsg = alreadyScrap ? '' :
-        '<br><span style="color:#166534;font-weight:600;">✓ סווג אוטומטית כ-"♻️ פינוי גרוטאה"</span>';
-
-      statusEl.innerHTML = '⚠️ <b>הרישיון פג לפני ' + ago + ' ימים</b> — נחשב גרוטאת רכב' + autoMsg;
-      statusEl.style.cssText = 'color:#b91c1c;background:#fee2e2;padding:8px 12px;border-radius:8px;border:1px solid #fecaca;font-size:12px;margin-top:6px;';
-
-      // Switch to scrap type
-      try {
-        var scrapCard = document.querySelector('.nf-type-card[onclick*="\'scrap\'"]');
-        if (scrapCard && typeof selectCaseType === 'function') {
-          selectCaseType(scrapCard, 'scrap');
-        } else {
-          window.newCaseType = 'scrap';
-        }
-      } catch(e) { console.warn('[v2.9.65] auto-classify scrap failed:', e); }
-
-    } else if (daysDiff < 30) {
-      statusEl.innerHTML = '⚠️ הרישיון פג בעוד <b>' + daysDiff + ' ימים</b>';
-      statusEl.style.cssText = 'color:#9a3412;background:#fff7ed;padding:8px 12px;border-radius:8px;border:1px solid #fed7aa;font-size:12px;margin-top:6px;';
-    } else {
-      statusEl.innerHTML = '✓ הרישיון בתוקף עוד ' + daysDiff + ' ימים';
-      statusEl.style.cssText = 'color:#166534;background:#f0fdf4;padding:8px 12px;border-radius:8px;border:1px solid #bbf7d0;font-size:12px;margin-top:6px;';
-    }
-  } catch(e) {
-    statusEl.textContent = '';
-    statusEl.style.cssText = '';
-  }
-}
-window.checkLicenseExpiry = checkLicenseExpiry;
-
 /* ═══════════════════════════════════════════════════════════════════
    🗑️ nukeAllVisibleCases — Emergency clear button.
    Marks every Firebase ID currently in the cases table as "deleted"
@@ -8840,10 +8046,6 @@ function openNewCase() {
   newCasePhotos = [];
   renderNewCasePhotoThumbs();
 
-  // ═══ v2.9.56: Reset scanned documents ═══
-  caseScans = [];
-  if (typeof renderCaseScanList === 'function') renderCaseScanList();
-
   // Reset case type to default
   newCaseType = 'abandoned';
   document.querySelectorAll('.nf-type-card').forEach(function(c) { c.classList.remove('selected'); });
@@ -9018,37 +8220,7 @@ function saveNewCase() {
       try {
         var fullSnap = Object.assign({}, CASE);
         fullSnap.photos = casePhotos.slice();
-        // ═══ v2.9.56: persist scanned documents alongside the case ═══
-        fullSnap.scans = (typeof caseScans !== 'undefined' && Array.isArray(caseScans)) ? caseScans.slice() : [];
         existingRow.setAttribute('data-case', JSON.stringify(fullSnap));
-
-        // ═══ v2.9.56: also save each scanned document to the case archive ═══
-        // so it shows up in "ארכיון מסמכים שנשלחו בתיק" alongside the auto-generated
-        // letters and stickers.
-        try {
-          if (typeof archivePrintedDocument === 'function' && Array.isArray(caseScans)) {
-            caseScans.forEach(function(s, i) {
-              if (!s || !s.dataUrl) return;
-              // Detect already-archived scans by name+addedAt to avoid duplicates
-              var docId = 'scan_' + (s.addedAt || '').replace(/[^0-9]/g, '').slice(0, 14) + '_' + i;
-              archivePrintedDocument(
-                docId,
-                '📎 ' + (s.name || 'מסמך סרוק'),
-                s.dataUrl,
-                {
-                  type: 'scanned_doc',
-                  fileType: s.type,
-                  fileName: s.name,
-                  fileSize: s.size,
-                  isBinary: true,
-                  plate: CASE.plate
-                }
-              );
-            });
-          }
-        } catch(scanErr) {
-          console.warn('[v2.9.56] failed to archive scans:', scanErr);
-        }
 
         // ═══ v2.9.38: re-render the FULL row using upsertCaseRow ═══
         // This ensures status badge, countdown, location, and ALL other cells
@@ -9302,12 +8474,6 @@ function _newCaseReadFields() {
     : combinedLoc;
   CASE.notes = document.getElementById('nf-notes').value.trim();
 
-  // ═══ v2.9.57: Read license expiry date ═══
-  var licEl = document.getElementById('nf-license-expiry');
-  if (licEl) {
-    CASE.licenseExpiry = licEl.value || '';
-  }
-
   // ═══ v2.9.42: READ INSPECTOR & DATE — without these, CASE keeps OLD values ═══
   // and fullSnap (built from CASE) saves stale data to the row's data-case attribute,
   // causing the table to show outdated info even after editing.
@@ -9375,7 +8541,6 @@ function _newCasePersistRow() {
       var fullCaseSnapshot = Object.assign({}, CASE, {
         photos: Array.isArray(casePhotos) ? casePhotos.slice() :
                 (Array.isArray(newCasePhotos) ? newCasePhotos.map(function(p){ return p.dataUrl || p; }) : []),
-        scans: (typeof caseScans !== 'undefined' && Array.isArray(caseScans)) ? caseScans.slice() : [],
         inspector: inspector,
         date: foundDate
       });
@@ -10287,28 +9452,6 @@ function closeDeleteModal() {
 
 function executeDeleteCase() {
   closeDeleteModal();
-
-  // ═══ v2.9.74: PLATE-LEVEL TOMBSTONE ═══
-  // The previous logic only added a tombstone if it could find the case's
-  // Firebase ID. But manual cases that were never synced to Firebase, OR
-  // cases whose ID lookup failed (because mobileCasesCache hadn't loaded
-  // yet), would have no tombstone — and on the next sync they'd reappear.
-  // Now we ALWAYS record the deleted plate immediately, before any of the
-  // ID/Firebase logic. Both row-add functions check this list and skip.
-  if (deletingPlate) {
-    try {
-      var dPlates = JSON.parse(localStorage.getItem('galilElyon_deletedPlates') || '[]');
-      if (!Array.isArray(dPlates)) dPlates = [];
-      var trimPlate = String(deletingPlate).trim();
-      if (trimPlate && dPlates.indexOf(trimPlate) === -1) {
-        dPlates.push(trimPlate);
-        // Cap the list at 500 entries so localStorage doesn't grow forever
-        if (dPlates.length > 500) dPlates = dPlates.slice(-500);
-        localStorage.setItem('galilElyon_deletedPlates', JSON.stringify(dPlates));
-        console.log('[executeDeleteCase] ✓ added plate to tombstone list:', trimPlate);
-      }
-    } catch(e) { console.warn('[executeDeleteCase] tombstone-by-plate failed:', e); }
-  }
 
   // Try to find the row's mobile-id BEFORE deleting, so we can also remove from Firebase
   var mobileIdToDelete = null;
@@ -11721,7 +10864,7 @@ document.addEventListener('keydown', function(e) {
 // ═══════════════════════════════════════════════════════════════════
 function _getCurrentVersion() {
   // Read from the visible version label in the sidebar
-  // <div ...>v2.9.74 — plate tombstone ...</div>
+  // <div ...>v2.9.55 — login fix ...</div>
   try {
     var nodes = document.querySelectorAll('div');
     for (var i = 0; i < nodes.length; i++) {
@@ -11733,92 +10876,22 @@ function _getCurrentVersion() {
   return '';
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// v2.9.73: AGGRESSIVE AUTO-UPDATE
-// Per user feedback ("when I deploy a new version, the app should
-// refresh automatically without me hitting Ctrl+Shift+R"):
-//   1. Check every 30 seconds (not just on load)
-//   2. Check on visibilitychange (when user comes back to tab)
-//   3. No throttling — version checks are tiny GitHub Pages requests
-//   4. When new version detected → auto-reload after 3-second toast
-//      (no confirm() popup; we already preserve work via autosave)
-//   5. Clear all caches + unregister service workers before reload
-//      so the new HTML is actually fetched, not served from cache.
-// ═══════════════════════════════════════════════════════════════════
-function _performAutoUpdate(currentVersion, remoteVersion) {
-  console.log('[auto-update] performing auto-update from', currentVersion, '→', remoteVersion);
-
-  // Show a friendly overlay so the user knows what's happening
-  var overlay = document.createElement('div');
-  overlay.id = 'auto-update-overlay';
-  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.85);z-index:999999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
-  overlay.innerHTML =
-    '<div style="background:#fff;border-radius:16px;padding:32px 40px;max-width:480px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.4);direction:rtl;font-family:inherit;">' +
-      '<div style="font-size:48px;margin-bottom:16px;">🔄</div>' +
-      '<div style="font-size:20px;font-weight:700;color:#0f172a;margin-bottom:8px;">גרסה חדשה זמינה</div>' +
-      '<div style="font-size:14px;color:#64748b;margin-bottom:20px;">' +
-        currentVersion + ' → <b style="color:#7c3aed;">' + remoteVersion + '</b>' +
-      '</div>' +
-      '<div style="font-size:14px;color:#0f172a;margin-bottom:24px;">' +
-        'התוכנה תתרענן אוטומטית בעוד <b id="auto-update-countdown" style="color:#dc2626;">3</b> שניות' +
-      '</div>' +
-      '<button id="auto-update-now-btn" style="background:#7c3aed;color:#fff;border:none;border-radius:10px;padding:10px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">' +
-        '⚡ עדכן עכשיו' +
-      '</button>' +
-    '</div>';
-  document.body.appendChild(overlay);
-
-  function doReload() {
-    console.log('[auto-update] clearing caches and reloading...');
-    var p = Promise.resolve();
-    // Clear all caches
-    if ('caches' in window) {
-      p = caches.keys().then(function(names) {
-        return Promise.all(names.map(function(n) { return caches.delete(n); }));
-      }).catch(function(){});
-    }
-    // Unregister service workers
-    p = p.then(function() {
-      if (navigator.serviceWorker) {
-        return navigator.serviceWorker.getRegistrations().then(function(regs) {
-          return Promise.all(regs.map(function(r) { return r.unregister(); }));
-        }).catch(function(){});
-      }
-    });
-    // Reload with cache-buster URL param to force fresh fetch
-    p.then(function() {
-      var url = location.pathname + '?_updated=' + Date.now() + location.hash;
-      window.location.replace(url);
-    });
-  }
-
-  // Manual update button
-  var btn = document.getElementById('auto-update-now-btn');
-  if (btn) btn.onclick = doReload;
-
-  // Auto countdown
-  var sec = 3;
-  var t = setInterval(function() {
-    sec--;
-    var el = document.getElementById('auto-update-countdown');
-    if (el) el.textContent = sec;
-    if (sec <= 0) {
-      clearInterval(t);
-      doReload();
-    }
-  }, 1000);
-}
-window._performAutoUpdate = _performAutoUpdate;
-
 function _checkForVersionUpdate() {
   var currentVersion = _getCurrentVersion();
   if (!currentVersion) return; // can't tell, skip
 
-  // Already updating? skip
-  if (document.getElementById('auto-update-overlay')) return;
-
   // Build URL to the live HTML page on GitHub Pages with a cache-buster
   var liveUrl = location.origin + location.pathname + '?_check=' + Date.now();
+
+  // Don't check more than once every 5 minutes (avoid spamming GitHub)
+  try {
+    var lastCheck = +(localStorage.getItem('galilElyon_lastVersionCheck') || 0);
+    if (Date.now() - lastCheck < 5 * 60 * 1000) {
+      console.log('[v2.9.49 version-check] skipped (checked recently)');
+      return;
+    }
+    localStorage.setItem('galilElyon_lastVersionCheck', String(Date.now()));
+  } catch(e){}
 
   fetch(liveUrl, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } })
     .then(function(resp) {
@@ -11829,12 +10902,12 @@ function _checkForVersionUpdate() {
       // Extract version number from the live HTML
       var match = html.match(/v(\d+\.\d+\.\d+)\s*—\s*[^<]+<\/div>/);
       if (!match) {
-        console.log('[auto-update] could not parse remote version');
+        console.log('[v2.9.49 version-check] could not parse remote version');
         return;
       }
       var remoteVersion = match[1];
       if (remoteVersion === currentVersion) {
-        // up to date — silent
+        console.log('[v2.9.49 version-check] up to date:', currentVersion);
         return;
       }
       // Compare versions semantically (newer=larger)
@@ -11847,27 +10920,26 @@ function _checkForVersionUpdate() {
         return 0;
       };
       if (cmp(remoteVersion, currentVersion) > 0) {
-        console.log('[auto-update] NEW VERSION available:', remoteVersion, '(running ' + currentVersion + ')');
-        _performAutoUpdate(currentVersion, remoteVersion);
+        console.log('[v2.9.49 version-check] NEW VERSION available:', remoteVersion, '(running ' + currentVersion + ')');
+        // Show a friendly confirm dialog
+        var msg = '🆕 גרסה חדשה זמינה!\n\n'
+                + 'גרסה נוכחית: ' + currentVersion + '\n'
+                + 'גרסה חדשה: ' + remoteVersion + '\n\n'
+                + 'האם תרצה לעדכן עכשיו?\n\n'
+                + '(הנתונים שלך נשמרו בענן ולא יאבדו)';
+        if (confirm(msg)) {
+          // Force reload bypassing cache
+          window.location.reload(true);
+        }
       } else {
-        console.log('[auto-update] running newer than remote:', currentVersion, '>', remoteVersion);
+        console.log('[v2.9.49 version-check] running newer than remote:', currentVersion, '>', remoteVersion);
       }
     })
     .catch(function(err) {
-      // Silent — offline / GitHub temporarily unreachable
+      console.warn('[v2.9.49 version-check] failed:', err.message || err);
     });
 }
 window._checkForVersionUpdate = _checkForVersionUpdate;
-
-// Periodic check every 30 seconds
-setInterval(_checkForVersionUpdate, 30 * 1000);
-
-// Check immediately when tab becomes visible (user comes back from another tab)
-document.addEventListener('visibilitychange', function() {
-  if (!document.hidden) {
-    setTimeout(_checkForVersionUpdate, 500);
-  }
-});
 
 // Restore on page load (run after all DOM + scripts are ready)
 function _bootSequence() {
@@ -13415,23 +12487,7 @@ if (document.readyState === 'loading') {
     try {
       var deletedIds = JSON.parse(localStorage.getItem('galilElyon_deletedIds') || '[]');
       if (Array.isArray(deletedIds) && deletedIds.indexOf(c.id) !== -1) {
-        console.log('[addOrUpdateManualRow] ✗ skipped (tombstoned by id):', c.id, c.plate);
-        return;
-      }
-    } catch(e){}
-
-    // ═══ v2.9.74: PLATE-LEVEL TOMBSTONE CHECK ═══
-    try {
-      var deletedPlates = JSON.parse(localStorage.getItem('galilElyon_deletedPlates') || '[]');
-      var cp = String(c.plate || '').trim();
-      if (Array.isArray(deletedPlates) && cp && deletedPlates.indexOf(cp) !== -1) {
-        console.log('[addOrUpdateManualRow] ✗ skipped (tombstoned by plate):', c.id, cp);
-        // Also push _deleted=true to Firebase so other devices stop seeing it
-        try {
-          if (c.id && fbDb) {
-            fbDb.ref('cases/' + c.id).update({ _deleted: true, _deletedAt: Date.now() }).catch(function(){});
-          }
-        } catch(e){}
+        console.log('[addOrUpdateManualRow] ✗ skipped (tombstoned):', c.id, c.plate);
         return;
       }
     } catch(e){}
@@ -13518,24 +12574,9 @@ if (document.readyState === 'loading') {
       var deletedIds = JSON.parse(localStorage.getItem('galilElyon_deletedIds') || '[]');
       if (Array.isArray(deletedIds)) {
         if (deletedIds.indexOf(c.id) !== -1) {
-          console.log('[addOrUpdateMobileRow] ✗ skipped (tombstoned by id):', c.id, c.plate);
+          console.log('[addOrUpdateMobileRow] ✗ skipped (tombstoned):', c.id, c.plate);
           return;
         }
-      }
-    } catch(e){}
-
-    // ═══ v2.9.74: PLATE-LEVEL TOMBSTONE CHECK ═══
-    try {
-      var deletedPlates = JSON.parse(localStorage.getItem('galilElyon_deletedPlates') || '[]');
-      var cp = String(c.plate || '').trim();
-      if (Array.isArray(deletedPlates) && cp && deletedPlates.indexOf(cp) !== -1) {
-        console.log('[addOrUpdateMobileRow] ✗ skipped (tombstoned by plate):', c.id, cp);
-        try {
-          if (c.id && fbDb) {
-            fbDb.ref('cases/' + c.id).update({ _deleted: true, _deletedAt: Date.now() }).catch(function(){});
-          }
-        } catch(e){}
-        return;
       }
     } catch(e){}
 
