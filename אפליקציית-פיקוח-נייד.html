@@ -1087,6 +1087,15 @@ function setSyncChip(state, text) {
 // ═══════════════════════════════════════════════════════════════════
 function pushCaseToFirebase(c) {
   if (!fbReady || !fbDb) return Promise.resolve(false);
+  // v3.15: ONE-SHOT SYNC — once a case has been sent to Firebase, never push
+  // it again. Even if the inspector later edits the case, the edit stays
+  // local. This prevents the manager from seeing a "deleted" case re-appear
+  // because the inspector's mobile keeps re-pushing it. Per Gabbi's rule:
+  // a case syncs ONCE; after that it lives only in the mobile's history.
+  if (c.sentToServer === true) {
+    console.log('[pushCaseToFirebase] ⏭ already sent once — never push again:', c.id, c.plate || '');
+    return Promise.resolve(false);
+  }
   setSyncChip('pending', 'בודק...');
   return fbDb.ref('cases/' + c.id).once('value')
     .then(function(snap) {
@@ -1133,6 +1142,7 @@ function pushCaseToFirebase(c) {
           setSyncChip('ok', 'מסונכרן');
           try {
             c.synced = true;
+            c.sentToServer = true; // v3.15: lock — never push this case again
             saveDB();
           } catch(e) {}
           return true;
