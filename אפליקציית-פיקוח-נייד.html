@@ -1629,6 +1629,7 @@ function renderList() {
     h += '<span class="mc-badge ' + c.status + '">' + (c.badge || '') + '</span></div>';
     h += '<div style="font-size:22px;font-weight:600;margin-top:2px">' + (c.owner || '—') + '</div>';
     h += '<div style="font-size:19px;color:#bbb;margin-top:1px">📍 ' + (c.location || '—') + ' · ' + dt + '</div>';
+    h += _miniCountdown(c);
     h += '</div></div></div>';
   });
   el.innerHTML = h;
@@ -2019,6 +2020,16 @@ function saveCase() {
       renderHome();
     });
   }
+
+  renderView();
+  showScreen('home'); // back to home so user sees archive immediately
+  renderHome();
+
+  // v3.16: silent save — no popup, no share sheet. The Firebase push
+  // happens above; the desktop pulls automatically via "🔄 רענן מהענן".
+  // The old askMoreCasesOrSend() dialog (and the share-sheet that followed)
+  // are obsolete now that Firebase is the transport. Functions left as
+  // dead code; can be removed in a later cleanup.
 }
 
 // v3.19: when an already-sent case is saved again, ask whether to also
@@ -2048,16 +2059,6 @@ function _askSendUpdate(c) {
     toast('💾 השינויים נשמרו במכשיר בלבד');
     renderHome();
   };
-
-  renderView();
-  showScreen('home'); // back to home so user sees archive immediately
-  renderHome();
-
-  // v3.16: silent save — no popup, no share sheet. The Firebase push
-  // happens above; the desktop pulls automatically via "🔄 רענן מהענן".
-  // The old askMoreCasesOrSend() dialog (and the share-sheet that followed)
-  // are obsolete now that Firebase is the transport. Functions left as
-  // dead code; can be removed in a later cleanup.
 }
 
 // ═══════════════════════════════════════════════════════════════════
