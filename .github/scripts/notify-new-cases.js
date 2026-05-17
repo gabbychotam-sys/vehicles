@@ -18,10 +18,6 @@ const RECIPIENTS   = (process.env.RECIPIENTS || '').split(',').map(s => s.trim()
 const MAIL_USER    = process.env.MAIL_USERNAME;
 const MAIL_PASS    = process.env.MAIL_PASSWORD;
 
-// Web mirror of the management software (so the email's CTA actually opens
-// something useful — both Gabi and Moran can click and edit the case there).
-const MANAGEMENT_URL = 'https://gabbychotam-sys.github.io/vehicles/%D7%AA%D7%95%D7%9B%D7%A0%D7%AA-%D7%A0%D7%99%D7%94%D7%95%D7%9C-%D7%A8%D7%9B%D7%91%D7%99%D7%9D-%D7%A0%D7%98%D7%95%D7%A9%D7%99%D7%9D.html';
-
 if (!FIREBASE_URL || !MAIL_USER || !MAIL_PASS || !RECIPIENTS.length) {
   console.error('Missing env vars. Need FIREBASE_URL, MAIL_USERNAME, MAIL_PASSWORD, RECIPIENTS');
   process.exit(1);
@@ -60,108 +56,89 @@ function esc(s) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-function renderCaseCard(c) {
+// Option B "Memo" design — Outlook/Ironscales-safe.
+// No bgcolor (stripped by sanitizers), no gradients, no buttons.
+// Only inline font color + table borders + emojis survive cleanly.
+
+function renderCaseRow(c, idx, alt) {
   const plate     = esc(c.plate     || '—');
   const location  = esc(c.location  || '—');
   const inspector = esc(c.inspector || '—');
-  // Pick gradient + status label based on status. Energetic warm-color palette.
-  let bgGradient, plateColor, subColor, statusLabel;
+  let statusLabel, statusColor;
   if (c.status === 'red') {
-    bgGradient  = 'linear-gradient(135deg,#fee2e2,#fecaca)';
-    plateColor  = '#991b1b';
-    subColor    = '#7f1d1d';
-    statusLabel = '🔴 מדבקה אדומה';
+    statusColor='#c62828'; statusLabel='🔴 מ.אדומה';
   } else if (c.status === 'orange') {
-    bgGradient  = 'linear-gradient(135deg,#fed7aa,#fdba74)';
-    plateColor  = '#9a3412';
-    subColor    = '#7c2d12';
-    statusLabel = '🚛 רכב נגרר לאחסנה';
+    statusColor='#e65100'; statusLabel='🚛 נגררה';
   } else if (c.status === 'green') {
-    bgGradient  = 'linear-gradient(135deg,#d1fae5,#a7f3d0)';
-    plateColor  = '#065f46';
-    subColor    = '#064e3b';
-    statusLabel = '✅ תיק נסגר';
+    statusColor='#2e7d32'; statusLabel='✅ נסגר';
+  } else if (c.status === 'photographed') {
+    statusColor='#1565c0'; statusLabel='📷 לבירור';
   } else {
-    bgGradient  = 'linear-gradient(135deg,#fef3c7,#fde68a)';
-    plateColor  = '#92400e';
-    subColor    = '#78350f';
-    statusLabel = '🟡 מדבקה צהובה';
+    statusColor='#f57f17'; statusLabel='🟡 מ.צהובה';
   }
-  // Inspector first name only — feels friendlier in the one-liner
   const inspectorShort = inspector.split(' ')[0] || inspector;
+  const rowBg = alt ? ' bgcolor="#f5f9ff" style="background-color:#f5f9ff;"' : '';
+  const bottomBorder = 'border-bottom:1px solid #ddd;';
 
   return `
-  <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:${bgGradient};border-radius:14px;margin-bottom:12px;">
-    <tr><td style="padding:14px 16px;">
-      <div style="font-size:24px;font-weight:900;color:${plateColor};direction:ltr;text-align:right;letter-spacing:1px;font-family:Heebo,Arial,sans-serif;">${plate}</div>
-      <div style="font-size:14px;color:${subColor};margin-top:4px;">${statusLabel} · 📍 ${location} · 👷 ${esc(inspectorShort)}</div>
-    </td></tr>
-  </table>`;
+    <tr${rowBg}>
+      <td style="padding:7px 8px;font-weight:bold;${bottomBorder}width:30px;">${idx}.</td>
+      <td style="padding:7px 8px;${bottomBorder}direction:ltr;text-align:right;width:90px;"><b>${plate}</b></td>
+      <td style="padding:7px 8px;${bottomBorder}color:${statusColor};font-weight:bold;white-space:nowrap;">${statusLabel}</td>
+      <td style="padding:7px 8px;${bottomBorder}">${location}</td>
+      <td style="padding:7px 8px;${bottomBorder}color:#666;text-align:left;">${esc(inspectorShort)}</td>
+    </tr>`;
 }
 
 function renderEmail(cases) {
   const dateStr = new Date().toLocaleDateString('he-IL', { day:'2-digit', month:'2-digit', year:'numeric' });
   const timeStr = new Date().toLocaleTimeString('he-IL').slice(0,5);
   const n = cases.length;
-  const cards = cases.map(renderCaseCard).join('');
-  const headline = n === 1 ? '1 תיק חדש' : n + ' תיקים חדשים';
+  const headline = n === 1 ? 'תיק חדש אחד' : n + ' תיקים חדשים';
+  const rows = cases.map((c, i) => renderCaseRow(c, i + 1, i % 2 === 0)).join('');
 
   return `<!DOCTYPE html><html dir="rtl" lang="he"><head><meta charset="utf-8"><title>${esc(headline)}</title></head>
-<body style="margin:0;padding:0;background:linear-gradient(135deg,#fef3c7 0%,#fce7f3 100%);font-family:Heebo,Arial,sans-serif;min-height:100vh;">
-  <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="padding:24px 12px;">
-    <tr><td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;background:#ffffff;border-radius:20px;box-shadow:0 10px 32px rgba(0,0,0,0.12);overflow:hidden;">
+<body style="margin:0;padding:20px;font-family:Arial,Helvetica,sans-serif;color:#222;direction:rtl;">
 
-        <!-- HERO HEADER -->
-        <tr><td style="background:linear-gradient(135deg,#f59e0b,#ef4444);color:#ffffff;padding:36px 28px;text-align:center;">
-          <div style="font-size:64px;line-height:1;margin-bottom:8px;">🚗 🚨 🚛</div>
-          <div style="font-size:26px;font-weight:900;margin-bottom:6px;">היי, חברים!</div>
-          <div style="font-size:16px;opacity:0.95;font-weight:500;">פקחים עבדו מהר היום ופתחו...</div>
-          <div style="font-size:42px;font-weight:900;margin-top:6px;">${esc(headline)}</div>
-        </td></tr>
+<table border="0" cellpadding="0" cellspacing="0" align="center" style="width:560px;max-width:100%;">
 
-        <!-- GREETING -->
-        <tr><td style="padding:28px 28px 8px 28px;text-align:center;">
-          <div style="font-size:17px;color:#374151;line-height:1.7;font-weight:500;">
-            שלום <strong style="color:#ef4444;">גבי ומורן</strong>,<br>
-            הצוות בשטח ממתין לכם — הגיע הזמן להיכנס לתוכנת הניהול ולקפוץ פנימה כדי להשלים את הטיפול 💪
-          </div>
-        </td></tr>
+  <!-- כותרת -->
+  <tr><td style="padding:0 0 10px 0;border-bottom:3px double #1565c0;">
+    <div style="font-size:11px;color:#888;letter-spacing:2px;">פיקוח רכבים נטושים · גליל עליון</div>
+    <div style="font-size:22px;font-weight:bold;color:#1565c0;margin-top:4px;">⚠ עדכון פעילות בשטח</div>
+  </td></tr>
 
-        <!-- CTA BUTTON -->
-        <tr><td style="padding:20px 28px 12px 28px;text-align:center;">
-          <table cellpadding="0" cellspacing="0" role="presentation" style="margin:0 auto;">
-            <tr><td style="background:linear-gradient(135deg,#ef4444,#dc2626);border-radius:12px;box-shadow:0 4px 16px rgba(239,68,68,0.4);">
-              <a href="${MANAGEMENT_URL}" style="display:inline-block;padding:16px 36px;color:#ffffff;text-decoration:none;font-size:17px;font-weight:800;font-family:Heebo,Arial,sans-serif;">🚀 חדש לתוכנת הניהול</a>
-            </td></tr>
-          </table>
-        </td></tr>
+  <!-- אל / תאריך / נושא -->
+  <tr><td style="padding:8px 0;font-size:13px;color:#666;">
+    <b>אל:</b> גבי חותם, מורן לוז<br>
+    <b>תאריך:</b> ${esc(dateStr)}, ${esc(timeStr)}<br>
+    <b>נושא:</b> נוספו <span style="color:#c62828;font-weight:bold;">${esc(headline)}</span> דרך האפליקציה
+  </td></tr>
 
-        <!-- DIVIDER -->
-        <tr><td style="padding:24px 28px 8px 28px;text-align:center;">
-          <div style="font-size:14px;color:#9ca3af;font-weight:600;letter-spacing:2px;">━━━ התיקים שהתווספו ━━━</div>
-        </td></tr>
+  <!-- גוף ההודעה -->
+  <tr><td style="padding:12px 0;border-top:1px solid #ddd;border-bottom:1px solid #ddd;">
+    <div style="font-size:14px;line-height:1.6;color:#333;">
+      שלום,<br>
+      פקחים בשטח פתחו תיקים חדשים. רשימה מפורטת מטה.<br>
+      <b>נדרשת השלמת טיפול</b> בתוכנת הניהול.
+    </div>
+  </td></tr>
 
-        <!-- CASE CARDS -->
-        <tr><td style="padding:8px 28px 8px 28px;">${cards}</td></tr>
+  <!-- פירוט התיקים -->
+  <tr><td style="padding:14px 0 6px 0;">
+    <div style="font-size:13px;font-weight:bold;color:#1565c0;margin-bottom:8px;">▸ פירוט התיקים</div>
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="font-size:13px;border-top:1px solid #1565c0;border-bottom:1px solid #1565c0;">${rows}
+    </table>
+  </td></tr>
 
-        <!-- ENCOURAGEMENT -->
-        <tr><td style="padding:20px 28px 24px 28px;text-align:center;">
-          <div style="font-size:24px;margin-bottom:6px;">💪 🎯 ✨</div>
-          <div style="font-size:15px;color:#6b7280;font-weight:600;">קדימה לטיפול!</div>
-        </td></tr>
+  <!-- חתימה -->
+  <tr><td style="padding:14px 0 0 0;border-top:1px solid #ddd;font-size:11px;color:#888;">
+    מערכת התראות אוטומטית · GalilVehicles<br>
+    הודעה זו נשלחת רק כשנוספים תיקים חדשים
+  </td></tr>
 
-        <!-- FOOTER -->
-        <tr><td style="padding:14px 28px;background:#f9fafb;border-top:1px solid #e5e7eb;text-align:center;">
-          <div style="font-size:11px;color:#9ca3af;line-height:1.6;">
-            🤖 התראה אוטומטית · GalilVehicles<br>
-            ${dateStr}, ${timeStr}
-          </div>
-        </td></tr>
+</table>
 
-      </table>
-    </td></tr>
-  </table>
 </body></html>`;
 }
 
