@@ -10,7 +10,13 @@ name: Notify new cases
 
 on:
   schedule:
-    - cron: '*/5 * * * *'   # every 5 minutes (GitHub Actions minimum)
+    # GitHub deprioritizes (and sometimes silently drops) cron jobs scheduled
+    # at the top of the hour due to peak load. Per the GitHub Actions docs:
+    # "To decrease the chance of delay, schedule your workflow to run at a
+    # different time of the hour." This list = every 5 min, offset 2 from
+    # the hour edge. Much more reliable than `*/5 * * * *` for low-traffic
+    # workflows on personal repos.
+    - cron: '2,7,12,17,22,27,32,37,42,47,52,57 * * * *'
   workflow_dispatch:        # also allow manual trigger from the Actions tab
 
 jobs:
