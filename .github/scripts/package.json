@@ -1,0 +1,10 @@
+{
+  "name": "galilvehicles-notify",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GitHub Actions script that emails Gabi+Moran when inspectors push new cases to Firebase",
+  "main": "notify-new-cases.js",
+  "dependencies": {
+    "nodemailer": "^6.9.16"
+  }
+}

@@ -1,0 +1,38 @@
+name: Notify new cases
+
+# Runs every 5 minutes — checks Firebase for cases that the mobile inspectors
+# pushed but that haven't triggered an email yet. Sends one email per new case
+# to Gabi + Moran. Marks the case in Firebase so it isn't notified twice.
+#
+# Required secrets:
+#   MAIL_USERNAME  — Gmail address that sends the notifications
+#   MAIL_PASSWORD  — Gmail App Password (16-char, NOT the regular password)
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'   # every 5 minutes (GitHub Actions minimum)
+  workflow_dispatch:        # also allow manual trigger from the Actions tab
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: .github/scripts
+        run: npm install --silent
+
+      - name: Send notifications
+        working-directory: .github/scripts
+        env:
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          FIREBASE_URL: https://galil-elyon-vehicles-default-rtdb.europe-west1.firebasedatabase.app
+          RECIPIENTS: gabbyc@galil-elion.org.il,moranl@galil-elion.org.il
+        run: node notify-new-cases.js
