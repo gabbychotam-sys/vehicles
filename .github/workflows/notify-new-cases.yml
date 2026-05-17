@@ -40,5 +40,5 @@ jobs:
           MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
           FIREBASE_URL: https://galil-elyon-vehicles-default-rtdb.europe-west1.firebasedatabase.app
-          RECIPIENTS: gabbyc@galil-elion.org.il,moranl@galil-elion.org.il,gabbychotam@gmail.com
+          RECIPIENTS: gabbyc@galil-elion.org.il,moranl@galil-elion.org.il
         run: node notify-new-cases.js
