@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>טופס הקצאת משימות – מחלקת פיקוח גליל עליון</title>
+<style>
+  :root{--ink:#1f2937;--muted:#6b7280;--line:#e5e7eb;--bg:#eef2f5;--brand:#7c3aed;--brand2:#1e3a8a}
+  *{box-sizing:border-box}
+  body{font-family:"Segoe UI",Arial,sans-serif;margin:0;background:var(--bg);color:var(--ink);direction:rtl}
+  header{background:linear-gradient(135deg,#7c3aed,#1e3a8a);color:#fff;padding:18px 22px}
+  header h1{margin:0;font-size:21px}
+  header p{margin:6px 0 0;font-size:14px;opacity:.92}
+  main{padding:18px 22px 60px;max-width:1200px;margin:0 auto}
+  .card{background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.07);padding:16px 18px}
+  table{border-collapse:collapse;width:100%;font-size:14px}
+  th,td{border:1px solid var(--line);padding:6px 8px;text-align:right;vertical-align:top}
+  th{background:#f3effe;color:#5b21b6}
+  input,textarea,select{width:100%;border:1px solid var(--line);border-radius:8px;padding:7px 9px;font-size:14px;font-family:inherit;background:#fff}
+  textarea{resize:vertical}
+  .btn{border:none;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:bold;cursor:pointer;color:#fff;margin-top:14px}
+  .btn-mail{background:#7c3aed} .btn-row{background:#fff;color:#5b21b6;border:1px solid var(--line);font-weight:normal}
+  .del{background:#fee2e2;color:#b91c1c;border:none;border-radius:6px;cursor:pointer;width:26px;height:26px;font-weight:bold}
+  .hint{font-size:13px;color:var(--muted);margin:6px 2px}
+  .ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;border-radius:10px;padding:10px 14px;margin-top:12px;display:none}
+</style>
+</head>
+<body>
+<header>
+  <h1>📝 טופס הקצאת משימות – מחלקת פיקוח גליל עליון</h1>
+  <p>למילוי ע״י <b>מאיה גורדון</b>. אפשר לערוך/למחוק/להוסיף שורות. בסיום לחצי <b>"📧 שלח לגבי"</b>.</p>
+</header>
+<main>
+  <div class="card">
+    <table id="tbl"><thead><tr>
+      <th style="width:22%">משימה</th><th style="width:30%">פירוט</th><th style="width:14%">פקח אחראי</th>
+      <th style="width:18%">תאריך ושעת יעד</th><th style="width:12%">דחיפות</th><th></th>
+    </tr></thead><tbody id="rows"></tbody></table>
+    <button class="btn btn-row" id="addRow" type="button">+ הוסף שורה</button>
+    <div class="hint">טיפ: אפשר להוסיף כמה משימות שצריך. מי שלא צריך פקח ספציפי — אפשר להשאיר "גבי חותם".</div>
+    <div>
+      <button class="btn btn-mail" id="sendMail">📧 שלח לגבי במייל</button>
+    </div>
+    <div class="ok" id="ok">נפתח חלון מייל לגבי. אם לא נפתח — אפשר להעתיק את הטקסט ידנית. תודה!</div>
+  </div>
+</main>
+<script>
+const GABI_EMAIL='gabbyc@galil-elion.org.il';
+const STAFF=['גבי חותם','אייל ארצי','פרנסיס ברוטמן','שימי רוזנברג','מורן לוז','מאיה גורדון'];
+const PRIO={normal:'רגיל',urgent:'דחוף',low:'נמוך'};
+const rows=document.getElementById('rows');
+function rowHtml(d){d=d||{};
+  const who=STAFF.map(s=>`<option${s===d.who?' selected':''}>${s}</option>`).join('');
+  const pr=Object.entries(PRIO).map(([k,v])=>`<option value="${k}"${k===d.priority?' selected':''}>${v}</option>`).join('');
+  return `<tr>
+    <td><input class="t-title" placeholder="כותרת המשימה" value="${esc(d.title)}"></td>
+    <td><textarea class="t-det" rows="2" placeholder="פירוט / הנחיות">${esc(d.details)}</textarea></td>
+    <td><select class="t-who">${who}</select></td>
+    <td><input class="t-due" type="datetime-local" value="${esc(d.due)}"></td>
+    <td><select class="t-pr">${pr}</select></td>
+    <td><button type="button" class="del">×</button></td></tr>`;
+}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+function addRow(d){rows.insertAdjacentHTML('beforeend',rowHtml(d));bindDel();}
+function bindDel(){rows.querySelectorAll('.del').forEach(b=>b.onclick=()=>{b.closest('tr').remove();if(!rows.children.length)addRow();});}
+document.getElementById('addRow').onclick=()=>addRow();
+
+// prefill from URL hash: #d=<base64(JSON array)>
+function readPrefill(){
+  try{
+    const h=location.hash||'';
+    const m=h.match(/[#&]d=([^&]+)/);
+    if(!m)return null;
+    const json=decodeURIComponent(escape(atob(decodeURIComponent(m[1]))));
+    const arr=JSON.parse(json);
+    return Array.isArray(arr)?arr:null;
+  }catch(e){return null;}
+}
+const pre=readPrefill();
+if(pre&&pre.length){pre.forEach(addRow);}else{for(let i=0;i<3;i++)addRow();}
+
+function collect(){
+  const out=[];
+  rows.querySelectorAll('tr').forEach(tr=>{
+    const title=tr.querySelector('.t-title').value.trim();
+    if(!title)return;
+    out.push({title,details:tr.querySelector('.t-det').value.trim(),who:tr.querySelector('.t-who').value,
+      due:tr.querySelector('.t-due').value,priority:tr.querySelector('.t-pr').value});
+  });
+  return out;
+}
+const fmtDue=s=>{if(!s)return '';const d=new Date(s);const p=n=>String(n).padStart(2,'0');return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;};
+function b64(json){return btoa(unescape(encodeURIComponent(json)));}
+function readable(tasks){
+  let L=['שלום גבי,','','להלן המשימות:'];
+  tasks.forEach((t,i)=>{L.push(`${i+1}. ${t.title} — ${t.who}${t.due?' · עד '+fmtDue(t.due):''} [${PRIO[t.priority]}]`);if(t.details)L.push('    '+t.details);});
+  L.push('','בברכה, מאיה');
+  return L.join('\n');
+}
+document.getElementById('sendMail').onclick=()=>{
+  const tasks=collect();if(!tasks.length){alert('יש למלא לפחות משימה אחת.');return;}
+  const body=readable(tasks)+'\n\n— — — אין למחוק את השורה הבאה (קוד לייבוא אוטומטי) — — —\n[[TASKS]]'+b64(JSON.stringify(tasks))+'[[/TASKS]]';
+  document.getElementById('ok').style.display='block';
+  window.location.href='mailto:'+GABI_EMAIL+'?subject='+encodeURIComponent('משימות חדשות – מאיה גורדון')+'&body='+encodeURIComponent(body);
+};
+</script>
+</body>
+</html>
